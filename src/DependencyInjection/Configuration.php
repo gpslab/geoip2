@@ -20,7 +20,8 @@ class Configuration implements ConfigurationInterface
      * Example config:
      *
      * gpslab_geoip:
-     *     cache: '%kernel.cache_dir%'
+     *     cache: '%kernel.cache_dir%GeoLite2-Country.mmdb'
+     *     url: 'http://geolite.maxmind.com/download/geoip/database/GeoLite2-Country.mmdb.gz'
      *
      * @return TreeBuilder
      */
@@ -30,8 +31,8 @@ class Configuration implements ConfigurationInterface
             ->root('gps_lab_geoip2')
             ->addDefaultsIfNotSet()
             ->children()
-                ->scalarNode('cache')
-                ->end()
+                ->scalarNode('cache')->end()
+                ->scalarNode('url')->end()
             ->end();
     }
 }

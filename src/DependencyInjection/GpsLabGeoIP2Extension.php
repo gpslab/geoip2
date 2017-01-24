@@ -21,10 +21,15 @@ class GpsLabGeoIP2Extension extends Extension
         $config = $this->processConfiguration(new Configuration(), $configs);
 
         if (empty($config['cache'])) {
-            $config['cache'] = $container->getParameter('kernel.cache_dir');
+            $config['cache'] = $container->getParameter('kernel.cache_dir').'GeoLite2-Country.mmdb';
+        }
+
+        if (empty($config['url'])) {
+            $config['url'] = 'http://geolite.maxmind.com/download/geoip/database/GeoLite2-Country.mmdb.gz';
         }
 
         $container->setParameter('geoip2.cache', $config['cache']);
+        $container->setParameter('geoip2.url', $config['url']);
 
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.yml');
