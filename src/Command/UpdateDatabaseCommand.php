@@ -103,7 +103,7 @@ class UpdateDatabaseCommand extends Command
 
         $io->comment(sprintf('Beginning download of file: %s', $url));
 
-        $this->download($url, $tmp);
+        file_put_contents($tmp, fopen($url, 'rb'));
 
         $io->comment('Download complete');
         $io->comment('De-compressing file');
@@ -117,22 +117,6 @@ class UpdateDatabaseCommand extends Command
         $this->stopwatch($io, $this->stopwatch->stop('update'));
 
         return 0;
-    }
-
-    /**
-     * @param string $url
-     * @param string $target
-     */
-    private function download($url, $target)
-    {
-        $ch = curl_init();
-        curl_setopt_array($ch, [
-            CURLOPT_FILE => fopen($target, 'wb'),
-            CURLOPT_TIMEOUT => 28800,
-            CURLOPT_URL => $url,
-        ]);
-        curl_exec($ch);
-        curl_close($ch);
     }
 
     /**
