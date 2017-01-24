@@ -35,6 +35,56 @@ public function registerBundles()
 }
 ```
 
+## Configuration
+
+Default configuration:
+
+```yml
+gpslab_geoip:
+    # Path to download GeoIP database.
+    # It's a default value. You can change it.
+    cache: '%kernel.cache_dir%GeoLite2-Country.mmdb'
+
+    # URL for download new GeoIP database.
+    # It's a default value. You can change it.
+    url: 'http://geolite.maxmind.com/download/geoip/database/GeoLite2-Country.mmdb.gz'
+```
+
+## Usage
+
+You can get GeoIP2 reader service:
+
+```php
+// get a GeoIP2 City model
+$record = $this->get('geoip2.reader')->city('128.101.101.101');
+
+print($record->country->isoCode . "\n"); // 'US'
+print($record->country->name . "\n"); // 'United States'
+print($record->country->names['zh-CN'] . "\n"); // '美国'
+
+print($record->mostSpecificSubdivision->name . "\n"); // 'Minnesota'
+print($record->mostSpecificSubdivision->isoCode . "\n"); // 'MN'
+
+print($record->city->name . "\n"); // 'Minneapolis'
+
+print($record->postal->code . "\n"); // '55455'
+
+print($record->location->latitude . "\n"); // 44.9733
+print($record->location->longitude . "\n"); // -93.2323
+```
+
+For more example see the [GeoIP2](https://github.com/maxmind/GeoIP2-php) library.
+
+## Update GeoIP database
+
+### From command line
+
+Execute command for update database:
+
+```
+php app/console geoip2:update
+```
+
 ## License
 
 This bundle is under the [MIT license](http://opensource.org/licenses/MIT). See the complete license in the file: LICENSE
