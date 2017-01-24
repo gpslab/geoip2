@@ -18,10 +18,10 @@ Bundle for use [maxmind/GeoIP2](https://github.com/maxmind/GeoIP2-php) in Symfon
 Pretty simple with [Composer](http://packagist.org), run:
 
 ```sh
-composer require gpslab/date-bundle
+composer require gpslab/geoip2
 ```
 
-Add GpsLabDateBundle to your application kernel
+Add GpsLabGeoIP2Bundle to your application kernel
 
 ```php
 // app/AppKernel.php
