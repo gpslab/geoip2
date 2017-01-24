@@ -2,3 +2,13 @@ services:
     geoip2.reader:
         class: GeoIp2\Database\Reader
         arguments: [ '%geoip2.cache%' ]
+
+    gpslab.command.geoip2.update:
+        class: GpsLab\Bundle\GeoIP2Bundle\Command\UpdateDatabaseCommand
+        arguments: [ '@filesystem', '@debug.stopwatch', '@gpslab.component.gzip', '%geoip2.url%', '%geoip2.cache%' ]
+        tags:
+            - { name: console.command }
+
+    gpslab.component.gzip:
+        class: GpsLab\Component\Compressor\GzipCompressor
+        public: false
