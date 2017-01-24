@@ -28,11 +28,17 @@ class Configuration implements ConfigurationInterface
     public function getConfigTreeBuilder()
     {
         return (new TreeBuilder())
-            ->root('gps_lab_geoip2')
-            ->addDefaultsIfNotSet()
-            ->children()
-                ->scalarNode('cache')->end()
-                ->scalarNode('url')->end()
+            ->root('gpslab_geoip')
+                ->children()
+                    ->scalarNode('cache')
+                        ->cannotBeEmpty()
+                        ->defaultValue('%kernel.cache_dir%GeoLite2-Country.mmdb')
+                    ->end()
+                    ->scalarNode('url')
+                        ->cannotBeEmpty()
+                        ->defaultValue('http://geolite.maxmind.com/download/geoip/database/GeoLite2-Country.mmdb.gz')
+                    ->end()
+                ->end()
             ->end();
     }
 }
