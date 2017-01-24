@@ -85,6 +85,23 @@ Execute command for update database:
 php app/console geoip2:update
 ```
 
+### From composer
+
+Add to your `composer.json` event callbacks in a `scripts` section:
+
+```json
+{
+    "scripts": {
+        "post-install-cmd": [
+            "GpsLab\\Bundle\\GeoIP2Bundle\\Composer\\ScriptHandler::updateDatabase"
+        ],
+        "post-update-cmd": [
+            "GpsLab\\Bundle\\GeoIP2Bundle\\Composer\\ScriptHandler::updateDatabase"
+        ]
+    }
+}
+```
+
 ## License
 
 This bundle is under the [MIT license](http://opensource.org/licenses/MIT). See the complete license in the file: LICENSE
