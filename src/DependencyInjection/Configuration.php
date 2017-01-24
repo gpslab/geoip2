@@ -19,7 +19,7 @@ class Configuration implements ConfigurationInterface
      *
      * Example config:
      *
-     * gps_lab_geo_ip2:
+     * gpslab_geoip:
      *     cache: '%kernel.cache_dir%/GeoLite2-Country.mmdb'
      *     url: 'http://geolite.maxmind.com/download/geoip/database/GeoLite2-Country.mmdb.gz'
      *
@@ -28,7 +28,7 @@ class Configuration implements ConfigurationInterface
     public function getConfigTreeBuilder()
     {
         return (new TreeBuilder())
-            ->root('gps_lab_geo_ip2')
+            ->root('gpslab_geoip')
                 ->children()
                     ->scalarNode('cache')
                         ->cannotBeEmpty()

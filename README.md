@@ -40,7 +40,7 @@ public function registerBundles()
 Default configuration:
 
 ```yml
-gps_lab_geo_ip2:
+gpslab_geoip:
     # Path to download GeoIP database.
     # It's a default value. You can change it.
     cache: '%kernel.cache_dir%/GeoLite2-Country.mmdb'
