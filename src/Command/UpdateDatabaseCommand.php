@@ -17,6 +17,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Stopwatch\Stopwatch;
+use Symfony\Component\Stopwatch\StopwatchEvent;
 
 class UpdateDatabaseCommand extends Command
 {
@@ -91,10 +92,9 @@ class UpdateDatabaseCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $io = new SymfonyStyle($input, $output);
         $url = $input->getArgument('url');
         $target = $input->getArgument('target');
-
-        $io = new SymfonyStyle($input, $output);
 
         $io->title('Update the GeoIP2 database');
         $this->stopwatch->start('update');
@@ -103,13 +103,7 @@ class UpdateDatabaseCommand extends Command
 
         $io->comment(sprintf('Beginning download of file: %s', $url));
 
-        $ch = curl_init();
-        curl_setopt_array($ch, [
-            CURLOPT_FILE => fopen($tmp, 'wb'),
-            CURLOPT_TIMEOUT => 28800,
-            CURLOPT_URL => $url,
-        ]);
-        curl_exec($ch);
+        $this->download($url, $tmp);
 
         $io->comment('Download complete');
         $io->comment('De-compressing file');
@@ -120,12 +114,36 @@ class UpdateDatabaseCommand extends Command
         $io->comment('Decompression complete');
         $io->success('Finished downloading.');
 
-        $event = $this->stopwatch->stop('update');
+        $this->stopwatch($io, $this->stopwatch->stop('update'));
+
+        return 0;
+    }
+
+    /**
+     * @param string $url
+     * @param string $target
+     */
+    private function download($url, $target)
+    {
+        $ch = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_FILE => fopen($target, 'wb'),
+            CURLOPT_TIMEOUT => 28800,
+            CURLOPT_URL => $url,
+        ]);
+        curl_exec($ch);
+        curl_close($ch);
+    }
+
+    /**
+     * @param SymfonyStyle $io
+     * @param StopwatchEvent $event
+     */
+    private function stopwatch(SymfonyStyle $io, StopwatchEvent $event)
+    {
         $io->writeln([
             sprintf('Time: <info>%.2F</info> s.', $event->getDuration() / 1000),
             sprintf('Memory: <info>%.2F</info> MiB.', $event->getMemory() / 1024 / 1024),
         ]);
-
-        return 0;
     }
 }
