@@ -108,6 +108,7 @@ class UpdateDatabaseCommand extends Command
         $io->comment('Download complete');
         $io->comment('De-compressing file');
 
+        $this->fs->mkdir(dirname($target), 0777);
         $this->compressor->uncompress($tmp, $target);
         $this->fs->chmod($target, 0777);
 
