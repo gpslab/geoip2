@@ -1,1 +1,4 @@
 services:
+    geoip2.reader:
+        class: GeoIp2\Database\Reader
+        arguments: [ '%geoip2.cache%' ]
