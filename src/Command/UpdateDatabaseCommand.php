@@ -112,7 +112,7 @@ class UpdateDatabaseCommand extends Command
         $this->fs->chmod($target, 0777);
 
         $io->comment('Decompression complete');
-        $io->success('Finished downloading.');
+        $io->success('Finished downloading');
 
         $this->stopwatch($io, $this->stopwatch->stop('update'));
 
