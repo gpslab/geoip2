@@ -57,7 +57,7 @@ class ScriptHandler
     }
 
     /**
-     * Get path to php executable
+     * Get path to php executable.
      *
      * @throws \RuntimeException
      *

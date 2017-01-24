@@ -107,7 +107,7 @@ class UpdateDatabaseCommand extends Command
         curl_setopt_array($ch, [
             CURLOPT_FILE => fopen($tmp, 'wb'),
             CURLOPT_TIMEOUT => 28800,
-            CURLOPT_URL => $url
+            CURLOPT_URL => $url,
         ]);
         curl_exec($ch);
 
