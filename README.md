@@ -8,8 +8,8 @@
 [![StyleCI](https://styleci.io/repos/79822037/shield?branch=master)](https://styleci.io/repos/79822037)
 [![License](https://img.shields.io/packagist/l/gpslab/geoip2.svg?maxAge=3600)](https://github.com/gpslab/geoip2)
 
-A Symfony Bundle for the GeoIP2 API
-====================================
+A Symfony Bundle for the Maxmind GeoIP2 API
+===========================================
 
 Bundle for use [maxmind/GeoIP2](https://github.com/maxmind/GeoIP2-php) in Symfony.
 
