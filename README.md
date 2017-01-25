@@ -43,11 +43,11 @@ Default configuration:
 gpslab_geoip:
     # Path to download GeoIP database.
     # It's a default value. You can change it.
-    cache: '%kernel.cache_dir%/GeoLite2-Country.mmdb'
+    cache: '%kernel.cache_dir%/GeoLite2-City.mmdb'
 
     # URL for download new GeoIP database.
     # It's a default value. You can change it.
-    url: 'http://geolite.maxmind.com/download/geoip/database/GeoLite2-Country.mmdb.gz'
+    url: 'http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz'
 ```
 
 ## Usage
