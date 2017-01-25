@@ -22,6 +22,7 @@ class Configuration implements ConfigurationInterface
      * gpslab_geoip:
      *     cache: '%kernel.cache_dir%/GeoLite2-City.mmdb'
      *     url: 'http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz'
+     *     locales: [ '%locale%' ]
      *
      * @return TreeBuilder
      */
@@ -37,6 +38,11 @@ class Configuration implements ConfigurationInterface
                     ->scalarNode('url')
                         ->cannotBeEmpty()
                         ->defaultValue('http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz')
+                    ->end()
+                    ->arrayNode('locales')
+                        ->treatNullLike([])
+                        ->prototype('scalar')->end()
+                        ->defaultValue(['%locale%'])
                     ->end()
                 ->end()
             ->end()

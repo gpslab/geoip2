@@ -22,6 +22,7 @@ class GpsLabGeoIP2Extension extends Extension
 
         $container->setParameter('geoip2.cache', $config['cache']);
         $container->setParameter('geoip2.url', $config['url']);
+        $container->setParameter('geoip2.locales', $config['locales']);
 
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.yml');
