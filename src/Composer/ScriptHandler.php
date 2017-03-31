@@ -20,12 +20,9 @@ class ScriptHandler
      * a composer.json and set new options, making them immediately available
      * to forthcoming listeners.
      */
-    private static $options = array(
+    private static $options = [
         'symfony-app-dir' => 'app',
-        'symfony-web-dir' => 'web',
-        'symfony-assets-install' => 'hard',
-        'symfony-cache-warmup' => false,
-    );
+    ];
 
     /**
      * @param Event $event
@@ -33,30 +30,33 @@ class ScriptHandler
     public static function updateDatabase(Event $event)
     {
         $options = static::getOptions($event);
-        $consoleDir = static::getConsoleDir($event, 'clear the cache');
+        $console_dir = static::getConsoleDir($event, 'clear the cache');
 
-        if (null === $consoleDir) {
+        if (null === $console_dir) {
             return;
         }
 
-        self::executeCommand($event, $consoleDir, 'geoip2:update --no-debug', $options['process-timeout']);
+        self::executeCommand($event, $console_dir, 'geoip2:update --no-debug', $options['process-timeout']);
     }
 
     /**
      * @param Event $event
+     * @param string $console_dir
      * @param string $cmd
      * @param int $timeout
      */
-    private static function executeCommand(Event $event, $consoleDir, $cmd, $timeout = 300)
+    protected static function executeCommand(Event $event, $console_dir, $cmd, $timeout = 300)
     {
         $php = escapeshellarg(static::getPhp(false));
-        $phpArgs = implode(' ', array_map('escapeshellarg', static::getPhpArguments()));
-        $console = escapeshellarg($consoleDir.'/console');
+        $php_args = implode(' ', array_map('escapeshellarg', static::getPhpArguments()));
+        $console = escapeshellarg($console_dir.'/console');
         if ($event->getIO()->isDecorated()) {
             $console .= ' --ansi';
         }
-        $process = new Process($php.($phpArgs ? ' '.$phpArgs : '').' '.$console.' '.$cmd, null, null, null, $timeout);
-        $process->run(function ($type, $buffer) use ($event) { $event->getIO()->write($buffer, false); });
+        $process = new Process($php.($php_args ? ' '.$php_args : '').' '.$console.' '.$cmd, null, null, null, $timeout);
+        $process->run(function ($type, $buffer) use ($event) {
+            $event->getIO()->write($buffer, false);
+        });
 
         if (!$process->isSuccessful()) {
             throw new \RuntimeException(sprintf(
@@ -77,28 +77,25 @@ class ScriptHandler
     {
         $options = array_merge(static::$options, $event->getComposer()->getPackage()->getExtra());
 
-        $options['symfony-assets-install'] = getenv('SYMFONY_ASSETS_INSTALL') ?: $options['symfony-assets-install'];
-        $options['symfony-cache-warmup'] = getenv('SYMFONY_CACHE_WARMUP') ?: $options['symfony-cache-warmup'];
-
         $options['process-timeout'] = $event->getComposer()->getConfig()->get('process-timeout');
 
         return $options;
     }
 
     /**
-     * Returns a relative path to the directory that contains the `console` command.
+     * Returns a relative path to the directory that contains the `console` command or null if not found.
      *
-     * @param Event  $event      The command event
-     * @param string $actionName The name of the action
+     * @param Event  $event       The command event
+     * @param string $action_name The name of the action
      *
-     * @return string|null The path to the console directory, null if not found.
+     * @return string|null
      */
-    private static function getConsoleDir(Event $event, $actionName)
+    protected static function getConsoleDir(Event $event, $action_name)
     {
         $options = static::getOptions($event);
 
         if (static::useNewDirectoryStructure($options)) {
-            if (!static::hasDirectory($event, 'symfony-bin-dir', $options['symfony-bin-dir'], $actionName)) {
+            if (!static::hasDirectory($event, 'symfony-bin-dir', $options['symfony-bin-dir'], $action_name)) {
                 return;
             }
 
@@ -114,16 +111,22 @@ class ScriptHandler
 
     /**
      * @param Event  $event
-     * @param string $configName
+     * @param string $config_name
      * @param string $path
-     * @param string $actionName
+     * @param string $action_name
      *
      * @return bool
      */
-    private static function hasDirectory(Event $event, $configName, $path, $actionName)
+    private static function hasDirectory(Event $event, $config_name, $path, $action_name)
     {
         if (!is_dir($path)) {
-            $event->getIO()->write(sprintf('The %s (%s) specified in composer.json was not found in %s, can not %s.', $configName, $path, getcwd(), $actionName));
+            $event->getIO()->write(sprintf(
+                'The %s (%s) specified in composer.json was not found in %s, can not %s.',
+                $config_name,
+                $path,
+                getcwd(),
+                $action_name
+            ));
 
             return false;
         }
@@ -169,9 +172,9 @@ class ScriptHandler
     {
         $ini = null;
         $arguments = [];
-        $phpFinder = new PhpExecutableFinder();
-        if (method_exists($phpFinder, 'findArguments')) {
-            $arguments = $phpFinder->findArguments();
+        $php_finder = new PhpExecutableFinder();
+        if (method_exists($php_finder, 'findArguments')) {
+            $arguments = $php_finder->findArguments();
         }
 
         if ($env = strval(getenv('COMPOSER_ORIGINAL_INIS'))) {
