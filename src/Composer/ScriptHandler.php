@@ -36,7 +36,7 @@ class ScriptHandler
             return;
         }
 
-        self::executeCommand($event, $console_dir, 'geoip2:update --no-debug', $options['process-timeout']);
+        static::executeCommand($event, $console_dir, 'geoip2:update --no-debug', $options['process-timeout']);
     }
 
     /**
@@ -47,8 +47,8 @@ class ScriptHandler
      */
     protected static function executeCommand(Event $event, $console_dir, $cmd, $timeout = 300)
     {
-        $php = escapeshellarg(static::getPhp(false));
-        $php_args = implode(' ', array_map('escapeshellarg', static::getPhpArguments()));
+        $php = escapeshellarg(self::getPhp(false));
+        $php_args = implode(' ', array_map('escapeshellarg', self::getPhpArguments()));
         $console = escapeshellarg($console_dir.'/console');
         if ($event->getIO()->isDecorated()) {
             $console .= ' --ansi';
@@ -75,7 +75,7 @@ class ScriptHandler
      */
     protected static function getOptions(Event $event)
     {
-        $options = array_merge(static::$options, $event->getComposer()->getPackage()->getExtra());
+        $options = array_merge(self::$options, $event->getComposer()->getPackage()->getExtra());
 
         $options['process-timeout'] = $event->getComposer()->getConfig()->get('process-timeout');
 
@@ -94,15 +94,15 @@ class ScriptHandler
     {
         $options = static::getOptions($event);
 
-        if (static::useNewDirectoryStructure($options)) {
-            if (!static::hasDirectory($event, 'symfony-bin-dir', $options['symfony-bin-dir'], $action_name)) {
+        if (self::useNewDirectoryStructure($options)) {
+            if (!self::hasDirectory($event, 'symfony-bin-dir', $options['symfony-bin-dir'], $action_name)) {
                 return;
             }
 
             return $options['symfony-bin-dir'];
         }
 
-        if (!static::hasDirectory($event, 'symfony-app-dir', $options['symfony-app-dir'], 'execute command')) {
+        if (!self::hasDirectory($event, 'symfony-app-dir', $options['symfony-app-dir'], 'execute command')) {
             return;
         }
 
@@ -170,7 +170,6 @@ class ScriptHandler
      */
     private static function getPhpArguments()
     {
-        $ini = null;
         $arguments = [];
         $php_finder = new PhpExecutableFinder();
         if (method_exists($php_finder, 'findArguments')) {
