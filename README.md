@@ -1,5 +1,4 @@
 [![Latest Stable Version](https://img.shields.io/packagist/v/gpslab/geoip2.svg?maxAge=3600&label=stable)](https://packagist.org/packages/gpslab/geoip2)
-[![Latest Unstable Version](https://img.shields.io/packagist/vpre/gpslab/geoip2.svg?maxAge=3600&label=unstable)](https://packagist.org/packages/gpslab/geoip2)
 [![Total Downloads](https://img.shields.io/packagist/dt/gpslab/geoip2.svg?maxAge=3600)](https://packagist.org/packages/gpslab/geoip2)
 [![Build Status](https://img.shields.io/travis/gpslab/geoip2.svg?maxAge=3600)](https://travis-ci.org/gpslab/geoip2)
 [![Coverage Status](https://img.shields.io/coveralls/gpslab/geoip2.svg?maxAge=3600)](https://coveralls.io/github/gpslab/geoip2?branch=master)
