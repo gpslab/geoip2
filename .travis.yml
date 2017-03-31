@@ -13,16 +13,20 @@ php:
 notifications:
     email: deploy@peter-gribanov.ru
 
+branches:
+  except:
+    - /^analysis-.*$/
+
 matrix:
     fast_finish: true
     include:
-        - php: 5.6
+        - php: 5.4
           env: SYMFONY_VERSION=2.7.*
-        - php: 5.6
+        - php: 5.4
           env: SYMFONY_VERSION=2.8.*
-        - php: 5.6
+        - php: 5.5
           env: SYMFONY_VERSION=3.0.*
-        - php: 5.6
+        - php: 5.4
           env: COVERAGE=1
     allow_failures:
         - php: hhvm
