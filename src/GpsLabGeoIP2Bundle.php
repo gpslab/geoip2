@@ -15,20 +15,23 @@ use Symfony\Component\HttpKernel\Bundle\Bundle;
 class GpsLabGeoIP2Bundle extends Bundle
 {
     /**
-     * @return ExtensionInterface|bool
+     * @return ExtensionInterface|null
      */
     public function getContainerExtension()
     {
         if (null === $this->extension) {
-            $extension = $this->createContainerExtension();
+            $this->extension = false;
+            $class = $this->getContainerExtensionClass();
 
-            if ($extension instanceof ExtensionInterface) {
-                $this->extension = $extension;
-            } else {
-                $this->extension = false;
+            if (class_exists($class)) {
+                $extension = new $class();
+
+                if ($extension instanceof ExtensionInterface) {
+                    $this->extension = $extension;
+                }
             }
         }
 
-        return $this->extension;
+        return $this->extension ?: null;
     }
 }
