@@ -99,7 +99,7 @@ class UpdateDatabaseCommand extends Command
         $io->title('Update the GeoIP2 database');
         $this->stopwatch->start('update');
 
-        $tmp = sys_get_temp_dir().basename($target);
+        $tmp = sys_get_temp_dir().DIRECTORY_SEPARATOR.basename($target);
 
         $io->comment(sprintf('Beginning download of file: %s', $url));
 
