@@ -99,20 +99,25 @@ class UpdateDatabaseCommand extends Command
         $io->title('Update the GeoIP2 database');
         $this->stopwatch->start('update');
 
-        $tmp = sys_get_temp_dir().DIRECTORY_SEPARATOR.basename($target);
+        $tmp_zip = sys_get_temp_dir().DIRECTORY_SEPARATOR.basename(parse_url($url, PHP_URL_PATH));
+        $tmp_unzip = sys_get_temp_dir().DIRECTORY_SEPARATOR. basename($target);
 
         $io->comment(sprintf('Beginning download of file: %s', $url));
 
-        file_put_contents($tmp, fopen($url, 'rb'));
+        file_put_contents($tmp_zip, fopen($url, 'rb'));
 
         $io->comment('Download complete');
         $io->comment('De-compressing file');
 
         $this->fs->mkdir(dirname($target), 0777);
-        $this->compressor->uncompress($tmp, $target);
-        $this->fs->chmod($target, 0777);
+        $this->compressor->uncompress($tmp_zip, $tmp_unzip);
 
         $io->comment('Decompression complete');
+
+        $this->fs->copy($tmp_unzip, $target, true);
+        $this->fs->chmod($target, 0777);
+        $this->fs->remove([$tmp_zip, $tmp_unzip]);
+
         $io->success('Finished downloading');
 
         $this->stopwatch($io, $this->stopwatch->stop('update'));
