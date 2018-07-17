@@ -2,6 +2,7 @@ services:
     geoip2.reader:
         class: GeoIp2\Database\Reader
         arguments: [ '%geoip2.cache%', '%geoip2.locales%' ]
+        public: true
 
     gpslab.command.geoip2.update:
         class: GpsLab\Bundle\GeoIP2Bundle\Command\UpdateDatabaseCommand
