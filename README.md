@@ -21,6 +21,8 @@ composer require gpslab/geoip2
 
 Add GpsLabGeoIP2Bundle to your application kernel
 
+**Symfony <3.4**
+
 ```php
 // app/AppKernel.php
 public function registerBundles()
@@ -28,9 +30,18 @@ public function registerBundles()
     return array(
         // ...
         new GpsLab\Bundle\GeoIP2Bundle\GpsLabGeoIP2Bundle(),
-        // ...
     );
 }
+```
+
+**Symfony >4.0**
+
+```php
+// config/bundles.php
+return [
+    // ...
+    GpsLab\Bundle\GeoIP2Bundle\GpsLabGeoIP2Bundle::class => ['all' => true],
+];
 ```
 
 ## Configuration
@@ -83,13 +94,24 @@ For more example see the [GeoIP2](https://github.com/maxmind/GeoIP2-php) library
 
 Execute command for update database:
 
+**Symfony <2.8**
+
 ```
 php app/console geoip2:update
+```
+
+**Symfony >3.0**
+
+```
+php bin/console geoip2:update
 ```
 
 ### From composer
 
 Add to your `composer.json` event callbacks in a `scripts` section:
+
+
+**Symfony <3.0**
 
 ```json
 {
@@ -103,6 +125,19 @@ Add to your `composer.json` event callbacks in a `scripts` section:
     }
 }
 ```
+
+**Symfony >3.1**
+
+```json
+{
+    "scripts": {
+        "symfony-scripts": [
+            "GpsLab\\Bundle\\GeoIP2Bundle\\Composer\\ScriptHandler::updateDatabase"
+        ]
+    }
+}
+```
+
 
 ## License
 
