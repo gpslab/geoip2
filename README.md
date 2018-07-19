@@ -1,9 +1,8 @@
 [![Latest Stable Version](https://img.shields.io/packagist/v/gpslab/geoip2.svg?maxAge=3600&label=stable)](https://packagist.org/packages/gpslab/geoip2)
-[![Total Downloads](https://img.shields.io/packagist/dt/gpslab/geoip2.svg?maxAge=3600)](https://packagist.org/packages/gpslab/geoip2)
+[![PHP from Travis config](https://img.shields.io/travis/php-v/gpslab/geoip2.svg?maxAge=3600)](https://packagist.org/packages/gpslab/geoip2)
 [![Build Status](https://img.shields.io/travis/gpslab/geoip2.svg?maxAge=3600)](https://travis-ci.org/gpslab/geoip2)
 [![Coverage Status](https://img.shields.io/coveralls/gpslab/geoip2.svg?maxAge=3600)](https://coveralls.io/github/gpslab/geoip2?branch=master)
 [![Scrutinizer Code Quality](https://img.shields.io/scrutinizer/g/gpslab/geoip2.svg?maxAge=3600)](https://scrutinizer-ci.com/g/gpslab/geoip2/?branch=master)
-[![SensioLabs Insight](https://img.shields.io/sensiolabs/i/21b2bef1-ea4f-4fe9-a82a-dc5e70616b66.svg?maxAge=3600&label=SLInsight)](https://insight.sensiolabs.com/projects/21b2bef1-ea4f-4fe9-a82a-dc5e70616b66)
 [![StyleCI](https://styleci.io/repos/79822037/shield?branch=master)](https://styleci.io/repos/79822037)
 [![License](https://img.shields.io/packagist/l/gpslab/geoip2.svg?maxAge=3600)](https://github.com/gpslab/geoip2)
 
