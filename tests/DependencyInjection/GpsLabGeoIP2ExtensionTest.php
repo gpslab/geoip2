@@ -16,26 +16,17 @@ class GpsLabGeoIP2ExtensionTest extends \PHPUnit_Framework_TestCase
 {
     public function testLoad()
     {
-        /* @var $container \PHPUnit_Framework_MockObject_MockObject|ContainerBuilder */
-        $container = $this->getMock('Symfony\Component\DependencyInjection\ContainerBuilder');
-        $container
-            ->expects($this->at(0))
-            ->method('setParameter')
-            ->with('geoip2.cache', '%kernel.cache_dir%/GeoLite2-City.mmdb')
-        ;
-        $container
-            ->expects($this->at(1))
-            ->method('setParameter')
-            ->with('geoip2.url', 'http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz')
-        ;
-        $container
-            ->expects($this->at(2))
-            ->method('setParameter')
-            ->with('geoip2.locales', ['%locale%'])
-        ;
+        $container = new ContainerBuilder();
 
         $extension = new GpsLabGeoIP2Extension();
         $extension->load([], $container);
+
+        $this->assertEquals('%kernel.cache_dir%/GeoLite2-City.mmdb', $container->getParameter('geoip2.cache'));
+        $this->assertEquals(
+            'http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz',
+            $container->getParameter('geoip2.url')
+        );
+        $this->assertEquals(['%locale%'], $container->getParameter('geoip2.locales'));
     }
 
     public function testGetAlias()
