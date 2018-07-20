@@ -104,7 +104,7 @@ class UpdateDatabaseCommand extends Command
 
         $io->comment(sprintf('Beginning download of file: %s', $url));
 
-        file_put_contents($tmp_zip, fopen($url, 'rb'));
+        $this->fs->copy($url, $tmp_zip, true);
 
         $io->comment('Download complete');
         $io->comment('De-compressing file');
