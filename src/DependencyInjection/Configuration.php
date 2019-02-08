@@ -14,7 +14,7 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
 
 class Configuration implements ConfigurationInterface
 {
-    const ROOT_NODE =   'gpslab_geoip';
+    const ROOT_NODE = 'gpslab_geoip';
 
     /**
      * Config tree builder.
