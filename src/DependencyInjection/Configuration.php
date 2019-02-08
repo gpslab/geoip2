@@ -39,6 +39,7 @@ class Configuration implements ConfigurationInterface
             // Symfony 4.1 and below
             $rootNode = $treeBuilder->root(static::ROOT_NODE);
         }
+
         return
             $rootNode
                 ->children()
