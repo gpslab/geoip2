@@ -14,6 +14,8 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
 
 class Configuration implements ConfigurationInterface
 {
+    const ROOT_NODE = 'gpslab_geoip';
+
     /**
      * Config tree builder.
      *
@@ -28,8 +30,18 @@ class Configuration implements ConfigurationInterface
      */
     public function getConfigTreeBuilder()
     {
-        return (new TreeBuilder())
-            ->root('gpslab_geoip')
+        $treeBuilder = new TreeBuilder(static::ROOT_NODE);
+
+        if (method_exists($treeBuilder, 'getRootNode')) {
+            // Symfony 4.2 +
+            $rootNode = $treeBuilder->getRootNode();
+        } else {
+            // Symfony 4.1 and below
+            $rootNode = $treeBuilder->root(static::ROOT_NODE);
+        }
+
+        return
+            $rootNode
                 ->children()
                     ->scalarNode('cache')
                         ->cannotBeEmpty()
