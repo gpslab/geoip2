@@ -53,7 +53,15 @@ class ScriptHandler
         if ($event->getIO()->isDecorated()) {
             $console .= ' --ansi';
         }
-        $process = new Process($php.($php_args ? ' '.$php_args : '').' '.$console.' '.$cmd, null, null, null, $timeout);
+
+        $command = $php.($php_args ? ' '.$php_args : '').' '.$console.' '.$cmd;
+        if (method_exists('Symfony\Component\Process\Process', 'fromShellCommandline')) {
+            // Symfony 4.2 +
+            $process = Process::fromShellCommandline($command, null, null, null, $timeout);
+        } else {
+            // Symfony 4.1 and below
+            $process = new Process($command, null, null, null, $timeout);
+        }
         $process->run(function ($type, $buffer) use ($event) {
             $event->getIO()->write($buffer, false);
         });
