@@ -1,0 +1,5 @@
+{
+    "bundles": {
+        "GpsLab\\Bundle\\GeoIP2Bundle\\GpsLabGeoIP2Bundle": ["all"]
+    }
+}
