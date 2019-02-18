@@ -23,7 +23,7 @@ class GpsLabGeoIP2ExtensionTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals('%kernel.cache_dir%/GeoLite2-City.mmdb', $container->getParameter('geoip2.cache'));
         $this->assertEquals(
-            'http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz',
+            'https://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz',
             $container->getParameter('geoip2.url')
         );
         $this->assertEquals(['%locale%'], $container->getParameter('geoip2.locales'));
