@@ -22,7 +22,7 @@ class ScriptHandler
      */
     private static $options = [
         'symfony-app-dir' => 'app',
-        'symfony-bin-dir' => 'bin
+        'symfony-bin-dir' => 'bin'
     ];
 
     /**
