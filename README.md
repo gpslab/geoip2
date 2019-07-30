@@ -138,6 +138,19 @@ Add to your `composer.json` event callbacks in a `scripts` section:
 }
 ```
 
+**Symfony >4 Flex**
+
+Add the command "geoip2:update": "symfony-cmd" to your autoscripts
+
+```json
+{
+    "scripts": {
+        "auto-scripts": {
+              "geoip2:update": "symfony-cmd"
+        },
+    }
+}
+```
 
 ## License
 

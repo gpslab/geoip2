@@ -21,7 +21,7 @@ class ScriptHandler
      * to forthcoming listeners.
      */
     private static $options = [
-        'symfony-app-dir' => 'app',
+        'symfony-app-dir' => 'app' 
     ];
 
     /**
@@ -151,7 +151,7 @@ class ScriptHandler
      */
     private static function useNewDirectoryStructure(array $options)
     {
-        return isset($options['symfony-var-dir']) && is_dir($options['symfony-var-dir']);
+        return isset($options['symfony-bin-dir']) && is_dir($options['symfony-bin-dir']);
     }
 
     /**
