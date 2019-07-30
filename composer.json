@@ -1,7 +1,7 @@
 {
     "name": "gpslab/geoip2",
     "license": "MIT",
-    "type": "library",
+    "type": "symfony-bundle",
     "homepage": "https://github.com/gpslab/geoip2",
     "description": "A Symfony Bundle for the Maxmind GeoIP2 API",
     "autoload": {
