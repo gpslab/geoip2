@@ -21,7 +21,7 @@ class ScriptHandler
      * to forthcoming listeners.
      */
     private static $options = [
-        'symfony-app-dir' => 'app' 
+        'symfony-app-dir' => 'app',
     ];
 
     /**
