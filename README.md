@@ -146,7 +146,7 @@ Add the command "geoip2:update": "symfony-cmd" to your autoscripts
 {
     "scripts": {
         "auto-scripts": {
-              "geoip2:update": "symfony-cmd""
+              "geoip2:update": "symfony-cmd"
         },
     }
 }
