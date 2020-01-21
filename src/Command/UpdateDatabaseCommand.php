@@ -27,11 +27,6 @@ class UpdateDatabaseCommand extends Command
     private $stopwatch;
 
     /**
-     * @var CompressorInterface
-     */
-    private $compressor;
-
-    /**
      * @var Filesystem
      */
     private $fs;
@@ -39,12 +34,12 @@ class UpdateDatabaseCommand extends Command
     /**
      * @var string
      */
-    private $url = '';
+    private $url;
 
     /**
      * @var string
      */
-    private $cache = '';
+    private $cache;
 
     /**
      * @param Filesystem $fs
@@ -59,8 +54,6 @@ class UpdateDatabaseCommand extends Command
         $this->url = $url;
         $this->cache = $cache;
         $this->stopwatch = $stopwatch;
-        $this->compressor = $compressor;
-
         parent::__construct();
     }
 
@@ -99,24 +92,75 @@ class UpdateDatabaseCommand extends Command
         $io->title('Update the GeoIP2 database');
         $this->stopwatch->start('update');
 
-        $tmp_zip = sys_get_temp_dir().DIRECTORY_SEPARATOR.basename(parse_url($url, PHP_URL_PATH));
-        $tmp_unzip = sys_get_temp_dir().DIRECTORY_SEPARATOR.basename($target);
+        $tmp_zip = sys_get_temp_dir().'/GeoLite2.tar.gz';
+        $tmp_unzip = sys_get_temp_dir().'/GeoLite2.tar';
+        $tmp_untar = sys_get_temp_dir().'/GeoLite2';
 
-        $io->comment(sprintf('Beginning download of file: %s', $url));
+        // remove old files and folders for correct overwrite it
+        $this->fs->remove([$tmp_zip, $tmp_unzip, $tmp_untar]);
 
-        $this->fs->copy($url, $tmp_zip, true);
+        $io->comment(sprintf('Beginning download of file <info>%s</info>', $url));
 
-        $io->comment('Download complete');
-        $io->comment('De-compressing file');
+        file_put_contents($tmp_zip, fopen($url, 'rb'));
+
+        $io->comment(sprintf('Download complete to <info>%s</info>', $tmp_zip));
+        $io->comment(sprintf('De-compressing file to <info>%s</info>', $tmp_unzip));
 
         $this->fs->mkdir(dirname($target), 0777);
-        $this->compressor->uncompress($tmp_zip, $tmp_unzip);
+
+        // decompress gz file
+        $phar = new \PharData($tmp_zip);
+        $phar->decompress();
 
         $io->comment('Decompression complete');
+        $io->comment(sprintf('Extract tar file to <info>%s</info>', $tmp_untar));
 
-        $this->fs->copy($tmp_unzip, $target, true);
+        // extract tar archive
+        $phar = new \PharData($tmp_unzip);
+        $phar->extractTo($tmp_untar);
+
+        $io->comment('Tar archive extracted');
+
+        // find database in archive
+        $database = '';
+        foreach (scandir($tmp_untar) as $folder) {
+            $path = $tmp_untar.'/'.$folder;
+
+            // find folder with database
+            // expected something like that "GeoLite2-City_20200114"
+            if (
+                preg_match('/^(?<database>.+)_(?<year>\d{4})(?<month>\d{2})(?<day>\d{2})$/', $folder, $match) &&
+                is_dir($path)
+            ) {
+                // find database in folder
+                // expected something like that "GeoLite2-City.mmdb"
+                foreach (scandir($path) as $filename) {
+                    $file = $path.'/'.$filename;
+
+                    if (strpos($filename, $match['database']) === 0 && is_file($file)) {
+                        $io->comment(sprintf(
+                            'Found <info>%s</info> database updated at <info>%s-%s-%s</info>',
+                            $match['database'],
+                            $match['year'],
+                            $match['month'],
+                            $match['day']
+                        ));
+
+                        $database = $file;
+                    }
+                }
+            }
+        }
+
+        if (!$database) {
+            throw new \RuntimeException('Not found GeoLite2 database in archive.');
+        }
+
+        $this->fs->copy($database, $target, true);
         $this->fs->chmod($target, 0777);
-        $this->fs->remove([$tmp_zip, $tmp_unzip]);
+        $this->fs->remove([$tmp_zip, $tmp_unzip, $tmp_untar]);
+
+        $io->comment(sprintf('Database moved to <info>%s</info>', $target));
 
         $io->success('Finished downloading');
 
