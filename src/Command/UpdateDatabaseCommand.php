@@ -48,8 +48,13 @@ class UpdateDatabaseCommand extends Command
      * @param string $url
      * @param string $cache
      */
-    public function __construct(Filesystem $fs, Stopwatch $stopwatch, CompressorInterface $compressor, $url, $cache)
-    {
+    public function __construct(
+        Filesystem $fs,
+        Stopwatch $stopwatch,
+        CompressorInterface $compressor,
+        string $url,
+        string $cache
+    ) {
         $this->fs = $fs;
         $this->url = $url;
         $this->cache = $cache;
@@ -57,7 +62,7 @@ class UpdateDatabaseCommand extends Command
         parent::__construct();
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setName('geoip2:update')
@@ -83,7 +88,7 @@ class UpdateDatabaseCommand extends Command
      *
      * @return int
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
         $url = $input->getArgument('url');
@@ -173,7 +178,7 @@ class UpdateDatabaseCommand extends Command
      * @param SymfonyStyle $io
      * @param StopwatchEvent $event
      */
-    private function stopwatch(SymfonyStyle $io, StopwatchEvent $event)
+    private function stopwatch(SymfonyStyle $io, StopwatchEvent $event): void
     {
         $io->writeln([
             sprintf('Time: <info>%.2F</info> s.', $event->getDuration() / 1000),

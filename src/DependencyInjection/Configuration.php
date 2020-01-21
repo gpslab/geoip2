@@ -9,12 +9,13 @@
 
 namespace GpsLab\Bundle\GeoIP2Bundle\DependencyInjection;
 
+use Symfony\Component\Config\Definition\Builder\NodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
 class Configuration implements ConfigurationInterface
 {
-    const ROOT_NODE = 'gpslab_geoip';
+    private const ROOT_NODE = 'gpslab_geoip';
 
     /**
      * Config tree builder.
@@ -28,36 +29,37 @@ class Configuration implements ConfigurationInterface
      *
      * @return TreeBuilder
      */
-    public function getConfigTreeBuilder()
+    public function getConfigTreeBuilder(): TreeBuilder
     {
-        $treeBuilder = new TreeBuilder(static::ROOT_NODE);
+        $tree_builder = new TreeBuilder(self::ROOT_NODE);
 
-        if (method_exists($treeBuilder, 'getRootNode')) {
+        if (method_exists($tree_builder, 'getRootNode')) {
             // Symfony 4.2 +
-            $rootNode = $treeBuilder->getRootNode();
+            $root_node = $tree_builder->getRootNode();
         } else {
             // Symfony 4.1 and below
-            $rootNode = $treeBuilder->root(static::ROOT_NODE);
+            $root_node = $tree_builder->root(self::ROOT_NODE);
         }
 
-        return
-            $rootNode
-                ->children()
-                    ->scalarNode('cache')
-                        ->cannotBeEmpty()
-                        ->defaultValue('%kernel.cache_dir%/GeoLite2-City.mmdb')
-                    ->end()
-                    ->scalarNode('url')
-                        ->cannotBeEmpty()
-                        ->defaultValue('https://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz')
-                    ->end()
-                    ->arrayNode('locales')
-                        ->treatNullLike([])
-                        ->prototype('scalar')->end()
-                        ->defaultValue(['%locale%'])
-                    ->end()
-                ->end()
-            ->end()
+        $cache = $root_node->children()->scalarNode('cache');
+        $cache
+            ->cannotBeEmpty()
+            ->defaultValue('%kernel.cache_dir%/GeoLite2-City.mmdb')
         ;
+
+        $url = $root_node->children()->scalarNode('url');
+        $url
+            ->cannotBeEmpty()
+            ->defaultValue('https://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz')
+        ;
+
+        $locales = $root_node->children()->arrayNode('locales');
+        $locales->prototype('scalar');
+        $locales
+            ->treatNullLike([])
+            ->defaultValue(['%locale%'])
+        ;
+
+        return $tree_builder;
     }
 }
