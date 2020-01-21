@@ -21,6 +21,7 @@
         "symfony/stopwatch": "~2.3|~3.0|~4.0"
     },
     "require-dev": {
+        "roave/security-advisories": "dev-master",
         "symfony/http-kernel": "~2.3|~3.0|~4.0",
         "symfony/dependency-injection": "~2.3|~3.0|~4.0",
         "symfony/expression-language": "~2.3|~3.0|~4.0",
