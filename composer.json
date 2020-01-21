@@ -28,7 +28,7 @@
         "symfony/expression-language": "~2.3|~3.0|~4.0",
         "symfony/console": "~2.3|~3.0|~4.0",
         "composer/composer" : "~1.3",
-        "phpunit/phpunit": "~8.0",
+        "phpunit/phpunit": "~7.0|~8.0",
         "scrutinizer/ocular": "~1.3",
         "satooshi/php-coveralls": "^1.0"
     }
