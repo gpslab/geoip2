@@ -67,12 +67,7 @@ class ScriptHandler
         });
 
         if (!$process->isSuccessful()) {
-            throw new \RuntimeException(sprintf(
-                "An error occurred when executing the \"%s\" command:\n\n%s\n\n%s.",
-                escapeshellarg($cmd),
-                $process->getOutput(),
-                $process->getErrorOutput()
-            ));
+            throw new \RuntimeException(sprintf("An error occurred when executing the \"%s\" command:\n\n%s\n\n%s.", escapeshellarg($cmd), $process->getOutput(), $process->getErrorOutput()));
         }
     }
 
