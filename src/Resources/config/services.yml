@@ -4,13 +4,8 @@ services:
         arguments: [ '%geoip2.cache%', '%geoip2.locales%' ]
         public: true
 
-    gpslab.command.geoip2.update:
-        class: GpsLab\Bundle\GeoIP2Bundle\Command\UpdateDatabaseCommand
-        arguments: [ '@filesystem', '@debug.stopwatch', '@gpslab.geoip2.component.gzip', '%geoip2.url%', '%geoip2.cache%' ]
+    GpsLab\Bundle\GeoIP2Bundle\Command\UpdateDatabaseCommand:
+        arguments: [ '@filesystem', '@debug.stopwatch', '%geoip2.url%', '%geoip2.cache%' ]
+        public: false
         tags:
             - { name: console.command }
-
-    # use this service only in this bundle
-    gpslab.geoip2.component.gzip:
-        class: GpsLab\Component\Compressor\GzipCompressor
-        public: false

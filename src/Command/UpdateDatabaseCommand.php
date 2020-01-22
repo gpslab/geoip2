@@ -9,7 +9,6 @@
 
 namespace GpsLab\Bundle\GeoIP2Bundle\Command;
 
-use GpsLab\Component\Compressor\CompressorInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -44,14 +43,12 @@ class UpdateDatabaseCommand extends Command
     /**
      * @param Filesystem $fs
      * @param Stopwatch $stopwatch
-     * @param CompressorInterface $compressor
      * @param string $url
      * @param string $cache
      */
     public function __construct(
         Filesystem $fs,
         Stopwatch $stopwatch,
-        CompressorInterface $compressor,
         string $url,
         string $cache
     ) {
