@@ -1,13 +1,60 @@
 UPGRADE FROM 1.x to 2.0
 =======================
 
-### Renamed services
+Update `composer.json` if you use composer vent callbacks.
 
- * The `gpslab.command.geoip2.update` renamed to `GpsLab\Bundle\GeoIP2Bundle\Command\UpdateDatabaseCommand`.
+Before in Symfony <3.0
 
-### Removed service
+```json
+{
+    "scripts": {
+        "post-install-cmd": [
+            "GpsLab\\Bundle\\GeoIP2Bundle\\Composer\\ScriptHandler::updateDatabase"
+        ],
+        "post-update-cmd": [
+            "GpsLab\\Bundle\\GeoIP2Bundle\\Composer\\ScriptHandler::updateDatabase"
+        ]
+    }
+}
+```
+
+Before in Symfony >3.1
+
+```json
+{
+    "scripts": {
+        "symfony-scripts": [
+            "GpsLab\\Bundle\\GeoIP2Bundle\\Composer\\ScriptHandler::updateDatabase"
+        ]
+    }
+}
+```
+
+After in Symfony >4
+
+```json
+{
+    "scripts": {
+        "auto-scripts": {
+              "geoip2:update": "symfony-cmd"
+        }
+    }
+}
+```
+
+### Dependencies
+
+ * The `UpdateDatabaseCommand` command not dependency a `CompressorInterface`.
+
+### Renamed
+
+
+ * The `gpslab.command.geoip2.update` service renamed to `GpsLab\Bundle\GeoIP2Bundle\Command\UpdateDatabaseCommand`.
+
+### Removed
 
  * The `gpslab.geoip2.component.gzip` service removed.
+ * The `ScriptHandler` removed.
 
 Updating Dependencies
 ---------------------
