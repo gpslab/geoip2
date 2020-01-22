@@ -48,6 +48,7 @@ After in Symfony >4
 
 ### Renamed
 
+
  * The `gpslab.command.geoip2.update` service renamed to `GpsLab\Bundle\GeoIP2Bundle\Command\UpdateDatabaseCommand`.
 
 ### Removed
@@ -61,3 +62,4 @@ Updating Dependencies
 ### Removed package
 
  * The `gpslab/compressor` package removed from dependencies.
+ * The `symfony/stopwatch` package removed from dependencies.
