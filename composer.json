@@ -18,7 +18,6 @@
         "ext-phar": "*",
         "php": ">=5.4.0",
         "geoip2/geoip2": "~2.0",
-        "gpslab/compressor": "~1.0",
         "symfony/stopwatch": "~2.3|~3.0|~4.0"
     },
     "require-dev": {
