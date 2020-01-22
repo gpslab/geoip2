@@ -15,16 +15,9 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Stopwatch\Stopwatch;
-use Symfony\Component\Stopwatch\StopwatchEvent;
 
 class UpdateDatabaseCommand extends Command
 {
-    /**
-     * @var Stopwatch
-     */
-    private $stopwatch;
-
     /**
      * @var Filesystem
      */
@@ -42,20 +35,17 @@ class UpdateDatabaseCommand extends Command
 
     /**
      * @param Filesystem $fs
-     * @param Stopwatch $stopwatch
      * @param string $url
      * @param string $cache
      */
     public function __construct(
         Filesystem $fs,
-        Stopwatch $stopwatch,
         string $url,
         string $cache
     ) {
         $this->fs = $fs;
         $this->url = $url;
         $this->cache = $cache;
-        $this->stopwatch = $stopwatch;
         parent::__construct();
     }
 
@@ -92,7 +82,6 @@ class UpdateDatabaseCommand extends Command
         $target = $input->getArgument('target');
 
         $io->title('Update the GeoIP2 database');
-        $this->stopwatch->start('update');
 
         $tmp_zip = sys_get_temp_dir().'/GeoLite2.tar.gz';
         $tmp_unzip = sys_get_temp_dir().'/GeoLite2.tar';
@@ -166,20 +155,6 @@ class UpdateDatabaseCommand extends Command
 
         $io->success('Finished downloading');
 
-        $this->stopwatch($io, $this->stopwatch->stop('update'));
-
         return 0;
-    }
-
-    /**
-     * @param SymfonyStyle $io
-     * @param StopwatchEvent $event
-     */
-    private function stopwatch(SymfonyStyle $io, StopwatchEvent $event): void
-    {
-        $io->writeln([
-            sprintf('Time: <info>%.2F</info> s.', $event->getDuration() / 1000),
-            sprintf('Memory: <info>%.2F</info> MiB.', $event->getMemory() / 1024 / 1024),
-        ]);
     }
 }
