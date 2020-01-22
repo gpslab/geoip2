@@ -5,7 +5,7 @@ services:
         public: true
 
     GpsLab\Bundle\GeoIP2Bundle\Command\UpdateDatabaseCommand:
-        arguments: [ '@filesystem', '@debug.stopwatch', '%geoip2.url%', '%geoip2.cache%' ]
+        arguments: [ '@filesystem', '%geoip2.url%', '%geoip2.cache%' ]
         public: false
         tags:
             - { name: console.command }
