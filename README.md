@@ -21,17 +21,33 @@ composer req gpslab/geoip2
 
 ## Configuration
 
-Default configuration:
+**Attention!** MaxMind [changed](https://blog.maxmind.com/2019/12/18/significant-changes-to-accessing-and-using-geolite2-databases/)
+their policy and user agreements about using their data so old URLs like
+`https://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz` are no working anymore.
 
+**Steps for Migration**
+
+1. [Sign up for a MaxMind account](https://www.maxmind.com/en/geolite2/signup) (no purchase required)
+2. Login and generate a [licence key](https://www.maxmind.com/en/accounts/current/license-key)
+3. Save your licence key
+4. Open [download page](https://www.maxmind.com/en/download_files) and find your needed DB edition `ID` and copy value
+from first column.
+![GeoIP2 download page](https://user-images.githubusercontent.com/2862833/72380833-4ccd5a00-3727-11ea-9c6c-aecd55c086ed.png)
+5. Open your config file with `gpslab_geoip` params and replace `url` param by next:
+`https://download.maxmind.com/app/geoip_download?edition_id={edition_id}&license_key={license_key}&suffix=tar.gz`
+
+* `ID` - character ID name from first column on download page
+* `license_key` - your saved licence key
+ 
 ```yml
 gpslab_geoip:
+    # URL for download new GeoIP database.
+    # You should change {edition_id} and {license_key} in URL to your values.
+    url: 'https://download.maxmind.com/app/geoip_download?edition_id={edition_id}&license_key={license_key}&suffix=tar.gz'
+
     # Path to download GeoIP database.
     # It's a default value. You can change it.
     cache: '%kernel.cache_dir%/GeoLite2-City.mmdb'
-
-    # URL for download new GeoIP database.
-    # It's a default value. You can change it.
-    url: 'https://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz'
 
     # Get model data in this locale
     # It's a default value. You can change it.

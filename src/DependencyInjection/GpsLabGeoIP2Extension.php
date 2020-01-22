@@ -16,7 +16,11 @@ use Symfony\Component\DependencyInjection\Loader;
 
 class GpsLabGeoIP2Extension extends Extension
 {
-    public function load(array $configs, ContainerBuilder $container)
+    /**
+     * @param array $configs
+     * @param ContainerBuilder $container
+     */
+    public function load(array $configs, ContainerBuilder $container): void
     {
         $config = $this->processConfiguration(new Configuration(), $configs);
 
@@ -31,7 +35,7 @@ class GpsLabGeoIP2Extension extends Extension
     /**
      * @return string
      */
-    public function getAlias()
+    public function getAlias(): string
     {
         return 'gpslab_geoip';
     }
