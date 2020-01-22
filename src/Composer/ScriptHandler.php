@@ -27,7 +27,7 @@ class ScriptHandler
     /**
      * @param Event $event
      */
-    public static function updateDatabase(Event $event)
+    public static function updateDatabase(Event $event): void
     {
         $options = static::getOptions($event);
         $console_dir = static::getConsoleDir($event, 'clear the cache');
@@ -45,16 +45,18 @@ class ScriptHandler
      * @param string $cmd
      * @param int $timeout
      */
-    protected static function executeCommand(Event $event, $console_dir, $cmd, $timeout = 300)
+    protected static function executeCommand(Event $event, string $console_dir, string $cmd, int $timeout = 300): void
     {
         $php = escapeshellarg(self::getPhp(false));
         $php_args = implode(' ', array_map('escapeshellarg', self::getPhpArguments()));
         $console = escapeshellarg($console_dir.'/console');
+
         if ($event->getIO()->isDecorated()) {
             $console .= ' --ansi';
         }
 
         $command = $php.($php_args ? ' '.$php_args : '').' '.$console.' '.$cmd;
+
         if (method_exists('Symfony\Component\Process\Process', 'fromShellCommandline')) {
             // Symfony 4.2 +
             $process = Process::fromShellCommandline($command, null, null, null, $timeout);
@@ -62,7 +64,8 @@ class ScriptHandler
             // Symfony 4.1 and below
             $process = new Process($command, null, null, null, $timeout);
         }
-        $process->run(function ($type, $buffer) use ($event) {
+
+        $process->run(static function ($type, $buffer) use ($event): void {
             $event->getIO()->write($buffer, false);
         });
 
@@ -76,7 +79,7 @@ class ScriptHandler
      *
      * @return array
      */
-    protected static function getOptions(Event $event)
+    protected static function getOptions(Event $event): array
     {
         $options = array_merge(self::$options, $event->getComposer()->getPackage()->getExtra());
 
@@ -93,20 +96,20 @@ class ScriptHandler
      *
      * @return string|null
      */
-    protected static function getConsoleDir(Event $event, $action_name)
+    protected static function getConsoleDir(Event $event, string $action_name): ?string
     {
         $options = static::getOptions($event);
 
         if (self::useNewDirectoryStructure($options)) {
             if (!self::hasDirectory($event, 'symfony-bin-dir', $options['symfony-bin-dir'], $action_name)) {
-                return;
+                return null;
             }
 
             return $options['symfony-bin-dir'];
         }
 
         if (!self::hasDirectory($event, 'symfony-app-dir', $options['symfony-app-dir'], 'execute command')) {
-            return;
+            return null;
         }
 
         return $options['symfony-app-dir'];
@@ -120,7 +123,7 @@ class ScriptHandler
      *
      * @return bool
      */
-    private static function hasDirectory(Event $event, $config_name, $path, $action_name)
+    private static function hasDirectory(Event $event, string $config_name, string $path, string $action_name): bool
     {
         if (!is_dir($path)) {
             $event->getIO()->write(sprintf(
@@ -144,7 +147,7 @@ class ScriptHandler
      *
      * @return bool
      */
-    private static function useNewDirectoryStructure(array $options)
+    private static function useNewDirectoryStructure(array $options): bool
     {
         return isset($options['symfony-bin-dir']) && is_dir($options['symfony-bin-dir']);
     }
@@ -158,28 +161,33 @@ class ScriptHandler
      *
      * @return string
      */
-    private static function getPhp($include_args = true)
+    private static function getPhp(bool $include_args = true): string
     {
-        $phpFinder = new PhpExecutableFinder();
-        if (!$phpPath = $phpFinder->find($include_args)) {
+        $php_finder = new PhpExecutableFinder();
+        $php_path = $php_finder->find($include_args);
+
+        if (!$php_path) {
             throw new \RuntimeException('The php executable could not be found, add it to your PATH environment variable and try again');
         }
 
-        return $phpPath;
+        return $php_path;
     }
 
     /**
      * @return array
      */
-    private static function getPhpArguments()
+    private static function getPhpArguments(): array
     {
         $arguments = [];
         $php_finder = new PhpExecutableFinder();
+
         if (method_exists($php_finder, 'findArguments')) {
             $arguments = $php_finder->findArguments();
         }
 
-        if ($env = strval(getenv('COMPOSER_ORIGINAL_INIS'))) {
+        $env = (string) getenv('COMPOSER_ORIGINAL_INIS');
+
+        if ($env) {
             $paths = explode(PATH_SEPARATOR, $env);
             $ini = array_shift($paths);
         } else {
