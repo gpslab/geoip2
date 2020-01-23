@@ -9,56 +9,171 @@
 
 namespace GpsLab\Bundle\GeoIP2Bundle\DependencyInjection;
 
+use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
 class Configuration implements ConfigurationInterface
 {
-    private const ROOT_NODE = 'gpslab_geoip';
+    private const URL = 'https://download.maxmind.com/app/geoip_download?edition_id=%s&license_key=%s&suffix=tar.gz';
+    private const PATH = '%s/%s.mmdb';
 
     /**
-     * Config tree builder.
-     *
-     * Example config:
-     *
-     * gpslab_geoip:
-     *     cache: '%kernel.cache_dir%/GeoLite2-City.mmdb'
-     *     url: 'https://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz'
-     *     locales: [ '%locale%' ]
-     *
+     * @var string
+     */
+    private $cache_dir;
+
+    /**
+     * @param string|null $cache_dir
+     */
+    public function __construct(?string $cache_dir)
+    {
+        $this->cache_dir = $cache_dir ?: '/tmp';
+    }
+
+    /**
      * @return TreeBuilder
      */
     public function getConfigTreeBuilder(): TreeBuilder
     {
-        $tree_builder = new TreeBuilder(self::ROOT_NODE);
+        $tree_builder = new TreeBuilder('gpslab_geoip');
 
         if (method_exists($tree_builder, 'getRootNode')) {
             // Symfony 4.2 +
             $root_node = $tree_builder->getRootNode();
         } else {
             // Symfony 4.1 and below
-            $root_node = $tree_builder->root(self::ROOT_NODE);
+            $root_node = $tree_builder->root('gpslab_geoip');
         }
 
-        $cache = $root_node->children()->scalarNode('cache');
-        $cache
-            ->cannotBeEmpty()
-            ->defaultValue('%kernel.cache_dir%/GeoLite2-City.mmdb')
-        ;
+        // normalize default_database from databases
+        $root_node
+            ->beforeNormalization()
+            ->ifTrue(static function ($v) {
+                return is_array($v) && !array_key_exists('default_database', $v) && array_key_exists('databases', $v);
+            })
+            ->then(static function ($v) {
+                $keys = array_keys($v['databases']);
+                $v['default_database'] = reset($keys);
 
-        $url = $root_node->children()->scalarNode('url');
-        $url
-            ->cannotBeEmpty()
-            ->defaultValue('https://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz')
-        ;
+                return $v;
+            });
 
-        $locales = $root_node->children()->arrayNode('locales');
+        // normalize databases root configuration to default_database
+        $root_node
+            ->beforeNormalization()
+            ->ifTrue(static function ($v) {
+                return is_array($v) && !array_key_exists('databases', $v) && !array_key_exists('database', $v);
+            })
+            ->then(static function ($v) {
+                // key that should not be rewritten to the database config
+                $database = [];
+                foreach ($v as $key => $value) {
+                    if ($key === 'default_database') {
+                        continue;
+                    }
+                    $database[$key] = $v[$key];
+                    unset($v[$key]);
+                }
+                $v['default_database'] = isset($v['default_database']) ? (string) $v['default_database'] : 'default';
+                $v['databases']        = [$v['default_database'] => $database];
+
+                return $v;
+            });
+
+        // default_database should be exists in databases
+        $root_node
+            ->validate()
+                ->ifTrue(static function($v) {
+                    return
+                        !is_array($v) ||
+                        !array_key_exists('default_database', $v) ||
+                        !array_key_exists('databases', $v) ||
+                        !array_key_exists($v['default_database'], $v['databases']);
+                })
+                ->then(static function($v) {
+                    if (is_array($v) && !empty($v['default_database'])) {
+                        throw new \InvalidArgumentException(sprintf('Invalid default database "%s"', $v['default_database']));
+                    }
+
+                    throw new \InvalidArgumentException('Invalid default database');
+                });
+
+        $default_database = $root_node->children()->scalarNode('default_database');
+        $default_database->defaultValue('default');
+
+        $root_node->fixXmlConfig('database');
+        $root_node->append($this->getDatabaseNode());
+
+        return $tree_builder;
+    }
+
+    /**
+     * @return ArrayNodeDefinition
+     */
+    private function getDatabaseNode(): ArrayNodeDefinition
+    {
+        $tree_builder = new TreeBuilder('databases');
+
+        if (method_exists($tree_builder, 'getRootNode')) {
+            // Symfony 4.2 +
+            $root_node = $tree_builder->getRootNode();
+        } else {
+            // Symfony 4.1 and below
+            $root_node = $tree_builder->root('databases');
+        }
+
+        /** @var ArrayNodeDefinition $database_node */
+        $database_node = $root_node
+            ->requiresAtLeastOneElement()
+            ->useAttributeAsKey('name')
+            ->prototype('array');
+
+        // normalize url from license and edition
+        $database_node
+            ->beforeNormalization()
+            ->ifTrue(static function ($v) {
+                return
+                    is_array($v) &&
+                    !array_key_exists('url', $v) &&
+                    array_key_exists('license', $v) &&
+                    array_key_exists('edition', $v);
+            })
+            ->then(static function ($v) {
+                $v['url'] = sprintf(self::URL, $v['edition'], $v['license']);
+
+                return $v;
+            });
+
+        // normalize path from edition
+        $database_node
+            ->beforeNormalization()
+            ->ifTrue(static function ($v) {
+                return is_array($v) && !array_key_exists('path', $v) && array_key_exists('edition', $v);
+            })
+            ->then(function ($v) {
+                $v['path'] = sprintf(self::PATH, $this->cache_dir, $v['edition']);
+
+                return $v;
+            });
+
+        $url = $database_node->children()->scalarNode('url');
+        $url->isRequired();
+
+        $path = $database_node->children()->scalarNode('path');
+        $path->isRequired();
+
+        $database_node->fixXmlConfig('locale');
+        $locales = $database_node->children()->arrayNode('locales');
         $locales->prototype('scalar');
         $locales
             ->treatNullLike([])
-            ->defaultValue(['%locale%'])
-        ;
+            ->defaultValue(['en']);
 
-        return $tree_builder;
+        $database_node->children()->scalarNode('license');
+
+        $database_node->children()->scalarNode('edition');
+
+        return $root_node;
     }
 }
