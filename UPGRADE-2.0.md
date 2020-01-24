@@ -17,7 +17,7 @@ gpslab_geoip:
     path: '%kernel.cache_dir%/GeoLite2-City.mmdb'
 ```
 
-Update `composer.json` if you use composer vent callbacks.
+Update `composer.json` if you use composer event callbacks.
 
 Before in Symfony <3.0
 
@@ -75,7 +75,23 @@ After in Symfony >4
 Updating Dependencies
 ---------------------
 
-### Removed package
+### Require PHP extensions
 
- * The `gpslab/compressor` package removed from dependencies.
+ * Require the [Phar](https://www.php.net/manual/en/book.phar.php) extension.
+ * Require the [Zlib](https://www.php.net/manual/en/book.zlib.php) extension.
+
+### Require packages
+
+ * Require the `symfony/filesystem` package.
+ * Require the `symfony/config` package.
+ * The `symfony/http-kernel` package moved from `require-dev` to `require`.
+ * The `symfony/dependency-injection` package moved from `require-dev` to `require`.
+ * The `symfony/expression-language` package moved from `require-dev` to `require`.
+ * The `symfony/console` package moved from `require-dev` to `require`.
+
+### Removed packages
+
  * The `symfony/stopwatch` package removed from dependencies.
+ * The `gpslab/compressor` package removed from dependencies.
+ * The `scrutinizer/ocular` package removed from dependencies.
+ * The `satooshi/php-coveralls` package removed from dependencies.
