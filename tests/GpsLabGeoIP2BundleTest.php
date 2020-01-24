@@ -23,5 +23,9 @@ class GpsLabGeoIP2BundleTest extends TestCase
         $extension = $bundle->getContainerExtension();
 
         $this->assertInstanceOf(GpsLabGeoIP2Extension::class, $extension);
+
+        // test laze-load
+        $extension2 = $bundle->getContainerExtension();
+        $this->assertSame($extension, $extension2);
     }
 }
