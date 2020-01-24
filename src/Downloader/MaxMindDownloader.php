@@ -15,7 +15,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**
- * MaxMind downloader
+ * MaxMind downloader.
  *
  * Expect GeoIP2 archive from https://download.maxmind.com/ with structure:
  *
@@ -39,7 +39,7 @@ class MaxMindDownloader implements Downloader
     private $logger;
 
     /**
-     * @param Filesystem $fs
+     * @param Filesystem      $fs
      * @param LoggerInterface $logger
      */
     public function __construct(Filesystem $fs, LoggerInterface $logger)

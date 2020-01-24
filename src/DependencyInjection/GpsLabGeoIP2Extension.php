@@ -46,7 +46,7 @@ class GpsLabGeoIP2Extension extends Extension
                 ->setLazy(true)
                 ->setArguments([
                     $database['path'],
-                    $database['locales'] ?: ['en']
+                    $database['locales'] ?: ['en'],
                 ]);
         }
 
@@ -55,7 +55,7 @@ class GpsLabGeoIP2Extension extends Extension
             ->setDefinition(MaxMindDownloader::class, new Definition(MaxMindDownloader::class))
             ->setArguments([
                 new Reference('filesystem'),
-                new Reference('logger')
+                new Reference('logger'),
             ]);
 
         $container->setAlias(Downloader::class, MaxMindDownloader::class);
@@ -65,7 +65,7 @@ class GpsLabGeoIP2Extension extends Extension
             ->setDefinition(UpdateDatabaseCommand::class, new Definition(UpdateDatabaseCommand::class))
             ->setArguments([
                 new Reference(Downloader::class),
-                $config['databases']
+                $config['databases'],
             ])
             ->addTag('console.command');
 
@@ -73,13 +73,13 @@ class GpsLabGeoIP2Extension extends Extension
         $container
             ->setDefinition(DownloadDatabaseCommand::class, new Definition(DownloadDatabaseCommand::class))
             ->setArguments([
-                new Reference(Downloader::class)
+                new Reference(Downloader::class),
             ])
             ->addTag('console.command');
     }
 
     /**
-     * @param array $config
+     * @param array            $config
      * @param ContainerBuilder $container
      *
      * @return Configuration

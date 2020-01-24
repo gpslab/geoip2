@@ -51,10 +51,10 @@ class Configuration implements ConfigurationInterface
         // normalize default_database from databases
         $root_node
             ->beforeNormalization()
-            ->ifTrue(static function ($v) {
+            ->ifTrue(static function ($v): bool {
                 return is_array($v) && !array_key_exists('default_database', $v) && array_key_exists('databases', $v);
             })
-            ->then(static function ($v) {
+            ->then(static function (array $v): array {
                 $keys = array_keys($v['databases']);
                 $v['default_database'] = reset($keys);
 
@@ -64,10 +64,10 @@ class Configuration implements ConfigurationInterface
         // normalize databases root configuration to default_database
         $root_node
             ->beforeNormalization()
-            ->ifTrue(static function ($v) {
+            ->ifTrue(static function ($v): bool {
                 return is_array($v) && !array_key_exists('databases', $v) && !array_key_exists('database', $v);
             })
-            ->then(static function ($v) {
+            ->then(static function (array $v): array {
                 // key that should not be rewritten to the database config
                 $database = [];
                 foreach ($v as $key => $value) {
@@ -78,7 +78,7 @@ class Configuration implements ConfigurationInterface
                     unset($v[$key]);
                 }
                 $v['default_database'] = isset($v['default_database']) ? (string) $v['default_database'] : 'default';
-                $v['databases']        = [$v['default_database'] => $database];
+                $v['databases'] = [$v['default_database'] => $database];
 
                 return $v;
             });
@@ -86,14 +86,14 @@ class Configuration implements ConfigurationInterface
         // default_database should be exists in databases
         $root_node
             ->validate()
-                ->ifTrue(static function($v) {
+                ->ifTrue(static function ($v): bool {
                     return
                         !is_array($v) ||
                         !array_key_exists('default_database', $v) ||
                         !array_key_exists('databases', $v) ||
                         !array_key_exists($v['default_database'], $v['databases']);
                 })
-                ->then(static function($v) {
+                ->then(static function (array $v): array {
                     if (is_array($v) && !empty($v['default_database'])) {
                         throw new \InvalidArgumentException(sprintf('Invalid default database "%s"', $v['default_database']));
                     }
@@ -104,10 +104,10 @@ class Configuration implements ConfigurationInterface
         // add license to databases config if not exists (allow use a global license for all databases)
         $root_node
             ->beforeNormalization()
-            ->ifTrue(static function ($v) {
+            ->ifTrue(static function ($v): bool {
                 return is_array($v) && array_key_exists('license', $v) && array_key_exists('databases', $v);
             })
-            ->then(static function ($v) {
+            ->then(static function (array $v): array {
                 foreach ($v['databases'] as $name => $database) {
                     if (!array_key_exists('license', $database)) {
                         $v['databases'][$name]['license'] = $v['license'];
@@ -120,10 +120,10 @@ class Configuration implements ConfigurationInterface
         // add locales to databases config if not exists (allow use a global locales for all databases)
         $root_node
             ->beforeNormalization()
-            ->ifTrue(static function ($v) {
+            ->ifTrue(static function ($v): bool {
                 return is_array($v) && array_key_exists('locales', $v) && array_key_exists('databases', $v);
             })
-            ->then(static function ($v) {
+            ->then(static function (array $v): array {
                 foreach ($v['databases'] as $name => $database) {
                     if (!array_key_exists('locales', $database)) {
                         $v['databases'][$name]['locales'] = $v['locales'];
@@ -175,14 +175,14 @@ class Configuration implements ConfigurationInterface
         // normalize url from license and edition
         $database_node
             ->beforeNormalization()
-            ->ifTrue(static function ($v) {
+            ->ifTrue(static function ($v): bool {
                 return
                     is_array($v) &&
                     !array_key_exists('url', $v) &&
                     array_key_exists('license', $v) &&
                     array_key_exists('edition', $v);
             })
-            ->then(static function ($v) {
+            ->then(static function (array $v): array {
                 $v['url'] = sprintf(self::URL, urlencode($v['edition']), urlencode($v['license']));
 
                 return $v;
@@ -191,10 +191,10 @@ class Configuration implements ConfigurationInterface
         // normalize path from edition
         $database_node
             ->beforeNormalization()
-            ->ifTrue(static function ($v) {
+            ->ifTrue(static function ($v): bool {
                 return is_array($v) && !array_key_exists('path', $v) && array_key_exists('edition', $v);
             })
-            ->then(function ($v) {
+            ->then(function (array $v): array {
                 $v['path'] = sprintf(self::PATH, $this->cache_dir, $v['edition']);
 
                 return $v;

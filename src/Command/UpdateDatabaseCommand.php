@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * GpsLab component.
  *
@@ -30,7 +32,7 @@ class UpdateDatabaseCommand extends Command
 
     /**
      * @param Downloader $downloader
-     * @param array $databases
+     * @param array      $databases
      */
     public function __construct(Downloader $downloader, array $databases)
     {
@@ -80,7 +82,7 @@ EOF;
     }
 
     /**
-     * @param InputInterface $input
+     * @param InputInterface  $input
      * @param OutputInterface $output
      *
      * @return int
