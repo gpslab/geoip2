@@ -37,8 +37,8 @@ class UpdateDatabaseCommand extends Command
 
     /**
      * @param Filesystem $fs
-     * @param string $url
-     * @param string $cache
+     * @param string     $url
+     * @param string     $cache
      */
     public function __construct(
         Filesystem $fs,
@@ -72,7 +72,7 @@ class UpdateDatabaseCommand extends Command
     }
 
     /**
-     * @param InputInterface $input
+     * @param InputInterface  $input
      * @param OutputInterface $output
      *
      * @return int
@@ -130,7 +130,7 @@ class UpdateDatabaseCommand extends Command
                 foreach (scandir($path) as $filename) {
                     $file = $path.'/'.$filename;
 
-                    if (strpos($filename, $match['database']) === 0 && is_file($file)) {
+                    if (0 === strpos($filename, $match['database']) && is_file($file)) {
                         $io->comment(sprintf(
                             'Found <info>%s</info> database updated at <info>%s-%s-%s</info>',
                             $match['database'],
