@@ -25,6 +25,7 @@ return PhpCsFixer\Config::create()
         'no_superfluous_phpdoc_tags' => false,
         'blank_line_after_opening_tag' => false,
         'phpdoc_no_empty_return' => false,
+        'yoda_style' => false,
         'ordered_imports' => [
             'sort_algorithm' => 'alpha',
         ],
