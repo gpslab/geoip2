@@ -64,6 +64,14 @@ class DownloadDatabaseCommand extends Command
         $url = $input->getArgument('url');
         $target = $input->getArgument('target');
 
+        if (!is_string($url)) {
+            throw new \InvalidArgumentException(sprintf('URL of downloaded GeoIP2 database should be a string, got %s instead.', json_encode($url)));
+        }
+
+        if (!is_string($target)) {
+            throw new \InvalidArgumentException(sprintf('Target download path should be a string, got %s instead.', json_encode($target)));
+        }
+
         $io->title('Download the GeoIP2 database');
 
         $this->downloader->download($url, $target);

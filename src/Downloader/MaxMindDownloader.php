@@ -73,19 +73,21 @@ class MaxMindDownloader implements Downloader
 
         // decompress gz file
         $zip = new \PharData($tmp_zip);
-        $tar = $zip->decompress();
+        $zip->decompress();
 
         $this->logger->debug('Decompression complete');
         $this->logger->debug(sprintf('Extract tar file to %s', $tmp_untar));
 
         // extract tar archive
+        $tar = new \PharData($tmp_unzip);
         $tar->extractTo($tmp_untar);
 
         $this->logger->debug('Tar archive extracted');
 
         // find database in archive
         $database = '';
-        foreach (glob(sprintf('%s/**/*.mmdb', $tmp_untar)) as $file) {
+        $files = glob(sprintf('%s/**/*.mmdb', $tmp_untar)) ?: [];
+        foreach ($files as $file) {
             // expected something like that "GeoLite2-City_20200114"
             if (preg_match('/(?<database>[^\/]+)_(?<year>\d{4})(?<month>\d{2})(?<day>\d{2})/', $file, $match)) {
                 $this->logger->debug(sprintf(

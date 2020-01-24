@@ -79,7 +79,7 @@ class GpsLabGeoIP2Extension extends Extension
     }
 
     /**
-     * @param array            $config
+     * @param array[]          $config
      * @param ContainerBuilder $container
      *
      * @return Configuration

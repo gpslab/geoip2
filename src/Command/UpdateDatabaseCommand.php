@@ -26,13 +26,13 @@ class UpdateDatabaseCommand extends Command
     private $downloader;
 
     /**
-     * @var array
+     * @var array[]
      */
     private $databases;
 
     /**
      * @param Downloader $downloader
-     * @param array      $databases
+     * @param array[]    $databases
      */
     public function __construct(Downloader $downloader, array $databases)
     {
@@ -95,12 +95,18 @@ EOF;
         $io->title('Update the GeoIP2 databases');
 
         if (!is_array($databases)) {
-            throw new \InvalidArgumentException(sprintf('URL of downloaded GeoIP2 database should be a string, got %s instead.', json_encode($databases)));
+            throw new \InvalidArgumentException(sprintf('Updated databases should be a array, got %s instead.', json_encode($databases)));
         }
 
         foreach ($databases as $database) {
             if (!array_key_exists($database, $this->databases)) {
                 throw new \InvalidArgumentException(sprintf('Undefined "%s" database.', $database));
+            }
+
+            if (!array_key_exists('url', $this->databases[$database]) ||
+                !array_key_exists('path', $this->databases[$database])
+            ) {
+                throw new \InvalidArgumentException(sprintf('Invalid "%s" database config.', $database));
             }
 
             $io->section(sprintf('Update "%s" database', $database));
