@@ -59,7 +59,7 @@ class UpdateDatabaseCommand extends Command
             ->addArgument(
                 'url',
                 InputArgument::OPTIONAL,
-                'URL to downloaded GeoIP2 database',
+                'URL of downloaded GeoIP2 database',
                 $this->url
             )
             ->addArgument(
@@ -80,8 +80,17 @@ class UpdateDatabaseCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-        $url = $input->getArgument('url');
-        $target = $input->getArgument('target');
+
+        if (!is_string($input->getArgument('url'))) {
+            throw new \InvalidArgumentException(sprintf('URL of downloaded GeoIP2 database should be a string, got %s instead.', json_encode($input->getArgument('url'))));
+        }
+
+        if (!is_string($input->getArgument('target'))) {
+            throw new \InvalidArgumentException(sprintf('Target download path should be a string, got %s instead.', json_encode($input->getArgument('target'))));
+        }
+
+        $url = (string) $input->getArgument('url');
+        $target = (string) $input->getArgument('target');
 
         $io->title('Update the GeoIP2 database');
 
@@ -116,30 +125,36 @@ class UpdateDatabaseCommand extends Command
 
         // find database in archive
         $database = '';
-        foreach (scandir($tmp_untar) as $folder) {
-            $path = $tmp_untar.'/'.$folder;
+        $folders = scandir($tmp_untar);
+        if ($folders) {
+            foreach ($folders as $folder) {
+                $path = $tmp_untar.'/'.$folder;
 
-            // find folder with database
-            // expected something like that "GeoLite2-City_20200114"
-            if (
-                preg_match('/^(?<database>.+)_(?<year>\d{4})(?<month>\d{2})(?<day>\d{2})$/', $folder, $match) &&
-                is_dir($path)
-            ) {
-                // find database in folder
-                // expected something like that "GeoLite2-City.mmdb"
-                foreach (scandir($path) as $filename) {
-                    $file = $path.'/'.$filename;
+                // find folder with database
+                // expected something like that "GeoLite2-City_20200114"
+                if (
+                    preg_match('/^(?<database>.+)_(?<year>\d{4})(?<month>\d{2})(?<day>\d{2})$/', $folder, $match) &&
+                    is_dir($path)
+                ) {
+                    // find database in folder
+                    // expected something like that "GeoLite2-City.mmdb"
+                    $files = scandir($path);
+                    if ($files) {
+                        foreach ($files as $filename) {
+                            $file = $path.'/'.$filename;
 
-                    if (0 === strpos($filename, $match['database']) && is_file($file)) {
-                        $io->comment(sprintf(
-                            'Found <info>%s</info> database updated at <info>%s-%s-%s</info>',
-                            $match['database'],
-                            $match['year'],
-                            $match['month'],
-                            $match['day']
-                        ));
+                            if (strpos($filename, $match['database']) === 0 && is_file($file)) {
+                                $io->comment(sprintf(
+                                    'Found <info>%s</info> database updated at <info>%s-%s-%s</info>',
+                                    $match['database'],
+                                    $match['year'],
+                                    $match['month'],
+                                    $match['day']
+                                ));
 
-                        $database = $file;
+                                $database = $file;
+                            }
+                        }
                     }
                 }
             }
