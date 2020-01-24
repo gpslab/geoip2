@@ -42,7 +42,7 @@ Example configuration:
 ```yml
 gpslab_geoip:
     # Your personal licence key
-    license: 'XXXXXX'
+    license: 'XXXXXXXXXXXXXXXX'
 
     # Database edition ID
     edition: 'GeoLite2-City'
@@ -121,13 +121,13 @@ You can use multiple GeoIP databases in one application. Need update configurati
 gpslab_geoip:
     databases:
         default:
-            license: 'XXXXXX'
+            license: 'XXXXXXXXXXXXXXXX'
             edition: 'GeoLite2-City'
         country:
-            license: 'XXXXXX'
+            license: 'XXXXXXXXXXXXXXXX'
             edition: 'GeoLite2-Country'
         asn:
-            license: 'XXXXXX'
+            license: 'XXXXXXXXXXXXXXXX'
             edition: 'GeoLite2-ASN'
 ```
 
@@ -151,14 +151,32 @@ gpslab_geoip:
     default_database: 'city'
     databases:
         asn:
-            license: 'XXXXXX'
+            license: 'XXXXXXXXXXXXXXXX'
             edition: 'GeoLite2-ASN'
         city:
-            license: 'XXXXXX'
+            license: 'XXXXXXXXXXXXXXXX'
             edition: 'GeoLite2-City'
         country:
-            license: 'XXXXXX'
+            license: 'XXXXXXXXXXXXXXXX'
             edition: 'GeoLite2-Country'
+```
+
+In order not to repeat the license key and locales for each database, you can specify them once.
+
+```yml
+gpslab_geoip:
+    license: 'XXXXXXXXXXXXXXXX' # global license
+    locales: [ 'ru', 'en' ] # global locales
+    default_database: 'city'
+    databases:
+        asn:
+            edition: 'GeoLite2-ASN'
+            locales: [ 'fr' ] # customize locales
+        city:
+            edition: 'GeoLite2-City'
+        country:
+            edition: 'GeoLite2-Country'
+            license: 'YYYYYYYYYYYYYYYY' # customize license
 ```
 
 ## Update GeoIP database

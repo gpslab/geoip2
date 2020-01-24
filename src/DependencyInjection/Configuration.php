@@ -99,6 +99,47 @@ class Configuration implements ConfigurationInterface
                     throw new \InvalidArgumentException('Invalid default database');
                 });
 
+        // add license to databases config if not exists (allow use a global license for all databases)
+        $root_node
+            ->beforeNormalization()
+            ->ifTrue(static function ($v) {
+                return is_array($v) && array_key_exists('license', $v) && array_key_exists('databases', $v);
+            })
+            ->then(static function ($v) {
+                foreach ($v['databases'] as $name => $database) {
+                    if (!array_key_exists('license', $database)) {
+                        $v['databases'][$name]['license'] = $v['license'];
+                    }
+                }
+
+                return $v;
+            });
+
+        // add locales to databases config if not exists (allow use a global locales for all databases)
+        $root_node
+            ->beforeNormalization()
+            ->ifTrue(static function ($v) {
+                return is_array($v) && array_key_exists('locales', $v) && array_key_exists('databases', $v);
+            })
+            ->then(static function ($v) {
+                foreach ($v['databases'] as $name => $database) {
+                    if (!array_key_exists('locales', $database)) {
+                        $v['databases'][$name]['locales'] = $v['locales'];
+                    }
+                }
+
+                return $v;
+            });
+
+        $root_node->fixXmlConfig('locale');
+        $locales = $root_node->children()->arrayNode('locales');
+        $locales->prototype('scalar');
+        $locales
+            ->treatNullLike([])
+            ->defaultValue(['en']);
+
+        $root_node->children()->scalarNode('license');
+
         $default_database = $root_node->children()->scalarNode('default_database');
         $default_database->defaultValue('default');
 
@@ -140,7 +181,7 @@ class Configuration implements ConfigurationInterface
                     array_key_exists('edition', $v);
             })
             ->then(static function ($v) {
-                $v['url'] = sprintf(self::URL, $v['edition'], $v['license']);
+                $v['url'] = sprintf(self::URL, urlencode($v['edition']), urlencode($v['license']));
 
                 return $v;
             });

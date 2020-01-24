@@ -32,9 +32,7 @@ class GpsLabGeoIP2Extension extends Extension
 
         // aliases for default database
         $container->setAlias('geoip2.reader', sprintf('geoip2.database.%s_reader', $default_database));
-        $container->getAlias('geoip2.reader')->setPublic(true);
         $container->setAlias(Reader::class, sprintf('geoip2.database.%s_reader', $default_database));
-        $container->getAlias(Reader::class)->setPublic(true);
 
         // define database services
         foreach ($config['databases'] as $name => $database) {
