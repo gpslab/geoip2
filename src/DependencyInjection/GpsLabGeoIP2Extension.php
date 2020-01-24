@@ -10,6 +10,7 @@
 namespace GpsLab\Bundle\GeoIP2Bundle\DependencyInjection;
 
 use GeoIp2\Database\Reader;
+use GpsLab\Bundle\GeoIP2Bundle\Command\DownloadDatabaseCommand;
 use GpsLab\Bundle\GeoIP2Bundle\Command\UpdateDatabaseCommand;
 use GpsLab\Bundle\GeoIP2Bundle\Downloader\Downloader;
 use GpsLab\Bundle\GeoIP2Bundle\Downloader\MaxMindDownloader;
@@ -30,7 +31,6 @@ class GpsLabGeoIP2Extension extends Extension
         $config = $this->processConfiguration($configuration, $configs);
 
         $default_database = $config['default_database'];
-        $default_database_config = $config['databases'][$default_database];
 
         // aliases for default database
         $container->setAlias('geoip2.reader', sprintf('geoip2.database.%s_reader', $default_database));
@@ -58,13 +58,20 @@ class GpsLabGeoIP2Extension extends Extension
 
         $container->setAlias(Downloader::class, MaxMindDownloader::class);
 
-        // configure update database command
+        // configure update database console command
         $container
             ->setDefinition(UpdateDatabaseCommand::class, new Definition(UpdateDatabaseCommand::class))
             ->setArguments([
                 new Reference(Downloader::class),
-                $default_database_config['url'],
-                $default_database_config['path']
+                $config['databases']
+            ])
+            ->addTag('console.command');
+
+        // configure download database console command
+        $container
+            ->setDefinition(DownloadDatabaseCommand::class, new Definition(DownloadDatabaseCommand::class))
+            ->setArguments([
+                new Reference(Downloader::class)
             ])
             ->addTag('console.command');
     }

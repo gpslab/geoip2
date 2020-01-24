@@ -10,6 +10,7 @@ declare(strict_types=1);
  */
 
 namespace GpsLab\Bundle\GeoIP2Bundle\Downloader;
+
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Filesystem\Filesystem;
 

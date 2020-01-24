@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * GpsLab component.
  *
@@ -24,49 +26,59 @@ class UpdateDatabaseCommand extends Command
     private $downloader;
 
     /**
-     * @var string
+     * @var array
      */
-    private $url;
-
-    /**
-     * @var string
-     */
-    private $cache;
+    private $databases;
 
     /**
      * @param Downloader $downloader
-     * @param string $url
-     * @param string $cache
+     * @param array $databases
      */
-    public function __construct(
-        Downloader $downloader,
-        string $url,
-        string $cache
-    ) {
+    public function __construct(Downloader $downloader, array $databases)
+    {
         $this->downloader = $downloader;
-        $this->url = $url;
-        $this->cache = $cache;
+        $this->databases = $databases;
         parent::__construct();
     }
 
     protected function configure(): void
     {
+        $help = <<<EOF
+The <info>%command.name%</info> command update all configured databases:
+
+    <info>%command.full_name%</info>
+
+EOF;
+
+        if (count($this->databases) > 1) {
+            $databases_help = '';
+            foreach (array_keys($this->databases) as $i => $name) {
+                $databases_help .= sprintf(' * <info>%s</info>'.PHP_EOL, $name);
+            }
+            [$first, $second, ] = array_keys($this->databases);
+
+            $help .= <<<EOF
+
+Update the <info>$first</info> and <info>$second</info> database:
+
+    <info>%command.full_name% $first $second</info>
+
+List of available databases:
+
+$databases_help
+EOF;
+        }
+
         $this
             ->setName('geoip2:update')
-            ->setDescription('Downloads and update the GeoIP2 database')
+            ->setDescription('Update the GeoIP2 databases')
             ->addArgument(
-                'url',
-                InputArgument::OPTIONAL,
-                'URL to downloaded GeoIP2 database',
-                $this->url
+                'databases',
+                InputArgument::OPTIONAL | InputArgument::IS_ARRAY,
+                'Updated databases',
+                array_keys($this->databases)
             )
-            ->addArgument(
-                'target',
-                InputArgument::OPTIONAL,
-                'Target download path',
-                $this->cache
-            )
-        ;
+            ->setHelp($help);
     }
 
     /**
@@ -78,14 +90,22 @@ class UpdateDatabaseCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-        $url = $input->getArgument('url');
-        $target = $input->getArgument('target');
 
-        $io->title('Download the GeoIP2 database');
+        $io->title('Update the GeoIP2 databases');
 
-        $this->downloader->download($url, $target);
+        foreach ($input->getArgument('databases') as $database) {
+            if (!array_key_exists($database, $this->databases)) {
+                throw new \InvalidArgumentException(sprintf('Undefined "%s" database.', $database));
+            }
 
-        $io->success('Finished downloading');
+            $io->section(sprintf('Update "%s" database', $database));
+
+            $this->downloader->download($this->databases[$database]['url'], $this->databases[$database]['path']);
+
+            $io->comment(sprintf('Database <info>%s</info> updated', $database));
+        }
+
+        $io->success('Finished updating');
 
         return 0;
     }

@@ -58,14 +58,19 @@ After in Symfony >4
 }
 ```
 
-### Dependencies
+### Update database command
 
- * The `UpdateDatabaseCommand` command not dependency a `CompressorInterface`.
+The update database command (`geoip2:update`) split into two separate commands.
+
+ * `geoip2:download` - command for download some not configured database from URL to specific path.
+ * `geoip2:update` - command for update configured databases.
 
 ### Renamed
 
-
- * The `gpslab.command.geoip2.update` service renamed to `GpsLab\Bundle\GeoIP2Bundle\Command\UpdateDatabaseCommand`.
+ * The `gpslab.command.geoip2.update` service renamed to `GpsLab\Bundle\GeoIP2Bundle\Command\DownloadDatabaseCommand`.
+ * The `GpsLab\Bundle\GeoIP2Bundle\Command\UpdateDatabaseCommand` class renamed to
+ `GpsLab\Bundle\GeoIP2Bundle\Command\DownloadDatabaseCommand`.
+ * The `geoip2:update` console command renamed to `geoip2:download`.
 
 ### Removed
 
