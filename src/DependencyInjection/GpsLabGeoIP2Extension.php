@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * GpsLab component.
  *
@@ -22,7 +24,7 @@ use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 class GpsLabGeoIP2Extension extends Extension
 {
     /**
-     * @param array $configs
+     * @param array[]          $configs
      * @param ContainerBuilder $container
      */
     public function load(array $configs, ContainerBuilder $container): void

@@ -1,6 +1,4 @@
 <?php
-declare(strict_types=1);
-
 /**
  * GpsLab component.
  *
@@ -90,10 +88,15 @@ EOF;
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
+        $databases = $input->getArgument('databases');
 
         $io->title('Update the GeoIP2 databases');
 
-        foreach ($input->getArgument('databases') as $database) {
+        if (!is_array($databases)) {
+            throw new \InvalidArgumentException(sprintf('URL of downloaded GeoIP2 database should be a string, got %s instead.', json_encode($databases)));
+        }
+
+        foreach ($databases as $database) {
             if (!array_key_exists($database, $this->databases)) {
                 throw new \InvalidArgumentException(sprintf('Undefined "%s" database.', $database));
             }
