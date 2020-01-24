@@ -1,6 +1,22 @@
 UPGRADE FROM 1.x to 2.0
 =======================
 
+Renamed configuration option `cache` to `path`.
+
+Before
+
+```yml
+gpslab_geoip:
+    cache: '%kernel.cache_dir%/GeoLite2-City.mmdb'
+```
+
+After
+
+```yml
+gpslab_geoip:
+    path: '%kernel.cache_dir%/GeoLite2-City.mmdb'
+```
+
 Update `composer.json` if you use composer vent callbacks.
 
 Before in Symfony <3.0
