@@ -38,21 +38,6 @@ class MaxMindDownloader implements Downloader
     private $logger;
 
     /**
-     * @var string
-     */
-    private $tmp_zip;
-
-    /**
-     * @var string
-     */
-    private $tmp_unzip;
-
-    /**
-     * @var string
-     */
-    private $tmp_untar;
-
-    /**
      * @param Filesystem $fs
      * @param LoggerInterface $logger
      */
@@ -60,9 +45,6 @@ class MaxMindDownloader implements Downloader
     {
         $this->fs = $fs;
         $this->logger = $logger;
-        $this->tmp_zip = sys_get_temp_dir().'/GeoLite2.tar.gz';
-        $this->tmp_unzip = sys_get_temp_dir().'/GeoLite2.tar';
-        $this->tmp_untar = sys_get_temp_dir().'/GeoLite2';
     }
 
     /**
@@ -71,34 +53,38 @@ class MaxMindDownloader implements Downloader
      */
     public function download(string $url, string $target): void
     {
+        $id = uniqid('', false);
+        $tmp_zip = sprintf('%s/%s_GeoLite2.tar.gz', sys_get_temp_dir(), $id);
+        $tmp_unzip = sprintf('%s/%s_GeoLite2.tar', sys_get_temp_dir(), $id);
+        $tmp_untar = sprintf('%s/%s_GeoLite2', sys_get_temp_dir(), $id);
+
         // remove old files and folders for correct overwrite it
-        $this->fs->remove([$this->tmp_zip, $this->tmp_unzip, $this->tmp_untar]);
+        $this->fs->remove([$tmp_zip, $tmp_unzip, $tmp_untar]);
 
         $this->logger->debug(sprintf('Beginning download of file %s', $url));
 
-        $this->fs->copy($url, $this->tmp_zip);
+        $this->fs->copy($url, $tmp_zip, true);
 
-        $this->logger->debug(sprintf('Download complete to %s', $this->tmp_zip));
-        $this->logger->debug(sprintf('De-compressing file to %s', $this->tmp_unzip));
+        $this->logger->debug(sprintf('Download complete to %s', $tmp_zip));
+        $this->logger->debug(sprintf('De-compressing file to %s', $tmp_unzip));
 
         $this->fs->mkdir(dirname($target), 0755);
 
         // decompress gz file
-        $phar = new \PharData($this->tmp_zip);
-        $phar->decompress();
+        $zip = new \PharData($tmp_zip);
+        $tar = $zip->decompress();
 
         $this->logger->debug('Decompression complete');
-        $this->logger->debug(sprintf('Extract tar file to %s', $this->tmp_untar));
+        $this->logger->debug(sprintf('Extract tar file to %s', $tmp_untar));
 
         // extract tar archive
-        $phar = new \PharData($this->tmp_unzip);
-        $phar->extractTo($this->tmp_untar);
+        $tar->extractTo($tmp_untar);
 
         $this->logger->debug('Tar archive extracted');
 
         // find database in archive
         $database = '';
-        foreach (glob(sprintf('%s/**/*.mmdb', $this->tmp_untar)) as $file) {
+        foreach (glob(sprintf('%s/**/*.mmdb', $tmp_untar)) as $file) {
             // expected something like that "GeoLite2-City_20200114"
             if (preg_match('/(?<database>[^\/]+)_(?<year>\d{4})(?<month>\d{2})(?<day>\d{2})/', $file, $match)) {
                 $this->logger->debug(sprintf(
@@ -120,7 +106,7 @@ class MaxMindDownloader implements Downloader
 
         $this->fs->copy($database, $target, true);
         $this->fs->chmod($target, 0755);
-        $this->fs->remove([$this->tmp_zip, $this->tmp_unzip, $this->tmp_untar]);
+        $this->fs->remove([$tmp_zip, $tmp_unzip, $tmp_untar]);
 
         $this->logger->debug(sprintf('Database moved to %s', $target));
     }
