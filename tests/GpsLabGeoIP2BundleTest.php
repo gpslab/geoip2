@@ -9,7 +9,7 @@ declare(strict_types=1);
  * @license   http://opensource.org/licenses/MIT
  */
 
-namespace GpsLab\Bundle\PaginationBundle\Tests;
+namespace GpsLab\Bundle\GeoIP2Bundle\Tests;
 
 use GpsLab\Bundle\GeoIP2Bundle\DependencyInjection\GpsLabGeoIP2Extension;
 use GpsLab\Bundle\GeoIP2Bundle\GpsLabGeoIP2Bundle;
