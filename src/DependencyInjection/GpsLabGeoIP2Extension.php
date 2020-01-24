@@ -11,10 +11,11 @@ namespace GpsLab\Bundle\GeoIP2Bundle\DependencyInjection;
 
 use GeoIp2\Database\Reader;
 use GpsLab\Bundle\GeoIP2Bundle\Command\UpdateDatabaseCommand;
-use Symfony\Component\Config\FileLocator;
+use GpsLab\Bundle\GeoIP2Bundle\Downloader\Downloader;
+use GpsLab\Bundle\GeoIP2Bundle\Downloader\MaxMindDownloader;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
-use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
+use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 
 class GpsLabGeoIP2Extension extends Extension
@@ -47,15 +48,25 @@ class GpsLabGeoIP2Extension extends Extension
                 ]);
         }
 
-        $locator = new FileLocator(__DIR__.'/../Resources/config');
-        $loader = new YamlFileLoader($container, $locator);
-        $loader->load('services.yml');
+        // define MaxMind downloader service
+        $container
+            ->setDefinition(MaxMindDownloader::class, new Definition(MaxMindDownloader::class))
+            ->setArguments([
+                new Reference('filesystem'),
+                new Reference('logger')
+            ]);
+
+        $container->setAlias(Downloader::class, MaxMindDownloader::class);
 
         // configure update database command
         $container
-            ->getDefinition(UpdateDatabaseCommand::class)
-            ->replaceArgument(1, $default_database_config['url'])
-            ->replaceArgument(2, $default_database_config['path']);
+            ->setDefinition(UpdateDatabaseCommand::class, new Definition(UpdateDatabaseCommand::class))
+            ->setArguments([
+                new Reference(Downloader::class),
+                $default_database_config['url'],
+                $default_database_config['path']
+            ])
+            ->addTag('console.command');
     }
 
     /**
