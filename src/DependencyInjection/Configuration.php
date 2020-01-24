@@ -168,6 +168,7 @@ class Configuration implements ConfigurationInterface
         $locales->prototype('scalar');
         $locales
             ->treatNullLike([])
+            ->cannotBeEmpty()
             ->defaultValue(['en']);
 
         $database_node->children()->scalarNode('license');
