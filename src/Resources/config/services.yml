@@ -1,0 +1,12 @@
+services:
+    GpsLab\Bundle\GeoIP2Bundle\Downloader\MaxMindDownloader:
+        arguments: [ '@filesystem', '@logger' ]
+
+    GpsLab\Bundle\GeoIP2Bundle\Downloader\Downloader:
+        alias: 'GpsLab\Bundle\GeoIP2Bundle\Downloader\MaxMindDownloader'
+        public: true
+
+    GpsLab\Bundle\GeoIP2Bundle\Command\UpdateDatabaseCommand:
+        arguments: [ '@GpsLab\Bundle\GeoIP2Bundle\Downloader\Downloader', ~, ~ ]
+        tags:
+            - { name: console.command }
