@@ -46,7 +46,7 @@ class GpsLabGeoIP2Extension extends Extension
                 ->setLazy(true)
                 ->setArguments([
                     $database['path'],
-                    $database['locales'] ?: ['en'],
+                    $database['locales'],
                 ]);
         }
 
@@ -86,7 +86,11 @@ class GpsLabGeoIP2Extension extends Extension
      */
     public function getConfiguration(array $config, ContainerBuilder $container): Configuration
     {
-        $cache_dir = $container->getParameter('kernel.cache_dir');
+        $cache_dir = null;
+
+        if ($container->hasParameter('kernel.cache_dir')) {
+            $cache_dir = $container->getParameter('kernel.cache_dir');
+        }
 
         return new Configuration(is_string($cache_dir) ? $cache_dir : null);
     }
