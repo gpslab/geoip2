@@ -94,7 +94,12 @@ You can get GeoIP2 reader service:
 use GeoIp2\Database\Reader;
 
 // get a GeoIP2 City model
-$record = $this->get(Reader::class)->city('128.101.101.101');
+$reader = $this->get(Reader::class);
+// or
+//$reader = $this->get('geoip2.reader');
+
+$record = $reader->city('128.101.101.101');
+
 
 print($record->country->isoCode . "\n"); // 'US'
 print($record->country->name . "\n"); // 'United States'
@@ -137,7 +142,9 @@ Using in application:
 // get a GeoIP2 City model
 $default_reader = $this->get('geoip2.database.default_reader');
 // or
-$default_reader = $this->get(Reader::class);
+//$default_reader = $this->get(Reader::class);
+// or
+//$default_reader = $this->get('geoip2.reader');
 
 // get a GeoIP2 Country model
 $country_reader = $this->get('geoip2.database.country_reader');
