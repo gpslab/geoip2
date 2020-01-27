@@ -13,7 +13,7 @@ namespace GpsLab\Bundle\GeoIP2Bundle\Reader;
 
 use GeoIp2\Database\Reader;
 
-final class ReaderFactory
+class ReaderFactory
 {
     /**
      * @var array[]
