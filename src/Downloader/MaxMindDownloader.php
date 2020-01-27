@@ -73,13 +73,12 @@ class MaxMindDownloader implements Downloader
 
         // decompress gz file
         $zip = new \PharData($tmp_zip);
-        $zip->decompress();
+        $tar = $zip->decompress();
 
         $this->logger->debug('Decompression complete');
         $this->logger->debug(sprintf('Extract tar file to %s', $tmp_untar));
 
         // extract tar archive
-        $tar = new \PharData($tmp_unzip);
         $tar->extractTo($tmp_untar);
 
         $this->logger->debug('Tar archive extracted');
