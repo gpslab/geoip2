@@ -54,7 +54,7 @@ class MaxMindDownloader implements Downloader
      */
     public function download(string $url, string $target): void
     {
-        $id = uniqid('', false);
+        $id = uniqid('', true);
         $tmp_zip = sprintf('%s/%s_GeoLite2.tar.gz', sys_get_temp_dir(), $id);
         $tmp_unzip = sprintf('%s/%s_GeoLite2.tar', sys_get_temp_dir(), $id);
         $tmp_untar = sprintf('%s/%s_GeoLite2', sys_get_temp_dir(), $id);
