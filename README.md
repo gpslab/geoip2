@@ -78,7 +78,7 @@ gpslab_geoip:
 
 #### Localization
 
-By default, the English locale is used for PGeoIP record. You can change the locale for record and declare multiple
+By default, the English locale is used for GeoIP record. You can change the locale for record and declare multiple
 locales for fallback.
 
 ```yml
@@ -136,6 +136,8 @@ Using in application:
 ```php
 // get a GeoIP2 City model
 $default_reader = $this->get('geoip2.database.default_reader');
+// or
+$default_reader = $this->get(Reader::class);
 
 // get a GeoIP2 Country model
 $country_reader = $this->get('geoip2.database.country_reader');
