@@ -143,6 +143,25 @@ class Configuration implements ConfigurationInterface
                 return $v;
             });
 
+        // validate database locales
+        $root_node
+            ->validate()
+                ->ifTrue(static function ($v): bool {
+                    return
+                        is_array($v) &&
+                        array_key_exists('databases', $v) &&
+                        is_array($v['databases']);
+                })
+                ->then(static function (array $v): array {
+                    foreach ($v['databases'] as $name => $database) {
+                        if (!array_key_exists('locales', $database) || empty($database['locales'])) {
+                            throw new \InvalidArgumentException(sprintf('The list of locales should not be empty in databases "%s".', $name));
+                        }
+                    }
+
+                    return $v;
+                });
+
         $root_node->fixXmlConfig('locale');
         $locales = $root_node->children()->arrayNode('locales');
         $locales->prototype('scalar');
