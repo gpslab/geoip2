@@ -188,6 +188,27 @@ gpslab_geoip:
             license: 'YYYYYYYYYYYYYYYY' # customize license
 ```
 
+### GeoIP data in client locale
+
+If you want to show the GeoIP data to the user and show them in the user locale, then you can use the reader factory.
+
+```php
+use GpsLab\Bundle\GeoIP2Bundle\Reader\ReaderFactory;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+public function index(Request $request, ReaderFactory $factory): Response
+{
+    $locale = $request->getLocale();
+    $ip = $request->getClientIp();
+
+    $reader = $factory->create('default', [$locale, 'en' /* fallback */]);
+    $record = $reader->city($ip);
+
+    return new Response(sprintf('You are from %s?', $record->country->name));
+}
+```
+
 ## Console commands
 
 ### Update GeoIP database
