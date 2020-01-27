@@ -30,7 +30,7 @@ class Configuration implements ConfigurationInterface
      */
     public function __construct(?string $cache_dir)
     {
-        $this->cache_dir = $cache_dir ?: '/tmp';
+        $this->cache_dir = $cache_dir ?: sys_get_temp_dir();
     }
 
     /**
@@ -52,7 +52,11 @@ class Configuration implements ConfigurationInterface
         $root_node
             ->beforeNormalization()
             ->ifTrue(static function ($v): bool {
-                return is_array($v) && !array_key_exists('default_database', $v) && array_key_exists('databases', $v);
+                return
+                    is_array($v) &&
+                    !array_key_exists('default_database', $v) &&
+                    array_key_exists('databases', $v) &&
+                    is_array($v['databases']);
             })
             ->then(static function (array $v): array {
                 $keys = array_keys($v['databases']);
@@ -88,24 +92,26 @@ class Configuration implements ConfigurationInterface
             ->validate()
                 ->ifTrue(static function ($v): bool {
                     return
-                        !is_array($v) ||
-                        !array_key_exists('default_database', $v) ||
-                        !array_key_exists('databases', $v) ||
+                        is_array($v) &&
+                        array_key_exists('default_database', $v) &&
+                        array_key_exists('databases', $v) &&
                         !array_key_exists($v['default_database'], $v['databases']);
                 })
                 ->then(static function (array $v): array {
-                    if (is_array($v) && !empty($v['default_database'])) {
-                        throw new \InvalidArgumentException(sprintf('Invalid default database "%s"', $v['default_database']));
-                    }
+                    $databases = implode('", "', array_keys($v['databases']));
 
-                    throw new \InvalidArgumentException('Invalid default database');
+                    throw new \InvalidArgumentException(sprintf('Undefined default database "%s". Available "%s" databases.', $v['default_database'], $databases));
                 });
 
         // add license to databases config if not exists (allow use a global license for all databases)
         $root_node
             ->beforeNormalization()
             ->ifTrue(static function ($v): bool {
-                return is_array($v) && array_key_exists('license', $v) && array_key_exists('databases', $v);
+                return
+                    is_array($v) &&
+                    array_key_exists('license', $v) &&
+                    array_key_exists('databases', $v) &&
+                    is_array($v['databases']);
             })
             ->then(static function (array $v): array {
                 foreach ($v['databases'] as $name => $database) {
@@ -121,7 +127,11 @@ class Configuration implements ConfigurationInterface
         $root_node
             ->beforeNormalization()
             ->ifTrue(static function ($v): bool {
-                return is_array($v) && array_key_exists('locales', $v) && array_key_exists('databases', $v);
+                return
+                    is_array($v) &&
+                    array_key_exists('locales', $v) &&
+                    array_key_exists('databases', $v) &&
+                    is_array($v['databases']);
             })
             ->then(static function (array $v): array {
                 foreach ($v['databases'] as $name => $database) {
