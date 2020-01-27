@@ -65,7 +65,7 @@ class DownloadDatabaseCommandTest extends TestCase
             ->willReturn(false);
     }
 
-    public function testNoURLExecute(): void
+    public function testNoURLArgument(): void
     {
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('URL of downloaded GeoIP2 database should be a string, got null instead.');
@@ -73,7 +73,21 @@ class DownloadDatabaseCommandTest extends TestCase
         $this->command->run($this->input, $this->output);
     }
 
-    public function testNoTargetExecute(): void
+    public function testInvalidURLArgument(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('URL of downloaded GeoIP2 database should be a string, got ["https:\/\/example.com\/GeoIP2.tar.gz"] instead.');
+
+        $this->input
+            ->expects($this->at(4))
+            ->method('getArgument')
+            ->with('url')
+            ->willReturn(['https://example.com/GeoIP2.tar.gz']);
+
+        $this->command->run($this->input, $this->output);
+    }
+
+    public function testNoTargetArgument(): void
     {
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Target download path should be a string, got null instead.');
@@ -87,7 +101,26 @@ class DownloadDatabaseCommandTest extends TestCase
         $this->command->run($this->input, $this->output);
     }
 
-    public function testExecute(): void
+    public function testInvalidTargetArgument(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Target download path should be a string, got ["\/tmp\/GeoIP2.mmdb"] instead.');
+
+        $this->input
+            ->expects($this->at(4))
+            ->method('getArgument')
+            ->with('url')
+            ->willReturn('https://example.com/GeoIP2.tar.gz');
+        $this->input
+            ->expects($this->at(5))
+            ->method('getArgument')
+            ->with('target')
+            ->willReturn(['/tmp/GeoIP2.mmdb']);
+
+        $this->command->run($this->input, $this->output);
+    }
+
+    public function testDownload(): void
     {
         $url = 'https://example.com/GeoIP2.tar.gz';
         $target = '/tmp/GeoIP2.mmdb';

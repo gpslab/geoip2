@@ -50,7 +50,7 @@ The <info>%command.name%</info> command update all configured databases:
 
 EOF;
 
-        if (count($this->databases) > 1) {
+        if (count($this->databases) >= 2) {
             $databases_help = '';
             foreach (array_keys($this->databases) as $i => $name) {
                 $databases_help .= sprintf(' * <info>%s</info>'.PHP_EOL, $name);
@@ -104,7 +104,9 @@ EOF;
             }
 
             if (!array_key_exists('url', $this->databases[$database]) ||
-                !array_key_exists('path', $this->databases[$database])
+                !array_key_exists('path', $this->databases[$database]) ||
+                !is_string($this->databases[$database]['url']) ||
+                !is_string($this->databases[$database]['path'])
             ) {
                 throw new \InvalidArgumentException(sprintf('Invalid "%s" database config.', $database));
             }
