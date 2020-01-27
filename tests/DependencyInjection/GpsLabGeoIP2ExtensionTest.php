@@ -103,7 +103,7 @@ class GpsLabGeoIP2ExtensionTest extends TestCase
         $this->assertTrue($alias->isPublic());
         $this->assertContains((string) $alias, [
             MaxMindDownloader::class, // Symfony >= 4.0
-            strtolower(MaxMindDownloader::class) // Symfony < 4.0
+            strtolower(MaxMindDownloader::class), // Symfony < 4.0
         ]);
 
         $databases = [];
@@ -143,7 +143,7 @@ class GpsLabGeoIP2ExtensionTest extends TestCase
         $this->assertInstanceOf(Reference::class, $update_command->getArgument(0));
         $this->assertContains((string) $update_command->getArgument(0), [
             Downloader::class, // Symfony >= 4.0
-            strtolower(Downloader::class) // Symfony < 4.0
+            strtolower(Downloader::class), // Symfony < 4.0
         ]);
         $this->assertIsArray($update_command->getArgument(1));
         $this->assertSame(array_keys($databases), array_keys($update_command->getArgument(1)));
@@ -159,7 +159,7 @@ class GpsLabGeoIP2ExtensionTest extends TestCase
         $this->assertInstanceOf(Reference::class, $download_command->getArgument(0));
         $this->assertContains((string) $update_command->getArgument(0), [
             Downloader::class, // Symfony >= 4.0
-            strtolower(Downloader::class) // Symfony < 4.0
+            strtolower(Downloader::class), // Symfony < 4.0
         ]);
     }
 

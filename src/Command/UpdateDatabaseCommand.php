@@ -43,12 +43,12 @@ class UpdateDatabaseCommand extends Command
 
     protected function configure(): void
     {
-        $help = <<<EOF
+        $help = <<<'EOT'
 The <info>%command.name%</info> command update all configured databases:
 
     <info>%command.full_name%</info>
 
-EOF;
+EOT;
 
         if (count($this->databases) >= 2) {
             $databases_help = '';
@@ -57,7 +57,7 @@ EOF;
             }
             [$first, $second, ] = array_keys($this->databases);
 
-            $help .= <<<EOF
+            $help .= <<<'EOT'
 
 Update the <info>$first</info> and <info>$second</info> database:
 
@@ -66,7 +66,7 @@ Update the <info>$first</info> and <info>$second</info> database:
 List of available databases:
 
 $databases_help
-EOF;
+EOT;
         }
 
         $this
