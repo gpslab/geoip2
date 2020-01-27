@@ -93,13 +93,13 @@ You can get GeoIP2 reader service:
 ```php
 use GeoIp2\Database\Reader;
 
-// get a GeoIP2 City model
+// get a GeoIP2 reader
 $reader = $this->get(Reader::class);
 // or
 //$reader = $this->get('geoip2.reader');
 
+// get a GeoIP2 City model
 $record = $reader->city('128.101.101.101');
-
 
 print($record->country->isoCode . "\n"); // 'US'
 print($record->country->name . "\n"); // 'United States'
@@ -139,17 +139,17 @@ gpslab_geoip:
 Using in application:
 
 ```php
-// get a GeoIP2 City model
+// get a GeoIP2 reader for City database
 $default_reader = $this->get('geoip2.database.default_reader');
 // or
 //$default_reader = $this->get(Reader::class);
 // or
 //$default_reader = $this->get('geoip2.reader');
 
-// get a GeoIP2 Country model
+// get a GeoIP2 reader for Country database
 $country_reader = $this->get('geoip2.database.country_reader');
 
-// get a GeoIP2 ASN model
+// get a GeoIP2 reader for ASN database
 $asn_reader = $this->get('geoip2.database.asn_reader');
 ```
 
