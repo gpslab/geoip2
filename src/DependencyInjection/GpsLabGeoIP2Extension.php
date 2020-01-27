@@ -11,9 +11,14 @@ declare(strict_types=1);
 
 namespace GpsLab\Bundle\GeoIP2Bundle\DependencyInjection;
 
-use Symfony\Component\Config\FileLocator;
+use GeoIp2\Database\Reader;
+use GpsLab\Bundle\GeoIP2Bundle\Command\DownloadDatabaseCommand;
+use GpsLab\Bundle\GeoIP2Bundle\Command\UpdateDatabaseCommand;
+use GpsLab\Bundle\GeoIP2Bundle\Downloader\Downloader;
+use GpsLab\Bundle\GeoIP2Bundle\Downloader\MaxMindDownloader;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Loader;
+use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 
 class GpsLabGeoIP2Extension extends Extension
@@ -24,14 +29,73 @@ class GpsLabGeoIP2Extension extends Extension
      */
     public function load(array $configs, ContainerBuilder $container): void
     {
-        $config = $this->processConfiguration(new Configuration(), $configs);
+        $configuration = $this->getConfiguration($configs, $container);
+        $config = $this->processConfiguration($configuration, $configs);
 
-        $container->setParameter('geoip2.cache', $config['cache']);
-        $container->setParameter('geoip2.url', $config['url']);
-        $container->setParameter('geoip2.locales', $config['locales']);
+        $default_database = $config['default_database'];
 
-        $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
-        $loader->load('services.yml');
+        // aliases for default database
+        $container->setAlias('geoip2.reader', sprintf('geoip2.database.%s_reader', $default_database));
+        $container->setAlias(Reader::class, sprintf('geoip2.database.%s_reader', $default_database));
+
+        // define database services
+        foreach ($config['databases'] as $name => $database) {
+            $container
+                ->setDefinition(sprintf('geoip2.database.%s_reader', $name), new Definition(Reader::class))
+                ->setPublic(true)
+                ->setLazy(true)
+                ->setArguments([
+                    $database['path'],
+                    $database['locales'],
+                ]);
+        }
+
+        // define MaxMind downloader service
+        $container
+            ->setDefinition(MaxMindDownloader::class, new Definition(MaxMindDownloader::class))
+            ->setPublic(false)
+            ->setArguments([
+                new Reference('filesystem'),
+                new Reference('logger'),
+            ]);
+
+        $container->setAlias(Downloader::class, MaxMindDownloader::class);
+
+        // configure update database console command
+        $container
+            ->setDefinition(UpdateDatabaseCommand::class, new Definition(UpdateDatabaseCommand::class))
+            ->setPublic(false)
+            ->setArguments([
+                new Reference(Downloader::class),
+                $config['databases'],
+            ])
+            ->addTag('console.command');
+
+        // configure download database console command
+        $container
+            ->setDefinition(DownloadDatabaseCommand::class, new Definition(DownloadDatabaseCommand::class))
+            ->setPublic(false)
+            ->setArguments([
+                new Reference(Downloader::class),
+            ])
+            ->addTag('console.command');
+    }
+
+    /**
+     * @param array[]          $config
+     * @param ContainerBuilder $container
+     *
+     * @return Configuration
+     */
+    public function getConfiguration(array $config, ContainerBuilder $container): Configuration
+    {
+        $cache_dir = null;
+
+        if ($container->hasParameter('kernel.cache_dir')) {
+            $cache_dir = $container->getParameter('kernel.cache_dir');
+        }
+
+        return new Configuration(is_string($cache_dir) ? $cache_dir : null);
     }
 
     /**

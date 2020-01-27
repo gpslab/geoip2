@@ -21,37 +21,69 @@ composer req gpslab/geoip2
 
 ## Configuration
 
-**Attention!** MaxMind [changed](https://blog.maxmind.com/2019/12/18/significant-changes-to-accessing-and-using-geolite2-databases/)
-their policy and user agreements about using their data so old URLs like
-`https://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz` are no working anymore.
+To configure auto-update the database you need to generate your personal licence key.
 
-**Steps for Migration**
+#### Steps for generate licence key
 
 1. [Sign up for a MaxMind account](https://www.maxmind.com/en/geolite2/signup) (no purchase required)
 2. Login and generate a [licence key](https://www.maxmind.com/en/accounts/current/license-key)
 3. Save your licence key
 4. Open [download page](https://www.maxmind.com/en/download_files) and find your needed DB edition `ID` and copy value
 from first column.
-![GeoIP2 download page](https://user-images.githubusercontent.com/2862833/72380833-4ccd5a00-3727-11ea-9c6c-aecd55c086ed.png)
-5. Open your config file with `gpslab_geoip` params and replace `url` param by next:
-`https://download.maxmind.com/app/geoip_download?edition_id={edition_id}&license_key={license_key}&suffix=tar.gz`
 
-* `ID` - character ID name from first column on download page
-* `license_key` - your saved licence key
- 
+<p align="center">
+    <a href="https://user-images.githubusercontent.com/2862833/72380833-4ccd5a00-3727-11ea-9c6c-aecd55c086ed.png">
+        <img src="https://user-images.githubusercontent.com/2862833/72380833-4ccd5a00-3727-11ea-9c6c-aecd55c086ed.png" alt="GeoIP2 download page">
+    </a>
+</p>
+
+Example configuration:
+
 ```yml
 gpslab_geoip:
-    # URL for download new GeoIP database.
-    # You should change {edition_id} and {license_key} in URL to your values.
-    url: 'https://download.maxmind.com/app/geoip_download?edition_id={edition_id}&license_key={license_key}&suffix=tar.gz'
+    # Your personal licence key
+    license: 'XXXXXXXXXXXXXXXX'
 
-    # Path to download GeoIP database.
-    # It's a default value. You can change it.
-    cache: '%kernel.cache_dir%/GeoLite2-City.mmdb'
+    # Database edition ID
+    edition: 'GeoLite2-City'
+```
 
-    # Get model data in this locale
-    # It's a default value. You can change it.
-    locales: [ '%locale%' ]
+#### Database source URL
+
+By default, this URL is used to download a new databases
+`https://download.maxmind.com/app/geoip_download?edition_id={edition_id}&license_key={license_key}&suffix=tar.gz`
+
+* `edition_id` - character ID name from first column on [download page](https://www.maxmind.com/en/download_files);
+* `license_key` - your personal [licence key](https://www.maxmind.com/en/accounts/current/license-key).
+
+You can change this URL, for example, if you want to use a proxy to download the database. You can customize the source
+URL in the configuration.
+
+```yml
+gpslab_geoip:
+    url: 'https://example.com/GeoLite2-City.tar.gz'
+```
+
+### Target download path
+
+By default, new databases downloaded in `%kernel.cache_dir%/{edition_id}.mmdb`, where `edition_id` is a character ID
+name from first column on [download page](https://www.maxmind.com/en/download_files). That is, by default, the new
+database will be downloaded into folder `var/cache/{env}/`. Keeping the database in the cache folder for each
+environment may not be optimal. You can choose a common directory for all environments.
+
+```yml
+gpslab_geoip:
+    path: '%kernel.project_dir%/var/GeoLite2-City.mmdb'
+```
+
+#### Localization
+
+By default, the English locale is used for GeoIP record. You can change the locale for record and declare multiple
+locales for fallback.
+
+```yml
+gpslab_geoip:
+    locales: [ 'ru', 'en' ]
 ```
 
 ## Usage
@@ -59,8 +91,15 @@ gpslab_geoip:
 You can get GeoIP2 reader service:
 
 ```php
+use GeoIp2\Database\Reader;
+
+// get a GeoIP2 reader
+$reader = $this->get(Reader::class);
+// or
+//$reader = $this->get('geoip2.reader');
+
 // get a GeoIP2 City model
-$record = $this->get('geoip2.reader')->city('128.101.101.101');
+$record = $reader->city('128.101.101.101');
 
 print($record->country->isoCode . "\n"); // 'US'
 print($record->country->name . "\n"); // 'United States'
@@ -79,12 +118,133 @@ print($record->location->longitude . "\n"); // -93.2323
 
 For more example see the [GeoIP2](https://github.com/maxmind/GeoIP2-php) library.
 
-## Update GeoIP database
+## Multiple databases
 
-Execute command for update database:
+You can use multiple GeoIP databases in one application. Need update configuration file. 
+
+```yml
+gpslab_geoip:
+    databases:
+        default:
+            license: 'XXXXXXXXXXXXXXXX'
+            edition: 'GeoLite2-City'
+        country:
+            license: 'XXXXXXXXXXXXXXXX'
+            edition: 'GeoLite2-Country'
+        asn:
+            license: 'XXXXXXXXXXXXXXXX'
+            edition: 'GeoLite2-ASN'
+```
+
+Using in application:
+
+```php
+// get a GeoIP2 reader for City database
+$default_reader = $this->get('geoip2.database.default_reader');
+// or
+//$default_reader = $this->get(Reader::class);
+// or
+//$default_reader = $this->get('geoip2.reader');
+
+// get a GeoIP2 reader for Country database
+$country_reader = $this->get('geoip2.database.country_reader');
+
+// get a GeoIP2 reader for ASN database
+$asn_reader = $this->get('geoip2.database.asn_reader');
+```
+
+You can rename the default database.
+
+```yml
+gpslab_geoip:
+    default_database: 'city'
+    databases:
+        asn:
+            license: 'XXXXXXXXXXXXXXXX'
+            edition: 'GeoLite2-ASN'
+        city:
+            license: 'XXXXXXXXXXXXXXXX'
+            edition: 'GeoLite2-City'
+        country:
+            license: 'XXXXXXXXXXXXXXXX'
+            edition: 'GeoLite2-Country'
+```
+
+In order not to repeat the license key and locales for each database, you can specify them once.
+
+```yml
+gpslab_geoip:
+    license: 'XXXXXXXXXXXXXXXX' # global license
+    locales: [ 'ru', 'en' ] # global locales
+    default_database: 'city'
+    databases:
+        asn:
+            edition: 'GeoLite2-ASN'
+            locales: [ 'fr' ] # customize locales
+        city:
+            edition: 'GeoLite2-City'
+        country:
+            edition: 'GeoLite2-Country'
+            license: 'YYYYYYYYYYYYYYYY' # customize license
+```
+
+### GeoIP data in client locale
+
+If you want to show the GeoIP data to the user and show them in the user locale, then you can use the reader factory.
+
+```php
+use GpsLab\Bundle\GeoIP2Bundle\Reader\ReaderFactory;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+public function index(Request $request, ReaderFactory $factory): Response
+{
+    $locale = $request->getLocale();
+    $ip = $request->getClientIp();
+
+    $reader = $factory->create('default', [$locale, 'en' /* fallback */]);
+    $record = $reader->city($ip);
+
+    return new Response(sprintf('You are from %s?', $record->country->name));
+}
+```
+
+## Console commands
+
+### Update GeoIP database
+
+Execute console command for update all databases:
 
 ```
 php bin/console geoip2:update
+```
+
+If you use multiple databases, then for config:
+
+```yml
+gpslab_geoip:
+    # ...
+    databases:
+        asn:
+            # ...
+        city:
+            # ...
+        country:
+            # ...
+```
+
+You can update several databases:
+
+```
+php bin/console geoip2:update city country
+```
+
+### Download GeoIP database
+
+You can download custom database with console command:
+
+```
+php bin/console geoip2:download https://example.com/GeoLite2-City.tar.gz /path/to/GeoLite2-City.mmdb
 ```
 
 ## License
