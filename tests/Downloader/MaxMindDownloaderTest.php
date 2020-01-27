@@ -25,6 +25,11 @@ class MaxMindDownloaderTest extends TestCase
     private const TAR_GZ = 'H4sIAAAAAAAAA3NPzffJLEk10nXOLKmMNzIwMjAwNDTRd4cK6+XmpiQxUAgMgMDMwACrOBgYmjAYGpsZGpsamRoamwDFDY2MzM0UMHXQAJQWlyQWMWBx3cgAIanFJbDIHmi3jIJRMApGwSigHwAAvq9e6AAIAAA=';
 
     /**
+     * Gzipped tar archive with path "GeoLite2.mmdb".
+     */
+    private const TAR_GZ_BAD = 'H4sIAAAAAAAAA3NPzffJLEk10svNTUlioA0wAAIzAwOs4lDAYGhsZmhsamZoZm4GEjc3MDRWwNRBA1BaXJJYxIDFdaNgFIyCUTC8AQCdCzBEAAYAAA==';
+
+    /**
      * @var Filesystem|MockObject
      */
     private $fs;
@@ -44,6 +49,62 @@ class MaxMindDownloaderTest extends TestCase
         $this->fs = $this->createMock(Filesystem::class);
         $this->logger = $this->createMock(LoggerInterface::class);
         $this->downloader = new MaxMindDownloader($this->fs, $this->logger);
+    }
+
+    public function testNotFoundDatabase(): void
+    {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Not found GeoLite2 database in archive.');
+
+        $url = 'https://example.com';
+        $target = sprintf('%s/%s_GeoLite2.mmdb', sys_get_temp_dir(), uniqid('', true));
+
+        $tmp_zip_regexp = sprintf('#^%s/[\da-f]+\.\d+_GeoLite2\.tar\.gz$#', sys_get_temp_dir());
+        $tmp_unzip_regexp = sprintf('#^%s/[\da-f]+\.\d+_GeoLite2\.tar$#', sys_get_temp_dir());
+        $tmp_untar_regexp = sprintf('#^%s/[\da-f]+\.\d+_GeoLite2$#', sys_get_temp_dir());
+
+        $this->logger
+            ->expects($this->atLeastOnce())
+            ->method('debug');
+
+        $fs_call = 0;
+        $this->fs
+            ->expects($this->at($fs_call++))
+            ->method('remove')
+            ->willReturnCallback(function ($files) use ($tmp_zip_regexp, $tmp_unzip_regexp, $tmp_untar_regexp) {
+                $this->assertIsArray($files);
+                $this->assertCount(3, $files);
+                $this->assertArrayHasKey(0, $files);
+                $this->assertArrayHasKey(1, $files);
+                $this->assertArrayHasKey(2, $files);
+                $this->assertIsString($files[0]);
+                $this->assertIsString($files[1]);
+                $this->assertIsString($files[2]);
+                $this->assertRegExp($tmp_zip_regexp, $files[0]);
+                $this->assertRegExp($tmp_unzip_regexp, $files[1]);
+                $this->assertRegExp($tmp_untar_regexp, $files[2]);
+            });
+        $this->fs
+            ->expects($this->at($fs_call++))
+            ->method('copy')
+            ->willReturnCallback(function ($origin_file, $target_file, $overwrite_newer_files) use (
+                $url,
+                $tmp_zip_regexp
+            ) {
+                $this->assertSame($url, $origin_file);
+                $this->assertIsString($target_file);
+                $this->assertTrue($overwrite_newer_files);
+                $this->assertRegExp($tmp_zip_regexp, $target_file);
+
+                // make test GeoLite2 db
+                file_put_contents($target_file, base64_decode(self::TAR_GZ_BAD));
+            });
+        $this->fs
+            ->expects($this->at($fs_call))
+            ->method('mkdir')
+            ->with(dirname($target), 0755);
+
+        $this->downloader->download($url, $target);
     }
 
     public function testDownload(): void
