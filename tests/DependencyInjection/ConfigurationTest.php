@@ -230,10 +230,11 @@ class ConfigurationTest extends TestCase
             $return[] = [$cache_dir, [
                 'gpslab_geoip' => [
                     'license' => 'LICENSE_1',
+                    'locales' => ['ru', 'en'],
                     'databases' => [
                         'default' => [
                             'edition' => 'EDITION_1',
-                            'locales' => ['ru'],
+                            'locales' => ['fr'],
                         ],
                         'foo' => [
                             'edition' => 'EDITION_2',
@@ -243,10 +244,11 @@ class ConfigurationTest extends TestCase
                 ],
             ], [
                 'license' => 'LICENSE_1',
+                'locales' => ['ru', 'en'],
                 'databases' => [
                     'default' => [
                         'edition' => 'EDITION_1',
-                        'locales' => ['ru'],
+                        'locales' => ['fr'],
                         'license' => 'LICENSE_1',
                         'url' => sprintf(self::URL, 'EDITION_1', 'LICENSE_1'),
                         'path' => sprintf(self::PATH, $real_cache_dir, 'EDITION_1'),
@@ -254,13 +256,12 @@ class ConfigurationTest extends TestCase
                     'foo' => [
                         'edition' => 'EDITION_2',
                         'license' => 'LICENSE_2',
+                        'locales' => ['ru', 'en'],
                         'url' => sprintf(self::URL, 'EDITION_2', 'LICENSE_2'),
                         'path' => sprintf(self::PATH, $real_cache_dir, 'EDITION_2'),
-                        'locales' => ['en'],
                     ],
                 ],
                 'default_database' => 'default',
-                'locales' => ['en'],
             ]];
             $return[] = [$cache_dir, [
                 'gpslab_geoip' => [
