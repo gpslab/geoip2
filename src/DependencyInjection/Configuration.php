@@ -212,6 +212,15 @@ class Configuration implements ConfigurationInterface
 
         $url = $database_node->children()->scalarNode('url');
         $url->isRequired();
+        // url must be a valid URL
+        $url
+            ->validate()
+            ->ifTrue(static function ($v): bool {
+                return is_string($v) && !filter_var($v, FILTER_VALIDATE_URL);
+            })
+            ->then(static function (string $v): array {
+                throw new \InvalidArgumentException(sprintf('URL "%s" must be valid.', $v));
+            });
 
         $path = $database_node->children()->scalarNode('path');
         $path->isRequired();

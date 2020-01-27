@@ -97,6 +97,16 @@ class ConfigurationTest extends TestCase
                     ],
                 ],
             ]];
+            $return[] = [$cache_dir, [
+                'gpslab_geoip' => [
+                    'databases' => [
+                        'default' => [
+                            'url' => 'example.com',
+                            'path' => '/tmp/GeoIP2-First.mmdb',
+                        ],
+                    ],
+                ],
+            ]];
         }
 
         return $return;
