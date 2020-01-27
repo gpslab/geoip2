@@ -133,7 +133,7 @@ gpslab_geoip:
 
 Using in application:
 
-```yml
+```php
 // get a GeoIP2 City model
 $default_reader = $this->get('geoip2.database.default_reader');
 
@@ -179,12 +179,42 @@ gpslab_geoip:
             license: 'YYYYYYYYYYYYYYYY' # customize license
 ```
 
-## Update GeoIP database
+## Console commands
 
-Execute command for update database:
+### Update GeoIP database
+
+Execute console command for update all databases:
 
 ```
 php bin/console geoip2:update
+```
+
+If you use multiple databases, then for config:
+
+```yml
+gpslab_geoip:
+    # ...
+    databases:
+        asn:
+            # ...
+        city:
+            # ...
+        country:
+            # ...
+```
+
+You can update several databases:
+
+```
+php bin/console geoip2:update city country
+```
+
+### Download GeoIP database
+
+You can download custom database with console command:
+
+```
+php bin/console geoip2:download https://example.com/GeoLite2-City.tar.gz /path/to/GeoLite2-City.mmdb
 ```
 
 ## License
