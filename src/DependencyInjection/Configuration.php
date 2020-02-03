@@ -76,11 +76,10 @@ class Configuration implements ConfigurationInterface
                 // key that should not be rewritten to the database config
                 $database = [];
                 foreach ($v as $key => $value) {
-                    if ($key === 'default_database') {
-                        continue;
+                    if ($key !== 'default_database') {
+                        $database[$key] = $v[$key];
+                        unset($v[$key]);
                     }
-                    $database[$key] = $v[$key];
-                    unset($v[$key]);
                 }
                 $v['default_database'] = isset($v['default_database']) ? (string) $v['default_database'] : 'default';
                 $v['databases'] = [$v['default_database'] => $database];
