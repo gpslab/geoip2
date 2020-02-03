@@ -39,6 +39,7 @@ before_script:
 script:
     - php php-cs-fixer fix --diff --dry-run -v
     - vendor/bin/phpunit --coverage-clover build/coverage-clover.xml
+    - vendor/phpstan/phpstan/phpstan analyse
 
 after_script:
     - php ocular.phar code-coverage:upload --format=php-clover build/coverage-clover.xml
