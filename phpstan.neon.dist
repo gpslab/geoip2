@@ -8,4 +8,7 @@ parameters:
         - src
         - tests
     ignoreErrors:
+        # error in Symfony 4.1 and below
         - '#Call to an undefined method Symfony\\Component\\Config\\Definition\\Builder\\TreeBuilder::root\(\)\.#'
+        # error in PHPStan because Phar::decompress() return Phar #37
+        - '#Call to an undefined method object::extractTo\(\)#'
