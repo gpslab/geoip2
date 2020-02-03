@@ -30,12 +30,14 @@ before_install:
     - if [ -n "$GH_TOKEN" ]; then composer config github-oauth.github.com ${GH_TOKEN}; fi;
     - wget https://scrutinizer-ci.com/ocular.phar
     - wget https://github.com/php-coveralls/php-coveralls/releases/download/v2.2.0/php-coveralls.phar
+    - wget https://cs.symfony.com/download/php-cs-fixer-v2.phar -O php-cs-fixer
 
 before_script:
     - if [ "$SYMFONY_VERSION" != "" ]; then composer require "symfony/symfony:${SYMFONY_VERSION}" --dev --no-update; fi;
     - composer install --prefer-dist --no-interaction --no-scripts --no-progress
 
 script:
+    - php php-cs-fixer fix --diff --dry-run -v
     - vendor/bin/phpunit --coverage-clover build/coverage-clover.xml
 
 after_script:
