@@ -170,6 +170,15 @@ gpslab_geoip:
             edition: 'GeoLite2-Country'
 ```
 
+```php
+// get a GeoIP2 reader for City database
+$default_reader = $this->get('geoip2.database.city_reader');
+// or
+//$default_reader = $this->get(Reader::class);
+// or
+//$default_reader = $this->get('geoip2.reader');
+```
+
 In order not to repeat the license key and locales for each database, you can specify them once.
 
 ```yml
@@ -197,15 +206,18 @@ use GpsLab\Bundle\GeoIP2Bundle\Reader\ReaderFactory;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-public function index(Request $request, ReaderFactory $factory): Response
+class GeoIPController
 {
-    $locale = $request->getLocale();
-    $ip = $request->getClientIp();
-
-    $reader = $factory->create('default', [$locale, 'en' /* fallback */]);
-    $record = $reader->city($ip);
-
-    return new Response(sprintf('You are from %s?', $record->country->name));
+    public function index(Request $request, ReaderFactory $factory): Response
+    {
+        $locale = $request->getLocale();
+        $ip = $request->getClientIp();
+    
+        $reader = $factory->create('default', [$locale, 'en' /* fallback */]);
+        $record = $reader->city($ip);
+    
+        return new Response(sprintf('You are from %s?', $record->country->name));
+    }
 }
 ```
 
