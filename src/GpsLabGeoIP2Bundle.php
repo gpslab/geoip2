@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * GpsLab component.
  *
@@ -9,6 +11,7 @@
 
 namespace GpsLab\Bundle\GeoIP2Bundle;
 
+use GpsLab\Bundle\GeoIP2Bundle\DependencyInjection\GpsLabGeoIP2Extension;
 use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
@@ -17,19 +20,10 @@ class GpsLabGeoIP2Bundle extends Bundle
     /**
      * @return ExtensionInterface|null
      */
-    public function getContainerExtension()
+    public function getContainerExtension(): ?ExtensionInterface
     {
         if (null === $this->extension) {
-            $this->extension = false;
-            $class = $this->getContainerExtensionClass();
-
-            if (class_exists($class)) {
-                $extension = new $class();
-
-                if ($extension instanceof ExtensionInterface) {
-                    $this->extension = $extension;
-                }
-            }
+            $this->extension = new GpsLabGeoIP2Extension();
         }
 
         return $this->extension ?: null;

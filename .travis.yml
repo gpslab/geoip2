@@ -13,36 +13,34 @@ branches:
 matrix:
     fast_finish: true
     include:
+        - php: 7.4
         - php: 7.3
         - php: 7.2
         - php: 7.1
-        - php: 7.0
-        - php: 5.6
-        - php: 5.5
-          dist: trusty
-        - php: 5.4
-          dist: trusty
+        - php: 7.1
           env: SYMFONY_VERSION=2.8.*
-        - php: 5.5
-          dist: trusty
+        - php: 7.1
           env: SYMFONY_VERSION=3.4.*
         - php: 7.1
-          env: SYMFONY_VERSION=4.2.* PHPUNIT_VERSION=5.7.*
-        - php: 7.1
-          env: SYMFONY_VERSION=4.3.* PHPUNIT_VERSION=5.7.*
+          env: SYMFONY_VERSION=4.4.*
+        - php: 7.2
+          env: SYMFONY_VERSION=5.0.*
 
 before_install:
-    - echo "memory_limit=2G" >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
     - if [ -n "$GH_TOKEN" ]; then composer config github-oauth.github.com ${GH_TOKEN}; fi;
+    - wget https://scrutinizer-ci.com/ocular.phar
+    - wget https://github.com/php-coveralls/php-coveralls/releases/download/v2.2.0/php-coveralls.phar
+    - wget https://cs.symfony.com/download/php-cs-fixer-v2.phar -O php-cs-fixer
 
 before_script:
     - if [ "$SYMFONY_VERSION" != "" ]; then composer require "symfony/symfony:${SYMFONY_VERSION}" --dev --no-update; fi;
-    - if [ "$PHPUNIT_VERSION" != "" ]; then composer require "phpunit/phpunit:${PHPUNIT_VERSION}" --dev --no-update; fi;
     - composer install --prefer-dist --no-interaction --no-scripts --no-progress
 
 script:
+    - php php-cs-fixer fix --diff --dry-run -v
     - vendor/bin/phpunit --coverage-clover build/coverage-clover.xml
+    - vendor/phpstan/phpstan/phpstan analyse
 
 after_script:
-    - vendor/bin/ocular code-coverage:upload --format=php-clover build/coverage-clover.xml
-    - vendor/bin/coveralls -v -c .coveralls.yml
+    - php ocular.phar code-coverage:upload --format=php-clover build/coverage-clover.xml
+    - php php-coveralls.phar -v -c .coveralls.yml

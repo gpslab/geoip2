@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * GpsLab component.
  *
@@ -9,175 +11,115 @@
 
 namespace GpsLab\Bundle\GeoIP2Bundle\Command;
 
-use GpsLab\Component\Compressor\CompressorInterface;
+use GpsLab\Bundle\GeoIP2Bundle\Downloader\Downloader;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Stopwatch\Stopwatch;
-use Symfony\Component\Stopwatch\StopwatchEvent;
 
 class UpdateDatabaseCommand extends Command
 {
     /**
-     * @var Stopwatch
+     * @var Downloader
      */
-    private $stopwatch;
+    private $downloader;
 
     /**
-     * @var Filesystem
+     * @var array[]
      */
-    private $fs;
+    private $databases;
 
     /**
-     * @var string
+     * @param Downloader $downloader
+     * @param array[]    $databases
      */
-    private $url;
-
-    /**
-     * @var string
-     */
-    private $cache;
-
-    /**
-     * @param Filesystem $fs
-     * @param Stopwatch $stopwatch
-     * @param CompressorInterface $compressor
-     * @param string $url
-     * @param string $cache
-     */
-    public function __construct(Filesystem $fs, Stopwatch $stopwatch, CompressorInterface $compressor, $url, $cache)
+    public function __construct(Downloader $downloader, array $databases)
     {
-        $this->fs = $fs;
-        $this->url = $url;
-        $this->cache = $cache;
-        $this->stopwatch = $stopwatch;
+        $this->downloader = $downloader;
+        $this->databases = $databases;
         parent::__construct();
     }
 
-    protected function configure()
+    protected function configure(): void
     {
+        $help = <<<'EOT'
+The <info>%command.name%</info> command update all configured databases:
+
+    <info>%command.full_name%</info>
+
+EOT;
+
+        if (count($this->databases) >= 2) {
+            $databases_help = '';
+            foreach (array_keys($this->databases) as $i => $name) {
+                $databases_help .= sprintf(' * <info>%s</info>'.PHP_EOL, $name);
+            }
+            [$first, $second, ] = array_keys($this->databases);
+
+            $help .= <<<'EOT'
+
+Update the <info>$first</info> and <info>$second</info> database:
+
+    <info>%command.full_name% $first $second</info>
+
+List of available databases:
+
+$databases_help
+EOT;
+        }
+
         $this
             ->setName('geoip2:update')
-            ->setDescription('Downloads and update the GeoIP2 database')
+            ->setDescription('Update the GeoIP2 databases')
             ->addArgument(
-                'url',
-                InputArgument::OPTIONAL,
-                'URL to downloaded GeoIP2 database',
-                $this->url
+                'databases',
+                InputArgument::OPTIONAL | InputArgument::IS_ARRAY,
+                'Updated databases',
+                array_keys($this->databases)
             )
-            ->addArgument(
-                'target',
-                InputArgument::OPTIONAL,
-                'Target download path',
-                $this->cache
-            )
-        ;
+            ->setHelp($help);
     }
 
     /**
-     * @param InputInterface $input
+     * @param InputInterface  $input
      * @param OutputInterface $output
      *
      * @return int
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-        $url = $input->getArgument('url');
-        $target = $input->getArgument('target');
+        $databases = $input->getArgument('databases');
 
-        $io->title('Update the GeoIP2 database');
-        $this->stopwatch->start('update');
+        $io->title('Update the GeoIP2 databases');
 
-        $tmp_zip = sys_get_temp_dir().'/GeoLite2.tar.gz';
-        $tmp_unzip = sys_get_temp_dir().'/GeoLite2.tar';
-        $tmp_untar = sys_get_temp_dir().'/GeoLite2';
+        if (!is_array($databases)) {
+            throw new \InvalidArgumentException(sprintf('Updated databases should be a array, got %s instead.', json_encode($databases)));
+        }
 
-        // remove old files and folders for correct overwrite it
-        $this->fs->remove([$tmp_zip, $tmp_unzip, $tmp_untar]);
-
-        $io->comment(sprintf('Beginning download of file <info>%s</info>', $url));
-
-        file_put_contents($tmp_zip, fopen($url, 'rb'));
-
-        $io->comment(sprintf('Download complete to <info>%s</info>', $tmp_zip));
-        $io->comment(sprintf('De-compressing file to <info>%s</info>', $tmp_unzip));
-
-        $this->fs->mkdir(dirname($target), 0777);
-
-        // decompress gz file
-        $phar = new \PharData($tmp_zip);
-        $phar->decompress();
-
-        $io->comment('Decompression complete');
-        $io->comment(sprintf('Extract tar file to <info>%s</info>', $tmp_untar));
-
-        // extract tar archive
-        $phar = new \PharData($tmp_unzip);
-        $phar->extractTo($tmp_untar);
-
-        $io->comment('Tar archive extracted');
-
-        // find database in archive
-        $database = '';
-        foreach (scandir($tmp_untar) as $folder) {
-            $path = $tmp_untar.'/'.$folder;
-
-            // find folder with database
-            // expected something like that "GeoLite2-City_20200114"
-            if (
-                preg_match('/^(?<database>.+)_(?<year>\d{4})(?<month>\d{2})(?<day>\d{2})$/', $folder, $match) &&
-                is_dir($path)
-            ) {
-                // find database in folder
-                // expected something like that "GeoLite2-City.mmdb"
-                foreach (scandir($path) as $filename) {
-                    $file = $path.'/'.$filename;
-
-                    if (strpos($filename, $match['database']) === 0 && is_file($file)) {
-                        $io->comment(sprintf(
-                            'Found <info>%s</info> database updated at <info>%s-%s-%s</info>',
-                            $match['database'],
-                            $match['year'],
-                            $match['month'],
-                            $match['day']
-                        ));
-
-                        $database = $file;
-                    }
-                }
+        foreach ($databases as $database) {
+            if (!array_key_exists($database, $this->databases)) {
+                throw new \InvalidArgumentException(sprintf('Undefined "%s" database.', $database));
             }
+
+            if (!array_key_exists('url', $this->databases[$database]) ||
+                !array_key_exists('path', $this->databases[$database]) ||
+                !is_string($this->databases[$database]['url']) ||
+                !is_string($this->databases[$database]['path'])
+            ) {
+                throw new \InvalidArgumentException(sprintf('Invalid "%s" database config.', $database));
+            }
+
+            $io->section(sprintf('Update "%s" database', $database));
+
+            $this->downloader->download($this->databases[$database]['url'], $this->databases[$database]['path']);
+
+            $io->comment(sprintf('Database <info>%s</info> updated', $database));
         }
 
-        if (!$database) {
-            throw new \RuntimeException('Not found GeoLite2 database in archive.');
-        }
-
-        $this->fs->copy($database, $target, true);
-        $this->fs->chmod($target, 0777);
-        $this->fs->remove([$tmp_zip, $tmp_unzip, $tmp_untar]);
-
-        $io->comment(sprintf('Database moved to <info>%s</info>', $target));
-
-        $io->success('Finished downloading');
-
-        $this->stopwatch($io, $this->stopwatch->stop('update'));
+        $io->success('Finished updating');
 
         return 0;
-    }
-
-    /**
-     * @param SymfonyStyle $io
-     * @param StopwatchEvent $event
-     */
-    private function stopwatch(SymfonyStyle $io, StopwatchEvent $event)
-    {
-        $io->writeln([
-            sprintf('Time: <info>%.2F</info> s.', $event->getDuration() / 1000),
-            sprintf('Memory: <info>%.2F</info> MiB.', $event->getMemory() / 1024 / 1024),
-        ]);
     }
 }
