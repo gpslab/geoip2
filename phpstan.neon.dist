@@ -10,6 +10,3 @@ parameters:
     excludes_analyse:
         # heavily dependent on the version of Symfony
         - src/DependencyInjection/Configuration
-    ignoreErrors:
-        # error in PHPStan because Phar::decompress() return Phar #37
-        - '#Call to an undefined method object::extractTo\(\)#'
