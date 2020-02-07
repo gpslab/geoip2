@@ -1,46 +1,76 @@
 language: php
 
-sudo: false
-
-notifications:
-    email:
-        - deploy@peter-gribanov.ru
+os: linux
 
 branches:
   except:
     - /^analysis-.*$/
 
-matrix:
-    fast_finish: true
-    include:
-        - php: 7.4
-        - php: 7.3
-        - php: 7.2
-        - php: 7.1
-        - php: 7.1
-          env: SYMFONY_VERSION=2.8.*
-        - php: 7.1
-          env: SYMFONY_VERSION=3.4.*
-        - php: 7.1
-          env: SYMFONY_VERSION=4.4.*
-        - php: 7.2
-          env: SYMFONY_VERSION=5.0.*
+cache:
+    directories:
+        - $HOME/.composer/cache
+
+php:
+    - 7.1
+    - 7.2
+    - 7.3
+    - 7.4
 
 before_install:
     - if [ -n "$GH_TOKEN" ]; then composer config github-oauth.github.com ${GH_TOKEN}; fi;
-    - wget https://scrutinizer-ci.com/ocular.phar
-    - wget https://github.com/php-coveralls/php-coveralls/releases/download/v2.2.0/php-coveralls.phar
-    - wget https://cs.symfony.com/download/php-cs-fixer-v2.phar -O php-cs-fixer
+    - if [ -n "$SYMFONY_VERSION" ]; then composer require "symfony/symfony:${SYMFONY_VERSION}" --dev --no-update; fi;
 
-before_script:
-    - if [ "$SYMFONY_VERSION" != "" ]; then composer require "symfony/symfony:${SYMFONY_VERSION}" --dev --no-update; fi;
-    - composer install --prefer-dist --no-interaction --no-scripts --no-progress
+install:
+    - travis_retry composer install --prefer-dist --no-interaction --no-scripts --no-progress
 
-script:
-    - php php-cs-fixer fix --diff --dry-run -v
-    - vendor/bin/phpunit --coverage-clover build/coverage-clover.xml
-    - vendor/phpstan/phpstan/phpstan analyse
+jobs:
+    include:
+        - stage: Code Quality
+          name: PHP CS Fixer
+          before_script: wget https://cs.symfony.com/download/php-cs-fixer-v2.phar -O php-cs-fixer
+          script:
+            - php php-cs-fixer fix --diff --dry-run -v
 
-after_script:
-    - php ocular.phar code-coverage:upload --format=php-clover build/coverage-clover.xml
-    - php php-coveralls.phar -v -c .coveralls.yml
+        - stage: Code Quality
+          name: PHPStan
+          script: vendor/phpstan/phpstan/phpstan analyse
+
+        - stage: Test
+          env: SYMFONY_VERSION=2.8.*
+          php: 7.1
+          script: vendor/bin/phpunit --coverage-clover build/coverage-clover.xml
+          after_script:
+            - wget https://scrutinizer-ci.com/ocular.phar
+            - wget https://github.com/php-coveralls/php-coveralls/releases/download/v2.2.0/php-coveralls.phar
+            - php ocular.phar code-coverage:upload --format=php-clover build/coverage-clover.xml
+            - php php-coveralls.phar -v -c .coveralls.yml
+
+        - stage: Test
+          env: SYMFONY_VERSION=3.4.*
+          php: 7.1
+          script: vendor/bin/phpunit --coverage-clover build/coverage-clover.xml
+          after_script:
+            - wget https://scrutinizer-ci.com/ocular.phar
+            - wget https://github.com/php-coveralls/php-coveralls/releases/download/v2.2.0/php-coveralls.phar
+            - php ocular.phar code-coverage:upload --format=php-clover build/coverage-clover.xml
+            - php php-coveralls.phar -v -c .coveralls.yml
+
+        - stage: Test
+          env: SYMFONY_VERSION=4.4.*
+          php: 7.1
+          script: vendor/bin/phpunit --coverage-clover build/coverage-clover.xml
+          after_script:
+            - wget https://scrutinizer-ci.com/ocular.phar
+            - wget https://github.com/php-coveralls/php-coveralls/releases/download/v2.2.0/php-coveralls.phar
+            - php ocular.phar code-coverage:upload --format=php-clover build/coverage-clover.xml
+            - php php-coveralls.phar -v -c .coveralls.yml
+
+        - stage: Test
+          env: SYMFONY_VERSION=5.0.*
+          php: 7.2
+          script: vendor/bin/phpunit --coverage-clover build/coverage-clover.xml
+          after_script:
+            - wget https://scrutinizer-ci.com/ocular.phar
+            - wget https://github.com/php-coveralls/php-coveralls/releases/download/v2.2.0/php-coveralls.phar
+            - php ocular.phar code-coverage:upload --format=php-clover build/coverage-clover.xml
+            - php php-coveralls.phar -v -c .coveralls.yml
