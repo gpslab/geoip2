@@ -26,6 +26,18 @@ install:
 jobs:
     include:
         - stage: Test Symfony
+          env: SYMFONY_VERSION=2.8.*
+          php: 7.1
+          script:
+            - vendor/bin/phpunit --coverage-clover build/coverage-clover.xml
+            - vendor/phpstan/phpstan/phpstan analyse -c .phpstan/symfony_2.neon
+          after_script:
+            - wget https://scrutinizer-ci.com/ocular.phar
+            - wget https://github.com/php-coveralls/php-coveralls/releases/download/v2.2.0/php-coveralls.phar
+            - php ocular.phar code-coverage:upload --format=php-clover build/coverage-clover.xml
+            - php php-coveralls.phar -v -c .coveralls.yml
+
+        - stage: Test Symfony
           env: SYMFONY_VERSION=3.0.*
           php: 7.1
           script:
@@ -166,15 +178,3 @@ jobs:
         - stage: Code Quality
           name: PHPStan
           script: vendor/phpstan/phpstan/phpstan analyse
-
-        - stage: Test Symfony
-          env: SYMFONY_VERSION=2.8.*
-          php: 7.1
-          script:
-            - vendor/bin/phpunit --coverage-clover build/coverage-clover.xml
-            - vendor/phpstan/phpstan/phpstan analyse -c .phpstan/symfony_2.neon
-          after_script:
-            - wget https://scrutinizer-ci.com/ocular.phar
-            - wget https://github.com/php-coveralls/php-coveralls/releases/download/v2.2.0/php-coveralls.phar
-            - php ocular.phar code-coverage:upload --format=php-clover build/coverage-clover.xml
-            - php php-coveralls.phar -v -c .coveralls.yml
