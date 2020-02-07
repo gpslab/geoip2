@@ -1,5 +1,7 @@
 language: php
 
+os: linux
+
 branches:
   except:
     - /^analysis-.*$/
