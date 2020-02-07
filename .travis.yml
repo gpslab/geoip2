@@ -20,8 +20,7 @@ before_install:
     - if [ -n "$GH_TOKEN" ]; then composer config github-oauth.github.com ${GH_TOKEN}; fi;
     - if [ -n "$SYMFONY_VERSION" ]; then composer require "symfony/symfony:${SYMFONY_VERSION}" --dev --no-update; fi;
 
-install:
-    - travis_retry composer install --prefer-dist --no-interaction --no-scripts --no-progress
+install: travis_retry composer install --prefer-dist --no-interaction --no-scripts --no-progress
 
 jobs:
     include:
@@ -172,8 +171,7 @@ jobs:
         - stage: Code Quality
           name: PHP CS Fixer
           before_script: wget https://cs.symfony.com/download/php-cs-fixer-v2.phar -O php-cs-fixer
-          script:
-            - php php-cs-fixer fix --diff --dry-run -v
+          script: php php-cs-fixer fix --diff --dry-run -v
 
         - stage: Code Quality
           name: PHPStan
