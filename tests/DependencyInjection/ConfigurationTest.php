@@ -27,70 +27,81 @@ class ConfigurationTest extends TestCase
      */
     public function getBadConfigs(): array
     {
+        $configurations = [];
+        // undefined edition
+        $configurations[] = [
+            'gpslab_geoip' => [
+                'license' => 'LICENSE',
+            ],
+        ];
+        $configurations[] = [
+            'gpslab_geoip' => [
+                'license' => 'LICENSE',
+                'edition' => 'EDITION',
+                'databases' => [],
+            ],
+        ];
+        // undefined default database
+        $configurations[] = [
+            'gpslab_geoip' => [
+                'default_database' => 'default',
+                'databases' => [
+                    'foo' => [
+                        'license' => 'LICENSE',
+                        'edition' => 'EDITION',
+                    ],
+                ],
+            ],
+        ];
+        // undefined default database
+        $configurations[] = [
+            'gpslab_geoip' => [
+                'default_database' => '',
+                'databases' => [
+                    'foo' => [
+                        'license' => 'LICENSE',
+                        'edition' => 'EDITION',
+                    ],
+                ],
+            ],
+        ];
+        // empty list of root locales
+        $configurations[] = [
+            'gpslab_geoip' => [
+                'license' => 'LICENSE',
+                'edition' => 'EDITION',
+                'locales' => [],
+            ],
+        ];
+        // empty list of locales in databases
+        $configurations[] = [
+            'gpslab_geoip' => [
+                'databases' => [
+                    'default' => [
+                        'license' => 'LICENSE',
+                        'edition' => 'EDITION',
+                        'locales' => [],
+                    ],
+                ],
+            ],
+        ];
+        // invalid URL
+        $configurations[] = [
+            'gpslab_geoip' => [
+                'databases' => [
+                    'default' => [
+                        'url' => 'example.com',
+                        'path' => '/tmp/GeoIP2-First.mmdb',
+                    ],
+                ],
+            ],
+        ];
+
         $return = [];
-        foreach (['/tmp/var/cache', null] as $cache_dir) {
-            $return[] = [$cache_dir, [
-                'gpslab_geoip' => [
-                    'license' => 'LICENSE',
-                ],
-            ]];
-            $return[] = [$cache_dir, [
-                'gpslab_geoip' => [
-                    'license' => 'LICENSE',
-                    'edition' => 'EDITION',
-                    'databases' => [],
-                ],
-            ]];
-            $return[] = [$cache_dir, [
-                'gpslab_geoip' => [
-                    'default_database' => 'default',
-                    'databases' => [
-                        'foo' => [
-                            'license' => 'LICENSE',
-                            'edition' => 'EDITION',
-                        ],
-                    ],
-                ],
-            ]];
-            $return[] = [$cache_dir, [
-                'gpslab_geoip' => [
-                    'default_database' => '',
-                    'databases' => [
-                        'foo' => [
-                            'license' => 'LICENSE',
-                            'edition' => 'EDITION',
-                        ],
-                    ],
-                ],
-            ]];
-            $return[] = [$cache_dir, [
-                'gpslab_geoip' => [
-                    'license' => 'LICENSE',
-                    'edition' => 'EDITION',
-                    'locales' => [],
-                ],
-            ]];
-            $return[] = [$cache_dir, [
-                'gpslab_geoip' => [
-                    'databases' => [
-                        'default' => [
-                            'license' => 'LICENSE',
-                            'edition' => 'EDITION',
-                            'locales' => [],
-                        ],
-                    ],
-                ],
-            ]];
-            $return[] = [$cache_dir, [
-                'gpslab_geoip' => [
-                    'databases' => [
-                        'default' => [
-                            'url' => 'example.com',
-                            'path' => '/tmp/GeoIP2-First.mmdb',
-                        ],
-                    ],
-                ],
-            ]];
+        foreach ($configurations as $configuration) {
+            foreach (['/tmp/var/cache', null] as $cache_dir) {
+                $return[] = [$cache_dir, $configuration];
+            }
         }
 
         return $return;

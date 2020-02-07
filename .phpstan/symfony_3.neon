@@ -1,0 +1,4 @@
+# config for Symfone 3.0 - 3.4
+
+includes:
+    - symfony_2.neon

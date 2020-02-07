@@ -1,12 +1,2 @@
 includes:
-    - vendor/phpstan/phpstan-phpunit/extension.neon
-    - vendor/phpstan/phpstan-phpunit/rules.neon
-
-parameters:
-    level: 7
-    paths:
-        - src
-        - tests
-    excludes_analyse:
-        # heavily dependent on the version of Symfony
-        - src/DependencyInjection/Configuration
+    - .phpstan/symfony_5.neon
