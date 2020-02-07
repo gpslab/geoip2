@@ -70,7 +70,7 @@ class Configuration implements ConfigurationInterface
         $root_node
             ->beforeNormalization()
             ->ifTrue(static function ($v): bool {
-                return is_array($v) && !array_key_exists('databases', $v) && !array_key_exists('database', $v);
+                return $v && is_array($v) && !array_key_exists('databases', $v) && !array_key_exists('database', $v);
             })
             ->then(static function (array $v): array {
                 // key that should not be rewritten to the database config
@@ -95,6 +95,7 @@ class Configuration implements ConfigurationInterface
                         is_array($v) &&
                         array_key_exists('default_database', $v) &&
                         array_key_exists('databases', $v) &&
+                        $v['databases'] &&
                         !array_key_exists($v['default_database'], $v['databases']);
                 })
                 ->then(static function (array $v): array {
