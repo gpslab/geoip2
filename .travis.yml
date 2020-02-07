@@ -35,6 +35,30 @@ jobs:
           name: PHPStan
           script: vendor/phpstan/phpstan/phpstan analyse
 
+        - stage: Code Quality
+          name: PHPStan
+          env: SYMFONY_VERSION=2.8.*
+          php: 7.1
+          script: vendor/phpstan/phpstan/phpstan analyse -c .phpstan/symfony_2.neon
+
+        - stage: Code Quality
+          name: PHPStan
+          env: SYMFONY_VERSION=3.4.*
+          php: 7.1
+          script: vendor/phpstan/phpstan/phpstan analyse -c .phpstan/symfony_3.neon
+
+        - stage: Code Quality
+          name: PHPStan
+          env: SYMFONY_VERSION=4.4.*
+          php: 7.1
+          script: vendor/phpstan/phpstan/phpstan analyse -c .phpstan/symfony_4.neon
+
+        - stage: Code Quality
+          name: PHPStan
+          env: SYMFONY_VERSION=5.0.*
+          php: 7.2
+          script: vendor/phpstan/phpstan/phpstan analyse -c .phpstan/symfony_5.neon
+
         - stage: Test
           env: SYMFONY_VERSION=2.8.*
           php: 7.1
