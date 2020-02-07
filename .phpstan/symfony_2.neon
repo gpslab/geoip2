@@ -1,4 +1,4 @@
-# config for Symfone 2.3 - 3.4
+# config for Symfone 2.8 - 3.4
 
 includes:
     - default.neon
