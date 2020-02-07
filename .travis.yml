@@ -9,10 +9,10 @@ cache:
         - $HOME/.composer/cache
 
 php:
-    - 7.4
-    - 7.3
-    - 7.2
     - 7.1
+    - 7.2
+    - 7.3
+    - 7.4
 
 before_install:
     - mv ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/xdebug.ini{,.disabled} || echo "xdebug not available"
@@ -25,11 +25,13 @@ install:
 jobs:
     include:
         - stage: Code Quality
+          name: PHP CS Fixer
           before_script: wget https://cs.symfony.com/download/php-cs-fixer-v2.phar -O php-cs-fixer
           script:
             - php php-cs-fixer fix --diff --dry-run -v
 
         - stage: Code Quality
+          name: PHPStan
           script: vendor/phpstan/phpstan/phpstan analyse
 
         - stage: Test
