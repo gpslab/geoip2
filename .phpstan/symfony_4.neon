@@ -1,0 +1,4 @@
+# config for Symfone 4.2 - 4.4
+
+includes:
+    - default.neon

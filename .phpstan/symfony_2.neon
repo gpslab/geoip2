@@ -1,0 +1,8 @@
+# config for Symfone 2.3 - 3.4
+
+includes:
+    - default.neon
+
+parameters:
+    ignoreErrors:
+        - '#Class Symfony\\Component\\Config\\Definition\\Builder\\TreeBuilder does not have a constructor and must be instantiated without any parameters\.#'
