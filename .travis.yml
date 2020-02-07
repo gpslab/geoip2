@@ -38,6 +38,7 @@ jobs:
 
         - stage: Test
           env: SYMFONY_VERSION=2.8.*
+          php: 7.1
           script: vendor/bin/phpunit --coverage-clover build/coverage-clover.xml
           after_script:
             - wget https://scrutinizer-ci.com/ocular.phar
@@ -47,6 +48,7 @@ jobs:
 
         - stage: Test
           env: SYMFONY_VERSION=3.4.*
+          php: 7.1
           script: vendor/bin/phpunit --coverage-clover build/coverage-clover.xml
           after_script:
             - wget https://scrutinizer-ci.com/ocular.phar
@@ -56,6 +58,7 @@ jobs:
 
         - stage: Test
           env: SYMFONY_VERSION=4.4.*
+          php: 7.1
           script: vendor/bin/phpunit --coverage-clover build/coverage-clover.xml
           after_script:
             - wget https://scrutinizer-ci.com/ocular.phar
@@ -65,6 +68,7 @@ jobs:
 
         - stage: Test
           env: SYMFONY_VERSION=5.0.*
+          php: 7.2
           script: vendor/bin/phpunit --coverage-clover build/coverage-clover.xml
           after_script:
             - wget https://scrutinizer-ci.com/ocular.phar
