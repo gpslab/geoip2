@@ -135,7 +135,8 @@ class Configuration implements ConfigurationInterface
                     is_array($v) &&
                     !array_key_exists('default_database', $v) &&
                     array_key_exists('databases', $v) &&
-                    is_array($v['databases']);
+                    is_array($v['databases']) &&
+                    $v['databases'];
             })
             ->then(static function (array $v): array {
                 $keys = array_keys($v['databases']);
