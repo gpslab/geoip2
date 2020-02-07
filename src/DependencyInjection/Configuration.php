@@ -53,9 +53,8 @@ class Configuration implements ConfigurationInterface
         $root_node->fixXmlConfig('locale');
         $locales = $root_node->children()->arrayNode('locales');
         $locales->prototype('scalar');
-        $locales
-            ->treatNullLike([])
-            ->defaultValue(['en']);
+        $locales->treatNullLike([]);
+        $locales->defaultValue(['en']);
 
         $root_node->children()->scalarNode('license');
 
@@ -93,10 +92,8 @@ class Configuration implements ConfigurationInterface
         $database_node->fixXmlConfig('locale');
         $locales = $database_node->children()->arrayNode('locales');
         $locales->prototype('scalar');
-        $locales
-            ->treatNullLike([])
-            ->requiresAtLeastOneElement()
-            ->defaultValue(['en']);
+        $locales->treatNullLike([]);
+        $locales->defaultValue(['en']);
 
         $database_node->children()->scalarNode('license');
 
