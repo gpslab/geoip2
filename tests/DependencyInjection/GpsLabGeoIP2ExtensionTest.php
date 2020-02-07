@@ -48,7 +48,7 @@ class GpsLabGeoIP2ExtensionTest extends TestCase
     /**
      * @dataProvider getCacheDirs
      *
-     * @param mixed $cache_dir
+     * @param string|bool|null $cache_dir
      */
     public function testLoad($cache_dir): void
     {

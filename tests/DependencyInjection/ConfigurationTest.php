@@ -29,13 +29,6 @@ class ConfigurationTest extends TestCase
     {
         $return = [];
         foreach (['/tmp/var/cache', null] as $cache_dir) {
-            $return[] = [$cache_dir, []];
-            $return[] = [$cache_dir, [
-                'gpslab_geoip' => null,
-            ]];
-            $return[] = [$cache_dir, [
-                'gpslab_geoip' => [],
-            ]];
             $return[] = [$cache_dir, [
                 'gpslab_geoip' => [
                     'databases' => null,
@@ -139,6 +132,25 @@ class ConfigurationTest extends TestCase
         foreach (['/tmp/var/cache', null] as $cache_dir) {
             $real_cache_dir = $cache_dir ?: sys_get_temp_dir();
 
+            $return[] = [$cache_dir, [], [
+                'locales' => ['en'],
+                'default_database' => 'default',
+                'databases' => [],
+            ]];
+            $return[] = [$cache_dir, [
+                'gpslab_geoip' => null,
+            ], [
+                'locales' => ['en'],
+                'default_database' => 'default',
+                'databases' => [],
+            ]];
+            $return[] = [$cache_dir, [
+                'gpslab_geoip' => [],
+            ], [
+                'locales' => ['en'],
+                'default_database' => 'default',
+                'databases' => [],
+            ]];
             $return[] = [$cache_dir, [
                 'gpslab_geoip' => [
                     'license' => 'LICENSE',
