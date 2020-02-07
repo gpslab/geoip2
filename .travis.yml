@@ -37,15 +37,93 @@ jobs:
 
         - stage: Code Quality
           name: PHPStan
+          env: SYMFONY_VERSION=2.3.*
+          php: 7.1
+          script: vendor/phpstan/phpstan/phpstan analyse -c .phpstan/symfony_2.neon
+
+        - stage: Code Quality
+          name: PHPStan
+          env: SYMFONY_VERSION=2.4.*
+          php: 7.1
+          script: vendor/phpstan/phpstan/phpstan analyse -c .phpstan/symfony_2.neon
+
+        - stage: Code Quality
+          name: PHPStan
+          env: SYMFONY_VERSION=2.5.*
+          php: 7.1
+          script: vendor/phpstan/phpstan/phpstan analyse -c .phpstan/symfony_2.neon
+
+        - stage: Code Quality
+          name: PHPStan
+          env: SYMFONY_VERSION=2.6.*
+          php: 7.1
+          script: vendor/phpstan/phpstan/phpstan analyse -c .phpstan/symfony_2.neon
+
+        - stage: Code Quality
+          name: PHPStan
+          env: SYMFONY_VERSION=2.7.*
+          php: 7.1
+          script: vendor/phpstan/phpstan/phpstan analyse -c .phpstan/symfony_2.neon
+
+        - stage: Code Quality
+          name: PHPStan
           env: SYMFONY_VERSION=2.8.*
           php: 7.1
           script: vendor/phpstan/phpstan/phpstan analyse -c .phpstan/symfony_2.neon
 
         - stage: Code Quality
           name: PHPStan
+          env: SYMFONY_VERSION=3.0.*
+          php: 7.1
+          script: vendor/phpstan/phpstan/phpstan analyse -c .phpstan/symfony_3.neon
+
+        - stage: Code Quality
+          name: PHPStan
+          env: SYMFONY_VERSION=3.1.*
+          php: 7.1
+          script: vendor/phpstan/phpstan/phpstan analyse -c .phpstan/symfony_3.neon
+
+        - stage: Code Quality
+          name: PHPStan
+          env: SYMFONY_VERSION=3.2.*
+          php: 7.1
+          script: vendor/phpstan/phpstan/phpstan analyse -c .phpstan/symfony_3.neon
+
+        - stage: Code Quality
+          name: PHPStan
+          env: SYMFONY_VERSION=3.3.*
+          php: 7.1
+          script: vendor/phpstan/phpstan/phpstan analyse -c .phpstan/symfony_3.neon
+
+        - stage: Code Quality
+          name: PHPStan
           env: SYMFONY_VERSION=3.4.*
           php: 7.1
           script: vendor/phpstan/phpstan/phpstan analyse -c .phpstan/symfony_3.neon
+
+        - stage: Code Quality
+          name: PHPStan
+          env: SYMFONY_VERSION=4.0.*
+          php: 7.1
+          script: vendor/phpstan/phpstan/phpstan analyse -c .phpstan/symfony_4.neon
+
+        - stage: Code Quality
+          name: PHPStan
+          env: SYMFONY_VERSION=4.1.*
+          php: 7.1
+          script: vendor/phpstan/phpstan/phpstan analyse -c .phpstan/symfony_4.neon
+
+        - stage: Code Quality
+          name: PHPStan
+          env: SYMFONY_VERSION=4.2.*
+          php: 7.1
+          script: vendor/phpstan/phpstan/phpstan analyse -c .phpstan/symfony_4.neon
+
+        - stage: Code Quality
+          name: PHPStan
+          env: SYMFONY_VERSION=4.3.*
+          php: 7.1
+          script: vendor/phpstan/phpstan/phpstan analyse -c .phpstan/symfony_4.neon
 
         - stage: Code Quality
           name: PHPStan
@@ -60,6 +138,56 @@ jobs:
           script: vendor/phpstan/phpstan/phpstan analyse -c .phpstan/symfony_5.neon
 
         - stage: Test
+          env: SYMFONY_VERSION=2.3.*
+          php: 7.1
+          script: vendor/bin/phpunit --coverage-clover build/coverage-clover.xml
+          after_script:
+            - wget https://scrutinizer-ci.com/ocular.phar
+            - wget https://github.com/php-coveralls/php-coveralls/releases/download/v2.2.0/php-coveralls.phar
+            - php ocular.phar code-coverage:upload --format=php-clover build/coverage-clover.xml
+            - php php-coveralls.phar -v -c .coveralls.yml
+
+        - stage: Test
+          env: SYMFONY_VERSION=2.4.*
+          php: 7.1
+          script: vendor/bin/phpunit --coverage-clover build/coverage-clover.xml
+          after_script:
+            - wget https://scrutinizer-ci.com/ocular.phar
+            - wget https://github.com/php-coveralls/php-coveralls/releases/download/v2.2.0/php-coveralls.phar
+            - php ocular.phar code-coverage:upload --format=php-clover build/coverage-clover.xml
+            - php php-coveralls.phar -v -c .coveralls.yml
+
+        - stage: Test
+          env: SYMFONY_VERSION=2.5.*
+          php: 7.1
+          script: vendor/bin/phpunit --coverage-clover build/coverage-clover.xml
+          after_script:
+            - wget https://scrutinizer-ci.com/ocular.phar
+            - wget https://github.com/php-coveralls/php-coveralls/releases/download/v2.2.0/php-coveralls.phar
+            - php ocular.phar code-coverage:upload --format=php-clover build/coverage-clover.xml
+            - php php-coveralls.phar -v -c .coveralls.yml
+
+        - stage: Test
+          env: SYMFONY_VERSION=2.6.*
+          php: 7.1
+          script: vendor/bin/phpunit --coverage-clover build/coverage-clover.xml
+          after_script:
+            - wget https://scrutinizer-ci.com/ocular.phar
+            - wget https://github.com/php-coveralls/php-coveralls/releases/download/v2.2.0/php-coveralls.phar
+            - php ocular.phar code-coverage:upload --format=php-clover build/coverage-clover.xml
+            - php php-coveralls.phar -v -c .coveralls.yml
+
+        - stage: Test
+          env: SYMFONY_VERSION=2.7.*
+          php: 7.1
+          script: vendor/bin/phpunit --coverage-clover build/coverage-clover.xml
+          after_script:
+            - wget https://scrutinizer-ci.com/ocular.phar
+            - wget https://github.com/php-coveralls/php-coveralls/releases/download/v2.2.0/php-coveralls.phar
+            - php ocular.phar code-coverage:upload --format=php-clover build/coverage-clover.xml
+            - php php-coveralls.phar -v -c .coveralls.yml
+
+        - stage: Test
           env: SYMFONY_VERSION=2.8.*
           php: 7.1
           script: vendor/bin/phpunit --coverage-clover build/coverage-clover.xml
@@ -70,7 +198,87 @@ jobs:
             - php php-coveralls.phar -v -c .coveralls.yml
 
         - stage: Test
+          env: SYMFONY_VERSION=3.0.*
+          php: 7.1
+          script: vendor/bin/phpunit --coverage-clover build/coverage-clover.xml
+          after_script:
+            - wget https://scrutinizer-ci.com/ocular.phar
+            - wget https://github.com/php-coveralls/php-coveralls/releases/download/v2.2.0/php-coveralls.phar
+            - php ocular.phar code-coverage:upload --format=php-clover build/coverage-clover.xml
+            - php php-coveralls.phar -v -c .coveralls.yml
+
+        - stage: Test
+          env: SYMFONY_VERSION=3.1.*
+          php: 7.1
+          script: vendor/bin/phpunit --coverage-clover build/coverage-clover.xml
+          after_script:
+            - wget https://scrutinizer-ci.com/ocular.phar
+            - wget https://github.com/php-coveralls/php-coveralls/releases/download/v2.2.0/php-coveralls.phar
+            - php ocular.phar code-coverage:upload --format=php-clover build/coverage-clover.xml
+            - php php-coveralls.phar -v -c .coveralls.yml
+
+        - stage: Test
+          env: SYMFONY_VERSION=3.2.*
+          php: 7.1
+          script: vendor/bin/phpunit --coverage-clover build/coverage-clover.xml
+          after_script:
+            - wget https://scrutinizer-ci.com/ocular.phar
+            - wget https://github.com/php-coveralls/php-coveralls/releases/download/v2.2.0/php-coveralls.phar
+            - php ocular.phar code-coverage:upload --format=php-clover build/coverage-clover.xml
+            - php php-coveralls.phar -v -c .coveralls.yml
+
+        - stage: Test
+          env: SYMFONY_VERSION=3.3.*
+          php: 7.1
+          script: vendor/bin/phpunit --coverage-clover build/coverage-clover.xml
+          after_script:
+            - wget https://scrutinizer-ci.com/ocular.phar
+            - wget https://github.com/php-coveralls/php-coveralls/releases/download/v2.2.0/php-coveralls.phar
+            - php ocular.phar code-coverage:upload --format=php-clover build/coverage-clover.xml
+            - php php-coveralls.phar -v -c .coveralls.yml
+
+        - stage: Test
           env: SYMFONY_VERSION=3.4.*
+          php: 7.1
+          script: vendor/bin/phpunit --coverage-clover build/coverage-clover.xml
+          after_script:
+            - wget https://scrutinizer-ci.com/ocular.phar
+            - wget https://github.com/php-coveralls/php-coveralls/releases/download/v2.2.0/php-coveralls.phar
+            - php ocular.phar code-coverage:upload --format=php-clover build/coverage-clover.xml
+            - php php-coveralls.phar -v -c .coveralls.yml
+
+        - stage: Test
+          env: SYMFONY_VERSION=4.0.*
+          php: 7.1
+          script: vendor/bin/phpunit --coverage-clover build/coverage-clover.xml
+          after_script:
+            - wget https://scrutinizer-ci.com/ocular.phar
+            - wget https://github.com/php-coveralls/php-coveralls/releases/download/v2.2.0/php-coveralls.phar
+            - php ocular.phar code-coverage:upload --format=php-clover build/coverage-clover.xml
+            - php php-coveralls.phar -v -c .coveralls.yml
+
+        - stage: Test
+          env: SYMFONY_VERSION=4.1.*
+          php: 7.1
+          script: vendor/bin/phpunit --coverage-clover build/coverage-clover.xml
+          after_script:
+            - wget https://scrutinizer-ci.com/ocular.phar
+            - wget https://github.com/php-coveralls/php-coveralls/releases/download/v2.2.0/php-coveralls.phar
+            - php ocular.phar code-coverage:upload --format=php-clover build/coverage-clover.xml
+            - php php-coveralls.phar -v -c .coveralls.yml
+
+        - stage: Test
+          env: SYMFONY_VERSION=4.2.*
+          php: 7.1
+          script: vendor/bin/phpunit --coverage-clover build/coverage-clover.xml
+          after_script:
+            - wget https://scrutinizer-ci.com/ocular.phar
+            - wget https://github.com/php-coveralls/php-coveralls/releases/download/v2.2.0/php-coveralls.phar
+            - php ocular.phar code-coverage:upload --format=php-clover build/coverage-clover.xml
+            - php php-coveralls.phar -v -c .coveralls.yml
+
+        - stage: Test
+          env: SYMFONY_VERSION=4.3.*
           php: 7.1
           script: vendor/bin/phpunit --coverage-clover build/coverage-clover.xml
           after_script:
