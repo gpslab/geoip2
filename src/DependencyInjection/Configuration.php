@@ -263,14 +263,11 @@ class Configuration implements ConfigurationInterface
         $root_node
             ->validate()
             ->ifTrue(static function ($v): bool {
-                return
-                    is_array($v) &&
-                    array_key_exists('databases', $v) &&
-                    is_array($v['databases']);
+                return is_array($v) && array_key_exists('databases', $v) && is_array($v['databases']);
             })
             ->then(static function (array $v): array {
                 foreach ($v['databases'] as $name => $database) {
-                    if (!array_key_exists('locales', $database) || empty($database['locales'])) {
+                    if (empty($database['locales'])) {
                         throw new \InvalidArgumentException(sprintf('The list of locales should not be empty in databases "%s".', $name));
                     }
                 }
