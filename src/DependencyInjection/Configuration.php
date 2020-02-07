@@ -40,15 +40,8 @@ class Configuration implements ConfigurationInterface
      */
     public function getConfigTreeBuilder(): TreeBuilder
     {
-        $tree_builder = new TreeBuilder('gpslab_geoip');
-
-        if (method_exists($tree_builder, 'getRootNode')) {
-            // Symfony 4.2 +
-            $root_node = $tree_builder->getRootNode();
-        } else {
-            // Symfony 4.1 and below
-            $root_node = $tree_builder->root('gpslab_geoip');
-        }
+        $tree_builder = $this->createTreeBuilder('gpslab_geoip');
+        $root_node = $this->getRootNode($tree_builder, 'gpslab_geoip');
 
         $this->normalizeDefaultDatabase($root_node);
         $this->normalizeRootConfigurationToDefaultDatabase($root_node);
@@ -80,20 +73,11 @@ class Configuration implements ConfigurationInterface
      */
     private function getDatabaseNode(): ArrayNodeDefinition
     {
-        $tree_builder = new TreeBuilder('databases');
-
-        if (method_exists($tree_builder, 'getRootNode')) {
-            // Symfony 4.2 +
-            $root_node = $tree_builder->getRootNode();
-        } else {
-            // Symfony 4.1 and below
-            $root_node = $tree_builder->root('databases');
-        }
-
+        $tree_builder = $this->createTreeBuilder('databases');
+        $root_node = $this->getRootNode($tree_builder, 'databases');
         $root_node->useAttributeAsKey('name');
 
-        /** @var ArrayNodeDefinition $database_node */
-        $database_node = $root_node->prototype('array');
+        $database_node = $this->arrayPrototype($root_node);
 
         $this->normalizeUrl($database_node);
         $this->normalizePath($database_node);
@@ -119,6 +103,71 @@ class Configuration implements ConfigurationInterface
         $database_node->children()->scalarNode('edition');
 
         return $root_node;
+    }
+
+    /**
+     * @param string $name
+     *
+     * @return TreeBuilder
+     */
+    private function createTreeBuilder(string $name): TreeBuilder
+    {
+        // Symfony 4.2 +
+        if (method_exists(TreeBuilder::class, '__construct')) {
+            return new TreeBuilder($name);
+        }
+
+        // Symfony 4.1 and below
+        return new TreeBuilder();
+    }
+
+    /**
+     * @param TreeBuilder $tree_builder
+     * @param string      $name
+     *
+     * @return ArrayNodeDefinition
+     */
+    private function getRootNode(TreeBuilder $tree_builder, string $name): ArrayNodeDefinition
+    {
+        if (method_exists($tree_builder, 'getRootNode')) {
+            // Symfony 4.2 +
+            $root = $tree_builder->getRootNode();
+        } else {
+            // Symfony 4.1 and below
+            $root = $tree_builder->root($name);
+        }
+
+        // @codeCoverageIgnoreStart
+        if (!($root instanceof ArrayNodeDefinition)) { // should be always false
+            throw new \RuntimeException(sprintf('The root node should be instance of %s, got %s instead.', ArrayNodeDefinition::class, get_class($root)));
+        }
+        // @codeCoverageIgnoreEnd
+
+        return $root;
+    }
+
+    /**
+     * @param ArrayNodeDefinition $root_node
+     *
+     * @return ArrayNodeDefinition
+     */
+    private function arrayPrototype(ArrayNodeDefinition $root_node): ArrayNodeDefinition
+    {
+        // Symfony 3.3 +
+        if (method_exists($root_node, 'arrayPrototype')) {
+            return $root_node->arrayPrototype();
+        }
+
+        // Symfony 3.2 and below
+        $node = $root_node->prototype('array');
+
+        // @codeCoverageIgnoreStart
+        if (!($node instanceof ArrayNodeDefinition)) { // should be always false
+            throw new \RuntimeException(sprintf('The "array" prototype should be instance of %s, got %s instead.', ArrayNodeDefinition::class, get_class($node)));
+        }
+        // @codeCoverageIgnoreEnd
+
+        return $node;
     }
 
     /**
