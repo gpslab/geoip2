@@ -146,7 +146,7 @@ class Configuration implements ConfigurationInterface
     }
 
     /**
-     * Normalize databases root configuration to default_database
+     * Normalize databases root configuration to default_database.
      *
      * @param NodeDefinition $root_node
      */
