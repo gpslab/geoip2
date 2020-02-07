@@ -177,4 +177,5 @@ jobs:
 
         - stage: Code Quality
           name: PHPStan
+          env: SYMFONY_VERSION=~5.0
           script: vendor/phpstan/phpstan/phpstan analyse
