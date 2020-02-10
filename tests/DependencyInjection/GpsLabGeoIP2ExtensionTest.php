@@ -163,6 +163,64 @@ class GpsLabGeoIP2ExtensionTest extends TestCase
         ]);
     }
 
+    /**
+     * @dataProvider getCacheDirs
+     *
+     * @param string|bool|null $cache_dir
+     */
+    public function testLoadWithEmptyConfiguration($cache_dir): void
+    {
+        $container = new ContainerBuilder();
+
+        if ($cache_dir !== null) {
+            $container->setParameter('kernel.cache_dir', $cache_dir);
+        }
+
+        $extension = new GpsLabGeoIP2Extension();
+        $extension->load([], $container);
+
+        $this->assertFalse($container->hasAlias('geoip2.reader'));
+        $this->assertFalse($container->hasAlias(Reader::class));
+
+        $this->assertTrue($container->hasAlias(Downloader::class));
+        $alias = $container->getAlias(Downloader::class);
+        $this->assertTrue($alias->isPublic());
+        $this->assertContains((string) $alias, [
+            MaxMindDownloader::class, // Symfony >= 4.0
+            strtolower(MaxMindDownloader::class), // Symfony < 4.0
+        ]);
+
+        $this->assertTrue($container->hasDefinition(MaxMindDownloader::class));
+        $downloader = $container->getDefinition(MaxMindDownloader::class);
+        $this->assertFalse($downloader->isPublic()); // isPrivate() allowed in Symfony >= 3.4
+        $this->assertInstanceOf(Reference::class, $downloader->getArgument(0));
+        $this->assertSame('filesystem', (string) $downloader->getArgument(0));
+        $this->assertInstanceOf(Reference::class, $downloader->getArgument(1));
+        $this->assertSame('logger', (string) $downloader->getArgument(1));
+
+        $this->assertTrue($container->hasDefinition(UpdateDatabaseCommand::class));
+        $update_command = $container->getDefinition(UpdateDatabaseCommand::class);
+        $this->assertFalse($update_command->isPublic()); // isPrivate() allowed in Symfony >= 3.4
+        $this->assertTrue($update_command->hasTag('console.command'));
+        $this->assertInstanceOf(Reference::class, $update_command->getArgument(0));
+        $this->assertContains((string) $update_command->getArgument(0), [
+            Downloader::class, // Symfony >= 4.0
+            strtolower(Downloader::class), // Symfony < 4.0
+        ]);
+        $this->assertIsArray($update_command->getArgument(1));
+        $this->assertSame([], $update_command->getArgument(1));
+
+        $this->assertTrue($container->hasDefinition(DownloadDatabaseCommand::class));
+        $download_command = $container->getDefinition(DownloadDatabaseCommand::class);
+        $this->assertFalse($download_command->isPublic()); // isPrivate() allowed in Symfony >= 3.4
+        $this->assertTrue($download_command->hasTag('console.command'));
+        $this->assertInstanceOf(Reference::class, $download_command->getArgument(0));
+        $this->assertContains((string) $update_command->getArgument(0), [
+            Downloader::class, // Symfony >= 4.0
+            strtolower(Downloader::class), // Symfony < 4.0
+        ]);
+    }
+
     public function testGetAlias(): void
     {
         $this->assertSame('gpslab_geoip', $this->extension->getAlias());

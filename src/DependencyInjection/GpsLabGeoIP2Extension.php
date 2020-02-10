@@ -24,6 +24,11 @@ use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 class GpsLabGeoIP2Extension extends Extension
 {
     /**
+     * Pattern of database service name.
+     */
+    private const SERVICE_NAME = 'geoip2.database.%s_reader';
+
+    /**
      * @param array[]          $configs
      * @param ContainerBuilder $container
      */
@@ -33,15 +38,18 @@ class GpsLabGeoIP2Extension extends Extension
         $config = $this->processConfiguration($configuration, $configs);
 
         $default_database = $config['default_database'];
+        $databases = $config['databases'];
 
         // aliases for default database
-        $container->setAlias('geoip2.reader', sprintf('geoip2.database.%s_reader', $default_database));
-        $container->setAlias(Reader::class, sprintf('geoip2.database.%s_reader', $default_database));
+        if (array_key_exists($default_database, $databases)) {
+            $container->setAlias('geoip2.reader', sprintf(self::SERVICE_NAME, $default_database));
+            $container->setAlias(Reader::class, sprintf(self::SERVICE_NAME, $default_database));
+        }
 
         // define database services
-        foreach ($config['databases'] as $name => $database) {
+        foreach ($databases as $name => $database) {
             $container
-                ->setDefinition(sprintf('geoip2.database.%s_reader', $name), new Definition(Reader::class))
+                ->setDefinition(sprintf(self::SERVICE_NAME, $name), new Definition(Reader::class))
                 ->setPublic(true)
                 ->setLazy(true)
                 ->setArguments([
@@ -67,7 +75,7 @@ class GpsLabGeoIP2Extension extends Extension
             ->setPublic(false)
             ->setArguments([
                 new Reference(Downloader::class),
-                $config['databases'],
+                $databases,
             ])
             ->addTag('console.command');
 
