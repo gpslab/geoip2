@@ -180,9 +180,8 @@ class Configuration implements ConfigurationInterface
                 return
                     is_array($v) &&
                     !array_key_exists('default_database', $v) &&
-                    array_key_exists('databases', $v) &&
-                    is_array($v['databases']) &&
-                    $v['databases'];
+                    !empty($v['databases']) &&
+                    is_array($v['databases']);
             })
             ->then(static function (array $v): array {
                 $keys = array_keys($v['databases']);
@@ -205,18 +204,16 @@ class Configuration implements ConfigurationInterface
                 return $v && is_array($v) && !array_key_exists('databases', $v) && !array_key_exists('database', $v);
             })
             ->then(static function (array $v): array {
-                // key that should not be rewritten to the database config
-                $database = [];
-                foreach ($v as $key => $value) {
-                    if ($key !== 'default_database') {
-                        $database[$key] = $v[$key];
-                        unset($v[$key]);
-                    }
-                }
-                $v['default_database'] = isset($v['default_database']) ? (string) $v['default_database'] : 'default';
-                $v['databases'] = [$v['default_database'] => $database];
+                $database = $v;
+                unset($database['default_database']);
+                $default_database = isset($v['default_database']) ? (string) $v['default_database'] : 'default';
 
-                return $v;
+                return [
+                    'default_database' => $default_database,
+                    'databases' => [
+                        $default_database => $database
+                    ],
+                ];
             });
     }
 
@@ -233,8 +230,7 @@ class Configuration implements ConfigurationInterface
                     return
                         is_array($v) &&
                         array_key_exists('default_database', $v) &&
-                        array_key_exists('databases', $v) &&
-                        $v['databases'] &&
+                        !empty($v['databases']) &&
                         !array_key_exists($v['default_database'], $v['databases']);
                 })
                 ->then(static function (array $v): array {
