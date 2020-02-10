@@ -211,7 +211,7 @@ class Configuration implements ConfigurationInterface
                 return [
                     'default_database' => $default_database,
                     'databases' => [
-                        $default_database => $database
+                        $default_database => $database,
                     ],
                 ];
             });
