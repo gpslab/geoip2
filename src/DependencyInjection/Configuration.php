@@ -48,7 +48,7 @@ class Configuration implements ConfigurationInterface
         $this->validateAvailableDefaultDatabase($root_node);
         $this->allowGlobalLicense($root_node);
         $this->allowGlobalLocales($root_node);
-        $this->validateDatabaseLocales($root_node);
+        $this->validateDatabases($root_node);
 
         $root_node->fixXmlConfig('locale');
         $locales = $root_node->children()->arrayNode('locales');
@@ -297,11 +297,11 @@ class Configuration implements ConfigurationInterface
     }
 
     /**
-     * Validate database locales.
+     * Validate database options.
      *
      * @param NodeDefinition $root_node
      */
-    private function validateDatabaseLocales(NodeDefinition $root_node): void
+    private function validateDatabases(NodeDefinition $root_node): void
     {
         $root_node
             ->validate()
@@ -310,8 +310,24 @@ class Configuration implements ConfigurationInterface
             })
             ->then(static function (array $v): array {
                 foreach ($v['databases'] as $name => $database) {
+                    if (empty($database['license'])) {
+                        throw new \InvalidArgumentException(sprintf('License for downloaded databases "%s" is not specified.', $name));
+                    }
+
+                    if (empty($database['edition'])) {
+                        throw new \InvalidArgumentException(sprintf('Edition of downloaded databases "%s" is not selected.', $name));
+                    }
+
+                    if (empty($database['url'])) {
+                        throw new \InvalidArgumentException(sprintf('URL for download databases "%s" is not specified.', $name));
+                    }
+
+                    if (empty($database['path'])) {
+                        throw new \InvalidArgumentException(sprintf('The destination path to download database "%s" is not specified.', $name));
+                    }
+
                     if (empty($database['locales'])) {
-                        throw new \InvalidArgumentException(sprintf('The list of locales should not be empty in databases "%s".', $name));
+                        throw new \InvalidArgumentException(sprintf('The list of locales for databases "%s" should not be empty.', $name));
                     }
                 }
 
