@@ -311,15 +311,15 @@ class Configuration implements ConfigurationInterface
             ->then(static function (array $v): array {
                 foreach ($v['databases'] as $name => $database) {
                     if (empty($database['license'])) {
-                        throw new \InvalidArgumentException(sprintf('License for downloaded databases "%s" is not specified.', $name));
+                        throw new \InvalidArgumentException(sprintf('License for downloaded database "%s" is not specified.', $name));
                     }
 
                     if (empty($database['edition'])) {
-                        throw new \InvalidArgumentException(sprintf('Edition of downloaded databases "%s" is not selected.', $name));
+                        throw new \InvalidArgumentException(sprintf('Edition of downloaded database "%s" is not selected.', $name));
                     }
 
                     if (empty($database['url'])) {
-                        throw new \InvalidArgumentException(sprintf('URL for download databases "%s" is not specified.', $name));
+                        throw new \InvalidArgumentException(sprintf('URL for download database "%s" is not specified.', $name));
                     }
 
                     if (empty($database['path'])) {
@@ -327,7 +327,7 @@ class Configuration implements ConfigurationInterface
                     }
 
                     if (empty($database['locales'])) {
-                        throw new \InvalidArgumentException(sprintf('The list of locales for databases "%s" should not be empty.', $name));
+                        throw new \InvalidArgumentException(sprintf('The list of locales for database "%s" should not be empty.', $name));
                     }
                 }
 
