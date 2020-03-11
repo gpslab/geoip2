@@ -226,18 +226,18 @@ class Configuration implements ConfigurationInterface
     {
         $root_node
             ->validate()
-                ->ifTrue(static function ($v): bool {
-                    return
-                        is_array($v) &&
-                        array_key_exists('default_database', $v) &&
-                        !empty($v['databases']) &&
-                        !array_key_exists($v['default_database'], $v['databases']);
-                })
-                ->then(static function (array $v): array {
-                    $databases = implode('", "', array_keys($v['databases']));
+            ->ifTrue(static function ($v): bool {
+                return
+                    is_array($v) &&
+                    array_key_exists('default_database', $v) &&
+                    !empty($v['databases']) &&
+                    !array_key_exists($v['default_database'], $v['databases']);
+            })
+            ->then(static function (array $v): array {
+                $databases = implode('", "', array_keys($v['databases']));
 
-                    throw new \InvalidArgumentException(sprintf('Undefined default database "%s". Available "%s" databases.', $v['default_database'], $databases));
-                });
+                throw new \InvalidArgumentException(sprintf('Undefined default database "%s". Available "%s" databases.', $v['default_database'], $databases));
+            });
     }
 
     /**
@@ -387,7 +387,7 @@ class Configuration implements ConfigurationInterface
         $url
             ->validate()
             ->ifTrue(static function ($v): bool {
-                return is_string($v) && !filter_var($v, FILTER_VALIDATE_URL);
+                return is_string($v) && $v && !filter_var($v, FILTER_VALIDATE_URL);
             })
             ->then(static function (string $v): array {
                 throw new \InvalidArgumentException(sprintf('URL "%s" must be valid.', $v));
