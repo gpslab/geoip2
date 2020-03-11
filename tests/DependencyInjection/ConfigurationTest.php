@@ -34,6 +34,7 @@ class ConfigurationTest extends TestCase
                 'license' => 'LICENSE',
             ],
         ];
+        // unrecognized option "edition" under "gpslab_geoip"
         $configurations[] = [
             'gpslab_geoip' => [
                 'license' => 'LICENSE',
@@ -65,37 +66,65 @@ class ConfigurationTest extends TestCase
                 ],
             ],
         ];
-        // empty list of root locales
-        $configurations[] = [
-            'gpslab_geoip' => [
-                'license' => 'LICENSE',
-                'edition' => 'EDITION',
-                'locales' => [],
-            ],
-        ];
-        // empty list of locales in databases
+        // invalid URL
         $configurations[] = [
             'gpslab_geoip' => [
                 'databases' => [
                     'default' => [
                         'license' => 'LICENSE',
                         'edition' => 'EDITION',
-                        'locales' => [],
-                    ],
-                ],
-            ],
-        ];
-        // invalid URL
-        $configurations[] = [
-            'gpslab_geoip' => [
-                'databases' => [
-                    'default' => [
                         'url' => 'example.com',
                         'path' => '/tmp/GeoIP2-First.mmdb',
                     ],
                 ],
             ],
         ];
+
+        $full_config = [
+            'license' => 'LICENSE',
+            'edition' => 'EDITION',
+            'url' => 'https://example.com/GoeIp2.tar.gz',
+            'path' => '/var/local/GoeIp2',
+            'locales' => ['en'],
+        ];
+
+        foreach (['license', 'edition', 'url', 'path', 'locales'] as $option) {
+            $config = $full_config;
+            $config[$option] = ''; // reset option to empty string
+
+            // empty option in root
+            $configurations[] = [
+                'gpslab_geoip' => $config,
+            ];
+
+            // empty option in database
+            $configurations[] = [
+                'gpslab_geoip' => [
+                    'databases' => [
+                        'default' => $config,
+                    ],
+                ],
+            ];
+        }
+
+        foreach (['license', 'edition'] as $option) {
+            $config = $full_config;
+            unset($config[$option]); // remove required option
+
+            // undefined option in root
+            $configurations[] = [
+                'gpslab_geoip' => $config,
+            ];
+
+            // undefined option in database
+            $configurations[] = [
+                'gpslab_geoip' => [
+                    'databases' => [
+                        'default' => $config,
+                    ],
+                ],
+            ];
+        }
 
         $return = [];
         foreach ($configurations as $configuration) {
@@ -294,69 +323,6 @@ class ConfigurationTest extends TestCase
                     ],
                 ],
                 'default_database' => 'default',
-            ]];
-            $return[] = [$cache_dir, [
-                'gpslab_geoip' => [
-                    'url' => 'https://example.com/GoeIp2.tar.gz',
-                    'path' => '/var/local/GoeIp2',
-                ],
-            ], [
-                'default_database' => 'default',
-                'databases' => [
-                    'default' => [
-                        'url' => 'https://example.com/GoeIp2.tar.gz',
-                        'path' => '/var/local/GoeIp2',
-                        'locales' => ['en'],
-                    ],
-                ],
-                'locales' => ['en'],
-            ]];
-            $return[] = [$cache_dir, [
-                'gpslab_geoip' => [
-                    'url' => 'https://example.com/GoeIp2.tar.gz',
-                    'edition' => 'EDITION',
-                ],
-            ], [
-                'default_database' => 'default',
-                'databases' => [
-                    'default' => [
-                        'url' => 'https://example.com/GoeIp2.tar.gz',
-                        'edition' => 'EDITION',
-                        'path' => sprintf(self::PATH, $real_cache_dir, 'EDITION'),
-                        'locales' => ['en'],
-                    ],
-                ],
-                'locales' => ['en'],
-            ]];
-            $return[] = [$cache_dir, [
-                'gpslab_geoip' => [
-                    'databases' => [
-                        'default' => [
-                            'url' => 'https://example.com/GoeIp2.tar.gz',
-                            'path' => '/var/local/GoeIp2',
-                        ],
-                        'foo' => [
-                            'url' => 'https://example.com/GoeIp2.tar.gz',
-                            'edition' => 'EDITION',
-                        ],
-                    ],
-                ],
-            ], [
-                'databases' => [
-                    'default' => [
-                        'url' => 'https://example.com/GoeIp2.tar.gz',
-                        'path' => '/var/local/GoeIp2',
-                        'locales' => ['en'],
-                    ],
-                    'foo' => [
-                        'url' => 'https://example.com/GoeIp2.tar.gz',
-                        'edition' => 'EDITION',
-                        'path' => sprintf(self::PATH, $real_cache_dir, 'EDITION'),
-                        'locales' => ['en'],
-                    ],
-                ],
-                'default_database' => 'default',
-                'locales' => ['en'],
             ]];
         }
 
