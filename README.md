@@ -31,12 +31,6 @@ To configure auto-update the database you need to generate your personal licence
 4. Open [download page](https://www.maxmind.com/en/download_files) and find your needed DB edition `ID` and copy value
 from first column.
 
-<p align="center">
-    <a href="https://user-images.githubusercontent.com/2862833/72380833-4ccd5a00-3727-11ea-9c6c-aecd55c086ed.png">
-        <img src="https://user-images.githubusercontent.com/2862833/72380833-4ccd5a00-3727-11ea-9c6c-aecd55c086ed.png" alt="GeoIP2 download page">
-    </a>
-</p>
-
 Example configuration:
 
 ```yml
