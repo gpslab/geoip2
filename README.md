@@ -44,7 +44,7 @@ gpslab_geoip:
     # Your personal licence key
     license: 'XXXXXXXXXXXXXXXX'
 
-    # Database edition ID
+    # Database edition ID GeoLite2-ASN, GeoLite2-City or GeoLite2-Country
     edition: 'GeoLite2-City'
 ```
 

@@ -34,11 +34,18 @@ class ConfigurationTest extends TestCase
                 'license' => 'LICENSE',
             ],
         ];
-        // unrecognized option "edition" under "gpslab_geoip"
+        // permissible values: "GeoLite2-ASN", "GeoLite2-City", "GeoLite2-Country"
         $configurations[] = [
             'gpslab_geoip' => [
                 'license' => 'LICENSE',
                 'edition' => 'EDITION',
+            ],
+        ];
+        // unrecognized option "edition" under "gpslab_geoip"
+        $configurations[] = [
+            'gpslab_geoip' => [
+                'license' => 'LICENSE',
+                'edition' => 'GeoLite2-City',
                 'databases' => [],
             ],
         ];
@@ -49,7 +56,7 @@ class ConfigurationTest extends TestCase
                 'databases' => [
                     'foo' => [
                         'license' => 'LICENSE',
-                        'edition' => 'EDITION',
+                        'edition' => 'GeoLite2-City',
                     ],
                 ],
             ],
@@ -61,7 +68,7 @@ class ConfigurationTest extends TestCase
                 'databases' => [
                     'foo' => [
                         'license' => 'LICENSE',
-                        'edition' => 'EDITION',
+                        'edition' => 'GeoLite2-City',
                     ],
                 ],
             ],
@@ -72,7 +79,7 @@ class ConfigurationTest extends TestCase
                 'databases' => [
                     'default' => [
                         'license' => 'LICENSE',
-                        'edition' => 'EDITION',
+                        'edition' => 'GeoLite2-City',
                         'url' => 'example.com',
                         'path' => '/tmp/GeoIP2-First.mmdb',
                     ],
@@ -82,7 +89,7 @@ class ConfigurationTest extends TestCase
 
         $full_config = [
             'license' => 'LICENSE',
-            'edition' => 'EDITION',
+            'edition' => 'GeoLite2-City',
             'url' => 'https://example.com/GoeIp2.tar.gz',
             'path' => '/var/local/GoeIp2',
             'locales' => ['en'],
@@ -202,16 +209,16 @@ class ConfigurationTest extends TestCase
             $return[] = [$cache_dir, [
                 'gpslab_geoip' => [
                     'license' => 'LICENSE',
-                    'edition' => 'EDITION',
+                    'edition' => 'GeoLite2-City',
                 ],
             ], [
                 'default_database' => 'default',
                 'databases' => [
                     'default' => [
                         'license' => 'LICENSE',
-                        'edition' => 'EDITION',
-                        'url' => sprintf(self::URL, 'EDITION', 'LICENSE'),
-                        'path' => sprintf(self::PATH, $real_cache_dir, 'EDITION'),
+                        'edition' => 'GeoLite2-City',
+                        'url' => sprintf(self::URL, 'GeoLite2-City', 'LICENSE'),
+                        'path' => sprintf(self::PATH, $real_cache_dir, 'GeoLite2-City'),
                         'locales' => ['en'],
                     ],
                 ],
@@ -222,7 +229,7 @@ class ConfigurationTest extends TestCase
                     'license' => 'LICENSE',
                     'databases' => [
                         'default' => [
-                            'edition' => 'EDITION',
+                            'edition' => 'GeoLite2-City',
                             'locales' => ['ru'],
                         ],
                     ],
@@ -231,11 +238,11 @@ class ConfigurationTest extends TestCase
                 'license' => 'LICENSE',
                 'databases' => [
                     'default' => [
-                        'edition' => 'EDITION',
+                        'edition' => 'GeoLite2-City',
                         'locales' => ['ru'],
                         'license' => 'LICENSE',
-                        'url' => sprintf(self::URL, 'EDITION', 'LICENSE'),
-                        'path' => sprintf(self::PATH, $real_cache_dir, 'EDITION'),
+                        'url' => sprintf(self::URL, 'GeoLite2-City', 'LICENSE'),
+                        'path' => sprintf(self::PATH, $real_cache_dir, 'GeoLite2-City'),
                     ],
                 ],
                 'default_database' => 'default',
@@ -247,16 +254,16 @@ class ConfigurationTest extends TestCase
                     'databases' => [
                         'foo' => [
                             'license' => 'LICENSE1',
-                            'edition' => 'EDITION_1',
+                            'edition' => 'GeoLite2-ASN',
                         ],
                         'bar' => [
                             'license' => 'LICENSE_2',
-                            'edition' => 'EDITION_2',
+                            'edition' => 'GeoLite2-City',
                             'locales' => ['ru'],
                         ],
                         'baz' => [
                             'license' => 'LICENSE_3',
-                            'edition' => 'EDITION_3',
+                            'edition' => 'GeoLite2-Country',
                             'locales' => ['fr', 'en'],
                         ],
                     ],
@@ -266,24 +273,24 @@ class ConfigurationTest extends TestCase
                 'databases' => [
                     'foo' => [
                         'license' => 'LICENSE1',
-                        'edition' => 'EDITION_1',
-                        'url' => sprintf(self::URL, 'EDITION_1', 'LICENSE1'),
-                        'path' => sprintf(self::PATH, $real_cache_dir, 'EDITION_1'),
+                        'edition' => 'GeoLite2-ASN',
+                        'url' => sprintf(self::URL, 'GeoLite2-ASN', 'LICENSE1'),
+                        'path' => sprintf(self::PATH, $real_cache_dir, 'GeoLite2-ASN'),
                         'locales' => ['en'],
                     ],
                     'bar' => [
                         'license' => 'LICENSE_2',
-                        'edition' => 'EDITION_2',
+                        'edition' => 'GeoLite2-City',
                         'locales' => ['ru'],
-                        'url' => sprintf(self::URL, 'EDITION_2', 'LICENSE_2'),
-                        'path' => sprintf(self::PATH, $real_cache_dir, 'EDITION_2'),
+                        'url' => sprintf(self::URL, 'GeoLite2-City', 'LICENSE_2'),
+                        'path' => sprintf(self::PATH, $real_cache_dir, 'GeoLite2-City'),
                     ],
                     'baz' => [
                         'license' => 'LICENSE_3',
-                        'edition' => 'EDITION_3',
+                        'edition' => 'GeoLite2-Country',
                         'locales' => ['fr', 'en'],
-                        'url' => sprintf(self::URL, 'EDITION_3', 'LICENSE_3'),
-                        'path' => sprintf(self::PATH, $real_cache_dir, 'EDITION_3'),
+                        'url' => sprintf(self::URL, 'GeoLite2-Country', 'LICENSE_3'),
+                        'path' => sprintf(self::PATH, $real_cache_dir, 'GeoLite2-Country'),
                     ],
                 ],
                 'locales' => ['en'],
@@ -294,11 +301,11 @@ class ConfigurationTest extends TestCase
                     'locales' => ['ru', 'en'],
                     'databases' => [
                         'default' => [
-                            'edition' => 'EDITION_1',
+                            'edition' => 'GeoLite2-ASN',
                             'locales' => ['fr'],
                         ],
                         'foo' => [
-                            'edition' => 'EDITION_2',
+                            'edition' => 'GeoLite2-City',
                             'license' => 'LICENSE_2',
                         ],
                     ],
@@ -308,18 +315,18 @@ class ConfigurationTest extends TestCase
                 'locales' => ['ru', 'en'],
                 'databases' => [
                     'default' => [
-                        'edition' => 'EDITION_1',
+                        'edition' => 'GeoLite2-ASN',
                         'locales' => ['fr'],
                         'license' => 'LICENSE_1',
-                        'url' => sprintf(self::URL, 'EDITION_1', 'LICENSE_1'),
-                        'path' => sprintf(self::PATH, $real_cache_dir, 'EDITION_1'),
+                        'url' => sprintf(self::URL, 'GeoLite2-ASN', 'LICENSE_1'),
+                        'path' => sprintf(self::PATH, $real_cache_dir, 'GeoLite2-ASN'),
                     ],
                     'foo' => [
-                        'edition' => 'EDITION_2',
+                        'edition' => 'GeoLite2-City',
                         'license' => 'LICENSE_2',
                         'locales' => ['ru', 'en'],
-                        'url' => sprintf(self::URL, 'EDITION_2', 'LICENSE_2'),
-                        'path' => sprintf(self::PATH, $real_cache_dir, 'EDITION_2'),
+                        'url' => sprintf(self::URL, 'GeoLite2-City', 'LICENSE_2'),
+                        'path' => sprintf(self::PATH, $real_cache_dir, 'GeoLite2-City'),
                     ],
                 ],
                 'default_database' => 'default',
