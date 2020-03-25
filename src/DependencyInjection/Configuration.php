@@ -22,6 +22,8 @@ class Configuration implements ConfigurationInterface
 
     private const PATH = '%s/%s.mmdb';
 
+    private const LICENSE_DIRTY_HACK = 'YOUR-LICENSE-KEY';
+
     /**
      * @var string
      */
@@ -45,6 +47,7 @@ class Configuration implements ConfigurationInterface
 
         $this->normalizeDefaultDatabase($root_node);
         $this->normalizeRootConfigurationToDefaultDatabase($root_node);
+        $this->normalizeLicenseDirtyHack($root_node);
         $this->validateAvailableDefaultDatabase($root_node);
         $this->allowGlobalLicense($root_node);
         $this->allowGlobalLocales($root_node);
@@ -214,6 +217,32 @@ class Configuration implements ConfigurationInterface
                         $default_database => $database,
                     ],
                 ];
+            });
+    }
+
+    /**
+     * Dirty hack for Symfony Flex.
+     *
+     * @see https://github.com/symfony/recipes-contrib/pull/837
+     *
+     * @param NodeDefinition $root_node
+     */
+    private function normalizeLicenseDirtyHack(NodeDefinition $root_node): void
+    {
+        $root_node
+            ->beforeNormalization()
+            ->ifTrue(static function ($v): bool {
+                return $v && is_array($v) && array_key_exists('databases', $v) && is_array($v['databases']);
+            })
+            ->then(static function (array $v): array {
+                foreach ($v['databases'] as $name => $database) {
+                    if (isset($database['license']) && $database['license'] === self::LICENSE_DIRTY_HACK) {
+                        unset($v['databases'][$name]);
+                        @trigger_error(sprintf('License for downloaded database "%s" is not specified.', $name), E_USER_WARNING);
+                    }
+                }
+
+                return $v;
             });
     }
 
