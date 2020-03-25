@@ -56,12 +56,14 @@ class MaxMindDownloaderTest extends TestCase
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('Not found GeoLite2 database in archive.');
 
+        $path = sys_get_temp_dir();
+        $path_quote = preg_quote($path, '#');
         $url = 'https://example.com';
-        $target = sprintf('%s/%s_GeoLite2.mmdb', sys_get_temp_dir(), uniqid('', true));
+        $target = sprintf('%s/%s_GeoLite2.mmdb', $path, uniqid('', true));
 
-        $tmp_zip_regexp = sprintf('#^%s/[\da-f]+\.\d+_GeoLite2\.tar\.gz$#', sys_get_temp_dir());
-        $tmp_unzip_regexp = sprintf('#^%s/[\da-f]+\.\d+_GeoLite2\.tar$#', sys_get_temp_dir());
-        $tmp_untar_regexp = sprintf('#^%s/[\da-f]+\.\d+_GeoLite2$#', sys_get_temp_dir());
+        $tmp_zip_regexp = sprintf('#^%s/[\da-f]+\.\d+_GeoLite2\.tar\.gz$#', $path_quote);
+        $tmp_unzip_regexp = sprintf('#^%s/[\da-f]+\.\d+_GeoLite2\.tar$#', $path_quote);
+        $tmp_untar_regexp = sprintf('#^%s/[\da-f]+\.\d+_GeoLite2$#', $path_quote);
 
         $this->logger
             ->expects($this->atLeastOnce())
@@ -109,12 +111,14 @@ class MaxMindDownloaderTest extends TestCase
 
     public function testDownload(): void
     {
+        $path = sys_get_temp_dir();
+        $path_quote = preg_quote($path, '#');
         $url = 'https://example.com';
-        $target = sprintf('%s/%s_GeoLite2.mmdb', sys_get_temp_dir(), uniqid('', true));
+        $target = sprintf('%s/%s_GeoLite2.mmdb', $path, uniqid('', true));
 
-        $tmp_zip_regexp = sprintf('#^%s/[\da-f]+\.\d+_GeoLite2\.tar\.gz$#', sys_get_temp_dir());
-        $tmp_unzip_regexp = sprintf('#^%s/[\da-f]+\.\d+_GeoLite2\.tar$#', sys_get_temp_dir());
-        $tmp_untar_regexp = sprintf('#^%s/[\da-f]+\.\d+_GeoLite2$#', sys_get_temp_dir());
+        $tmp_zip_regexp = sprintf('#^%s/[\da-f]+\.\d+_GeoLite2\.tar\.gz$#', $path_quote);
+        $tmp_unzip_regexp = sprintf('#^%s/[\da-f]+\.\d+_GeoLite2\.tar$#', $path_quote);
+        $tmp_untar_regexp = sprintf('#^%s/[\da-f]+\.\d+_GeoLite2$#', $path_quote);
 
         $this->logger
             ->expects($this->atLeastOnce())
@@ -159,13 +163,17 @@ class MaxMindDownloaderTest extends TestCase
         $this->fs
             ->expects($this->at($fs_call++))
             ->method('copy')
-            ->willReturnCallback(function ($origin_file, $target_file, $overwrite_newer_files) use ($target) {
+            ->willReturnCallback(function (
+                $origin_file,
+                $target_file,
+                $overwrite_newer_files
+            ) use ($target, $path_quote) {
                 $this->assertIsString($origin_file);
                 $this->assertSame($target, $target_file);
                 $this->assertTrue($overwrite_newer_files);
                 $regexp = sprintf(
                     '#^%s/[\da-f]+\.\d+_GeoLite2/GeoLite2-City_20200114/GeoLite2.mmdb$#',
-                    sys_get_temp_dir()
+                    $path_quote
                 );
                 $this->assertRegExp($regexp, $origin_file);
                 $this->assertFileExists($origin_file);

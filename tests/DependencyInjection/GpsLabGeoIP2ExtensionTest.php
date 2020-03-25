@@ -115,7 +115,7 @@ class GpsLabGeoIP2ExtensionTest extends TestCase
             $this->assertTrue($reader->isPublic());
             $this->assertTrue($reader->isLazy());
             $this->assertSame(Reader::class, $reader->getClass());
-            $path = sprintf('%s/%s.mmdb', $cache_dir ?: '/tmp', $database['edition']);
+            $path = sprintf('%s/%s.mmdb', $cache_dir ?: sys_get_temp_dir(), $database['edition']);
             $this->assertSame($path, $reader->getArgument(0));
             $this->assertSame($database['locales'] ?? ['en'], $reader->getArgument(1));
 
