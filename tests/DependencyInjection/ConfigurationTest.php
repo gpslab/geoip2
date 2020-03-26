@@ -331,6 +331,31 @@ class ConfigurationTest extends TestCase
                 ],
                 'default_database' => 'default',
             ]];
+
+            // test dirty hack for Symfony Flex
+            // https://github.com/symfony/recipes-contrib/pull/837
+            $return[] = [$cache_dir, [
+                'gpslab_geoip' => [
+                    'license' => 'YOUR-LICENSE-KEY',
+                ],
+            ], [
+                'default_database' => 'default',
+                'databases' => [],
+                'locales' => ['en'],
+            ]];
+            $return[] = [$cache_dir, [
+                'gpslab_geoip' => [
+                    'databases' => [
+                        'default' => [
+                            'license' => 'YOUR-LICENSE-KEY',
+                        ],
+                    ],
+                ],
+            ], [
+                'databases' => [],
+                'default_database' => 'default',
+                'locales' => ['en'],
+            ]];
         }
 
         return $return;
