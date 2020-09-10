@@ -24,6 +24,17 @@ class Configuration implements ConfigurationInterface
 
     private const LICENSE_DIRTY_HACK = 'YOUR-LICENSE-KEY';
 
+    private const DATABASE_EDITION_IDS = [
+        'GeoLite2-ASN',
+        'GeoLite2-City',
+        'GeoLite2-Country',
+        'GeoIP2-City',
+        'GeoIP2-Country',
+        'GeoIP2-Anonymous-IP',
+        'GeoIP2-Domain',
+        'GeoIP2-ISP',
+    ];
+
     /**
      * @var string
      */
@@ -100,16 +111,7 @@ class Configuration implements ConfigurationInterface
 
         $database_node->children()->scalarNode('license');
 
-        $database_node->children()->enumNode('edition')->values([
-            'GeoLite2-ASN',
-            'GeoLite2-City',
-            'GeoLite2-Country',
-            'GeoIP2-City',
-            'GeoIP2-Country',
-            'GeoIP2-Anonymous-IP',
-            'GeoIP2-Domain',
-            'GeoIP2-ISP',
-        ]);
+        $database_node->children()->enumNode('edition')->values(self::DATABASE_EDITION_IDS);
 
         return $root_node;
     }
