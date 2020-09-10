@@ -1,4 +1,4 @@
-# config for Symfone 5.0
+# config for Symfone 5.0 - 5.1
 
 includes:
     - default.neon
