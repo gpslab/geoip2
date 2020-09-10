@@ -100,7 +100,7 @@ class Configuration implements ConfigurationInterface
 
         $database_node->children()->scalarNode('license');
 
-        $database_node->children()->enumNode('edition')->values(['GeoLite2-ASN', 'GeoLite2-City', 'GeoLite2-Country']);
+        $database_node->children()->enumNode('edition')->values(['GeoLite2-ASN', 'GeoLite2-City', 'GeoLite2-Country', 'GeoIP2-City', 'GeoIP2-Country']);
 
         return $root_node;
     }
