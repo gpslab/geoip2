@@ -22,10 +22,21 @@ class ConfigurationTest extends TestCase
 
     private const PATH = '%s/%s.mmdb';
 
+    private const DATABASE_EDITION_IDS = [
+        'GeoLite2-ASN',
+        'GeoLite2-City',
+        'GeoLite2-Country',
+        'GeoIP2-City',
+        'GeoIP2-Country',
+        'GeoIP2-Anonymous-IP',
+        'GeoIP2-Domain',
+        'GeoIP2-ISP',
+    ];
+
     /**
-     * @return array[]
+     * @return mixed[]
      */
-    public function getBadConfigs(): array
+    public function getBadConfigs(): iterable
     {
         $configurations = [];
         // undefined edition
@@ -34,7 +45,15 @@ class ConfigurationTest extends TestCase
                 'license' => 'LICENSE',
             ],
         ];
-        // permissible values: "GeoLite2-ASN", "GeoLite2-City", "GeoLite2-Country"
+        // available values:
+        //   GeoLite2-ASN
+        //   GeoLite2-City
+        //   GeoLite2-Country
+        //   GeoIP2-City
+        //   GeoIP2-Country
+        //   GeoIP2-Anonymous-IP
+        //   GeoIP2-Domain
+        //   GeoIP2-ISP
         $configurations[] = [
             'gpslab_geoip' => [
                 'license' => 'LICENSE',
@@ -133,14 +152,11 @@ class ConfigurationTest extends TestCase
             ];
         }
 
-        $return = [];
         foreach ($configurations as $configuration) {
             foreach (['/tmp/var/cache', null] as $cache_dir) {
-                $return[] = [$cache_dir, $configuration];
+                yield [$cache_dir, $configuration];
             }
         }
-
-        return $return;
     }
 
     /**
@@ -161,34 +177,36 @@ class ConfigurationTest extends TestCase
     }
 
     /**
-     * @return array[]
+     * @return mixed[]
      */
-    public function getConfigs(): array
+    public function getConfigs(): iterable
     {
-        $return = [];
         foreach (['/tmp/var/cache', null] as $cache_dir) {
             $real_cache_dir = $cache_dir ?: sys_get_temp_dir();
 
-            $return[] = [$cache_dir, [], [
+            yield [$cache_dir, [], [
                 'locales' => ['en'],
                 'default_database' => 'default',
                 'databases' => [],
             ]];
-            $return[] = [$cache_dir, [
+
+            yield [$cache_dir, [
                 'gpslab_geoip' => null,
             ], [
                 'locales' => ['en'],
                 'default_database' => 'default',
                 'databases' => [],
             ]];
-            $return[] = [$cache_dir, [
+
+            yield [$cache_dir, [
                 'gpslab_geoip' => [],
             ], [
                 'locales' => ['en'],
                 'default_database' => 'default',
                 'databases' => [],
             ]];
-            $return[] = [$cache_dir, [
+
+            yield [$cache_dir, [
                 'gpslab_geoip' => [
                     'databases' => null,
                 ],
@@ -197,7 +215,8 @@ class ConfigurationTest extends TestCase
                 'locales' => ['en'],
                 'default_database' => 'default',
             ]];
-            $return[] = [$cache_dir, [
+
+            yield [$cache_dir, [
                 'gpslab_geoip' => [
                     'databases' => [],
                 ],
@@ -206,49 +225,54 @@ class ConfigurationTest extends TestCase
                 'locales' => ['en'],
                 'default_database' => 'default',
             ]];
-            $return[] = [$cache_dir, [
-                'gpslab_geoip' => [
-                    'license' => 'LICENSE',
-                    'edition' => 'GeoLite2-City',
-                ],
-            ], [
-                'default_database' => 'default',
-                'databases' => [
-                    'default' => [
+
+            foreach (self::DATABASE_EDITION_IDS as $database_edition_id) {
+                yield [$cache_dir, [
+                    'gpslab_geoip' => [
                         'license' => 'LICENSE',
-                        'edition' => 'GeoLite2-City',
-                        'url' => sprintf(self::URL, 'GeoLite2-City', 'LICENSE'),
-                        'path' => sprintf(self::PATH, $real_cache_dir, 'GeoLite2-City'),
-                        'locales' => ['en'],
+                        'edition' => $database_edition_id,
                     ],
-                ],
-                'locales' => ['en'],
-            ]];
-            $return[] = [$cache_dir, [
-                'gpslab_geoip' => [
+                ], [
+                    'default_database' => 'default',
+                    'databases' => [
+                        'default' => [
+                            'license' => 'LICENSE',
+                            'edition' => $database_edition_id,
+                            'url' => sprintf(self::URL, $database_edition_id, 'LICENSE'),
+                            'path' => sprintf(self::PATH, $real_cache_dir, $database_edition_id),
+                            'locales' => ['en'],
+                        ],
+                    ],
+                    'locales' => ['en'],
+                ]];
+
+                yield [$cache_dir, [
+                    'gpslab_geoip' => [
+                        'license' => 'LICENSE',
+                        'databases' => [
+                            'default' => [
+                                'edition' => $database_edition_id,
+                                'locales' => ['ru'],
+                            ],
+                        ],
+                    ],
+                ], [
                     'license' => 'LICENSE',
                     'databases' => [
                         'default' => [
-                            'edition' => 'GeoLite2-City',
+                            'edition' => $database_edition_id,
                             'locales' => ['ru'],
+                            'license' => 'LICENSE',
+                            'url' => sprintf(self::URL, $database_edition_id, 'LICENSE'),
+                            'path' => sprintf(self::PATH, $real_cache_dir, $database_edition_id),
                         ],
                     ],
-                ],
-            ], [
-                'license' => 'LICENSE',
-                'databases' => [
-                    'default' => [
-                        'edition' => 'GeoLite2-City',
-                        'locales' => ['ru'],
-                        'license' => 'LICENSE',
-                        'url' => sprintf(self::URL, 'GeoLite2-City', 'LICENSE'),
-                        'path' => sprintf(self::PATH, $real_cache_dir, 'GeoLite2-City'),
-                    ],
-                ],
-                'default_database' => 'default',
-                'locales' => ['en'],
-            ]];
-            $return[] = [$cache_dir, [
+                    'default_database' => 'default',
+                    'locales' => ['en'],
+                ]];
+            }
+
+            yield [$cache_dir, [
                 'gpslab_geoip' => [
                     'default_database' => 'foo',
                     'databases' => [
@@ -295,7 +319,8 @@ class ConfigurationTest extends TestCase
                 ],
                 'locales' => ['en'],
             ]];
-            $return[] = [$cache_dir, [
+
+            yield [$cache_dir, [
                 'gpslab_geoip' => [
                     'license' => 'LICENSE_1',
                     'locales' => ['ru', 'en'],
@@ -334,7 +359,7 @@ class ConfigurationTest extends TestCase
 
             // test dirty hack for Symfony Flex
             // https://github.com/symfony/recipes-contrib/pull/837
-            $return[] = [$cache_dir, [
+            yield [$cache_dir, [
                 'gpslab_geoip' => [
                     'license' => 'YOUR-LICENSE-KEY',
                 ],
@@ -343,7 +368,8 @@ class ConfigurationTest extends TestCase
                 'databases' => [],
                 'locales' => ['en'],
             ]];
-            $return[] = [$cache_dir, [
+
+            yield [$cache_dir, [
                 'gpslab_geoip' => [
                     'databases' => [
                         'default' => [
@@ -357,8 +383,6 @@ class ConfigurationTest extends TestCase
                 'locales' => ['en'],
             ]];
         }
-
-        return $return;
     }
 
     /**
