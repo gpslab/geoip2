@@ -168,6 +168,18 @@ jobs:
             - php ocular.phar code-coverage:upload --format=php-clover build/coverage-clover.xml
             - php php-coveralls.phar -v -c .coveralls.yml
 
+        - stage: Test Symfony
+          env: SYMFONY_VERSION=5.1.*
+          php: 7.2
+          script:
+            - vendor/bin/phpunit --coverage-clover build/coverage-clover.xml
+            - vendor/phpstan/phpstan/phpstan analyse -c .phpstan/symfony_5.neon
+          after_script:
+            - wget https://scrutinizer-ci.com/ocular.phar
+            - wget https://github.com/php-coveralls/php-coveralls/releases/download/v2.2.0/php-coveralls.phar
+            - php ocular.phar code-coverage:upload --format=php-clover build/coverage-clover.xml
+            - php php-coveralls.phar -v -c .coveralls.yml
+
         - stage: Code Quality
           name: PHP CS Fixer
           before_script: wget https://cs.symfony.com/download/php-cs-fixer-v2.phar -O php-cs-fixer
