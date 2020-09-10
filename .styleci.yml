@@ -7,3 +7,4 @@ disabled:
   - phpdoc_align
   - yoda_style
   - blank_line_after_opening_tag
+  - no_superfluous_phpdoc_tags_symfony
