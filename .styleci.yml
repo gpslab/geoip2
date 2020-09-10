@@ -1,11 +1,9 @@
 preset: symfony
 
 enabled:
-  - short_array_syntax
   - alpha_ordered_imports
 
 disabled:
   - phpdoc_align
   - yoda_style
   - blank_line_after_opening_tag
-  - phpdoc_no_empty_return
