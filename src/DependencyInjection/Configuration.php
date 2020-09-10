@@ -108,7 +108,7 @@ class Configuration implements ConfigurationInterface
             'GeoIP2-Country',
             'GeoIP2-Anonymous-IP',
             'GeoIP2-Domain',
-            'GeoIP2-ISP'
+            'GeoIP2-ISP',
         ]);
 
         return $root_node;
