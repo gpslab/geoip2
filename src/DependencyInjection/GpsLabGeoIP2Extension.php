@@ -42,8 +42,10 @@ class GpsLabGeoIP2Extension extends Extension
 
         // aliases for default database
         if (array_key_exists($default_database, $databases)) {
-            $container->setAlias('geoip2.reader', sprintf(self::SERVICE_NAME, $default_database))->setPublic(true);
-            $container->setAlias(Reader::class, sprintf(self::SERVICE_NAME, $default_database))->setPublic(true);
+            $container->setAlias('geoip2.reader', sprintf(self::SERVICE_NAME, $default_database));
+            $container->getAlias('geoip2.reader')->setPublic(true);
+            $container->setAlias(Reader::class, sprintf(self::SERVICE_NAME, $default_database));
+            $container->getAlias(Reader::class)->setPublic(true);
         }
 
         // define database services
@@ -67,7 +69,8 @@ class GpsLabGeoIP2Extension extends Extension
                 new Reference('logger'),
             ]);
 
-        $container->setAlias(Downloader::class, MaxMindDownloader::class)->setPublic(true);
+        $container->setAlias(Downloader::class, MaxMindDownloader::class);
+        $container->getAlias(Downloader::class)->setPublic(true);
 
         // configure update database console command
         $container
