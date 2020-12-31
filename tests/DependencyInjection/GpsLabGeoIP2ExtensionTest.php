@@ -17,6 +17,7 @@ use GpsLab\Bundle\GeoIP2Bundle\Command\UpdateDatabaseCommand;
 use GpsLab\Bundle\GeoIP2Bundle\DependencyInjection\GpsLabGeoIP2Extension;
 use GpsLab\Bundle\GeoIP2Bundle\Downloader\Downloader;
 use GpsLab\Bundle\GeoIP2Bundle\Downloader\MaxMindDownloader;
+use GpsLab\Bundle\GeoIP2Bundle\Reader\ReaderFactory;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
@@ -161,6 +162,16 @@ class GpsLabGeoIP2ExtensionTest extends TestCase
             Downloader::class, // Symfony >= 4.0
             strtolower(Downloader::class), // Symfony < 4.0
         ]);
+
+        $this->assertTrue($container->hasDefinition(ReaderFactory::class));
+        $reader_factory = $container->getDefinition(ReaderFactory::class);
+        $this->assertFalse($reader_factory->isPublic()); // isPrivate() allowed in Symfony >= 3.4
+        $this->assertIsArray($reader_factory->getArgument(0));
+        $this->assertSame(array_keys($databases), array_keys($reader_factory->getArgument(0)));
+        foreach ($reader_factory->getArgument(0) as $name => $database) {
+            ksort($database);
+            $this->assertSame($databases[$name], $database);
+        }
     }
 
     /**
