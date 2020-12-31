@@ -16,6 +16,7 @@ use GpsLab\Bundle\GeoIP2Bundle\Command\DownloadDatabaseCommand;
 use GpsLab\Bundle\GeoIP2Bundle\Command\UpdateDatabaseCommand;
 use GpsLab\Bundle\GeoIP2Bundle\Downloader\Downloader;
 use GpsLab\Bundle\GeoIP2Bundle\Downloader\MaxMindDownloader;
+use GpsLab\Bundle\GeoIP2Bundle\Reader\ReaderFactory;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
@@ -90,6 +91,14 @@ class GpsLabGeoIP2Extension extends Extension
                 new Reference(Downloader::class),
             ])
             ->addTag('console.command');
+
+        // configure reader factory service
+        $container
+            ->setDefinition(ReaderFactory::class, new Definition(ReaderFactory::class))
+            ->setPublic(false)
+            ->setArguments([
+                $databases,
+            ]);
     }
 
     /**
