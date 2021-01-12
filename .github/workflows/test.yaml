@@ -108,7 +108,6 @@ jobs:
         uses: 'ramsey/composer-install@v1'
         with:
           dependency-versions: '${{ matrix.dependencies }}'
-          composer-options: '--prefer-dist --prefer-stable'
 
       - name: Run Tests
         run: vendor/bin/phpunit --coverage-clover build/coverage-clover.xml

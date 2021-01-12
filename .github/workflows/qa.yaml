@@ -82,7 +82,6 @@ jobs:
         uses: 'ramsey/composer-install@v1'
         with:
           dependency-versions: '${{ matrix.dependencies }}'
-          composer-options: '--prefer-dist --prefer-stable'
 
       - name: Run PHPStan
         run: phpstan --memory-limit=1G analyse -c ${{ matrix.config }}
@@ -107,7 +106,6 @@ jobs:
         uses: 'ramsey/composer-install@v1'
         with:
           dependency-versions: 'highest'
-          composer-options: '--prefer-dist --prefer-stable'
 
       - name: Run PHP-CS-Fixer
         run: php-cs-fixer fix --dry-run --format checkstyle | cs2pr
