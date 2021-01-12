@@ -6,22 +6,12 @@ on:
 
 jobs:
   test:
-    name: 'PHP ${{ matrix.php }} + ${{ matrix.dependencies }} + ${{ matrix.variant }}'
+    name: 'PHP ${{ matrix.php }} + ${{ matrix.variant }}'
     runs-on: ubuntu-latest
     continue-on-error: ${{ matrix.experimental }}
     strategy:
       fail-fast: false
       matrix:
-        dependencies: [highest]
-        php:
-          - '7.1'
-          - '7.2'
-          - '7.3'
-          - '7.4'
-          - '8.0'
-        experimental: [false]
-        variant: [normal]
-        phpstan: [.phpstan/symfony_5.neon]
         include:
           - php: '7.1'
             dependencies: highest
@@ -89,6 +79,11 @@ jobs:
             variant: 'symfony/symfony:"5.1.*"'
             phpstan: .phpstan/symfony_5.neon
           - php: '7.2'
+            dependencies: highest
+            experimental: false
+            variant: 'symfony/symfony:"5.2.*"'
+            phpstan: .phpstan/symfony_5.neon
+          - php: '8.0'
             dependencies: highest
             experimental: false
             variant: 'symfony/symfony:"5.2.*"'
