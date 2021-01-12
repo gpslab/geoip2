@@ -117,7 +117,7 @@ jobs:
         if: matrix.php < '8.0'
         run: |
           wget https://scrutinizer-ci.com/ocular.phar
-          php ocular code-coverage:upload --format=php-clover build/coverage-clover.xml
+          php ocular.phar code-coverage:upload --format=php-clover build/coverage-clover.xml
 
       - name: Send coverage results to Coveralls
         env:
