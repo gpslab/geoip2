@@ -6,14 +6,14 @@ on:
 
 jobs:
   test:
-    name: 'PHP ${{ matrix.php-version }} + ${{ matrix.dependencies }} + ${{ matrix.variant }}'
+    name: 'PHP ${{ matrix.php }} + ${{ matrix.dependencies }} + ${{ matrix.variant }}'
     runs-on: ubuntu-latest
     continue-on-error: ${{ matrix.experimental }}
     strategy:
       fail-fast: false
       matrix:
         dependencies: [highest]
-        php-version:
+        php:
           - '7.1'
 #          - '7.2'
 #          - '7.3'
@@ -21,67 +21,67 @@ jobs:
         experimental: [false]
         variant: [normal]
         include:
-#          - php-version: '7.1'
+#          - php: '7.1'
 #            dependencies: highest
 #            experimental: false
 #            variant: 'symfony/symfony:"2.8.*"'
-#          - php-version: '7.1'
+#          - php: '7.1'
 #            dependencies: highest
 #            experimental: false
 #            variant: 'symfony/symfony:"3.0.*"'
-#          - php-version: '7.1'
+#          - php: '7.1'
 #            dependencies: highest
 #            experimental: false
 #            variant: 'symfony/symfony:"3.1.*"'
-#          - php-version: '7.1'
+#          - php: '7.1'
 #            dependencies: highest
 #            experimental: false
 #            variant: 'symfony/symfony:"3.2.*"'
-#          - php-version: '7.1'
+#          - php: '7.1'
 #            dependencies: highest
 #            experimental: false
 #            variant: 'symfony/symfony:"3.3.*"'
-#          - php-version: '7.1'
+#          - php: '7.1'
 #            dependencies: highest
 #            experimental: false
 #            variant: 'symfony/symfony:"3.4.*"'
-#          - php-version: '7.1'
+#          - php: '7.1'
 #            dependencies: highest
 #            experimental: false
 #            variant: 'symfony/symfony:"4.0.*"'
-#          - php-version: '7.1'
+#          - php: '7.1'
 #            dependencies: highest
 #            experimental: false
 #            variant: 'symfony/symfony:"4.1.*"'
-#          - php-version: '7.1'
+#          - php: '7.1'
 #            dependencies: highest
 #            experimental: false
 #            variant: 'symfony/symfony:"4.2.*"'
-#          - php-version: '7.1'
+#          - php: '7.1'
 #            dependencies: highest
 #            experimental: false
 #            variant: 'symfony/symfony:"4.3.*"'
-#          - php-version: '7.1'
+#          - php: '7.1'
 #            dependencies: highest
 #            experimental: false
 #            variant: 'symfony/symfony:"4.4.*"'
-#          - php-version: '7.2'
+#          - php: '7.2'
 #            dependencies: highest
 #            experimental: false
 #            variant: 'symfony/symfony:"5.0.*"'
-#          - php-version: '7.2'
+#          - php: '7.2'
 #            dependencies: highest
 #            experimental: false
 #            variant: 'symfony/symfony:"5.1.*"'
-#          - php-version: '7.2'
+#          - php: '7.2'
 #            dependencies: highest
 #            experimental: false
 #            variant: 'symfony/symfony:"5.2.*"'
-#          - php-version: '8.0'
+#          - php: '8.0'
 #            dependencies: lowest
 #            variant: normal
 #            experimental: true
-          - php-version: '8.0'
+          - php: '8.0'
             dependencies: highest
             variant: normal
             experimental: true
@@ -91,12 +91,12 @@ jobs:
 
       - name: Configure coverage driver
         id: coverage
-        run: echo ::set-output name=driver::$([ "${{ matrix.php-version }}" = "7.1" ] && echo "xdebug" || echo "pcov")
+        run: echo ::set-output name=driver::$([ "${{ matrix.php }}" = "7.1" ] && echo "xdebug" || echo "pcov")
 
       - name: Install PHP with extensions
         uses: shivammathur/setup-php@v2
         with:
-          php-version: ${{ matrix.php-version }}
+          php-version: ${{ matrix.php }}
           coverage: ${{ steps.coverage.outputs.driver }}
           tools: composer:v2
 
@@ -114,7 +114,7 @@ jobs:
         run: vendor/bin/phpunit --coverage-clover build/coverage-clover.xml
 
       - name: Send coverage results to Scrutinizer CI
-        if: matrix.php-version < '8.0'
+        if: matrix.php != '8.0'
         run: |
           wget https://scrutinizer-ci.com/ocular.phar
           php ocular.phar code-coverage:upload --format=php-clover build/coverage-clover.xml
@@ -123,7 +123,7 @@ jobs:
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COVERALLS_PARALLEL: true
-          COVERALLS_FLAG_NAME: 'PHP ${{ matrix.php-version }} + ${{ matrix.dependencies }} + ${{ matrix.variant }}'
+          COVERALLS_FLAG_NAME: 'PHP ${{ matrix.php }} + ${{ matrix.dependencies }} + ${{ matrix.variant }}'
         run: |
           composer global require php-coveralls/php-coveralls
           php-coveralls -x build/coverage-clover.xml -o build/coveralls-upload.json -v

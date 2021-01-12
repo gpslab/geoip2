@@ -6,52 +6,52 @@ on:
 
 jobs:
   phpstan:
-    name: 'PHPStan PHP ${{ matrix.php-version }} + ${{ matrix.variant }}'
+    name: 'PHPStan PHP ${{ matrix.php }} + ${{ matrix.variant }}'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         include:
-          - php-version: '7.1'
+          - php: '7.1'
             variant: 'symfony/symfony:"2.8.*"'
             config: symfony_2.neon
-          - php-version: '7.1'
+          - php: '7.1'
             variant: 'symfony/symfony:"3.0.*"'
             config: symfony_3.neon
-          - php-version: '7.1'
+          - php: '7.1'
             variant: 'symfony/symfony:"3.1.*"'
             config: symfony_3.neon
-          - php-version: '7.1'
+          - php: '7.1'
             variant: 'symfony/symfony:"3.2.*"'
             config: symfony_3.neon
-          - php-version: '7.1'
+          - php: '7.1'
             variant: 'symfony/symfony:"3.3.*"'
             config: symfony_3.neon
-          - php-version: '7.1'
+          - php: '7.1'
             variant: 'symfony/symfony:"3.4.*"'
             config: symfony_3.neon
-          - php-version: '7.1'
+          - php: '7.1'
             variant: 'symfony/symfony:"4.0.*"'
             config: symfony_4.1.neon
-          - php-version: '7.1'
+          - php: '7.1'
             variant: 'symfony/symfony:"4.1.*"'
             config: symfony_4.1.neon
-          - php-version: '7.1'
+          - php: '7.1'
             variant: 'symfony/symfony:"4.2.*"'
             config: symfony_4.neon
-          - php-version: '7.1'
+          - php: '7.1'
             variant: 'symfony/symfony:"4.3.*"'
             config: symfony_4.neon
-          - php-version: '7.1'
+          - php: '7.1'
             variant: 'symfony/symfony:"4.4.*"'
             config: symfony_4.neon
-          - php-version: '7.2'
+          - php: '7.2'
             variant: 'symfony/symfony:"5.0.*"'
             config: symfony_5.neon
-          - php-version: '7.2'
+          - php: '7.2'
             variant: 'symfony/symfony:"5.1.*"'
             config: symfony_5.neon
-          - php-version: '7.2'
+          - php: '7.2'
             variant: 'symfony/symfony:"5.2.*"'
             config: symfony_5.neon
     steps:
@@ -61,7 +61,7 @@ jobs:
       - name: Install PHP with extensions
         uses: shivammathur/setup-php@v2
         with:
-          php-version: ${{ matrix.php-version }}
+          php-version: ${{ matrix.php }}
           coverage: none
           tools: composer:v2
 
