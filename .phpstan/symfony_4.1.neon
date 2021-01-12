@@ -1,4 +1,0 @@
-# config for Symfone 4.0 - 4.1
-
-includes:
-    - symfony_2.neon
