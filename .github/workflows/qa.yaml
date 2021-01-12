@@ -14,46 +14,46 @@ jobs:
         include:
           - php: '7.1'
             variant: 'symfony/symfony:"2.8.*"'
-            config: symfony_2.neon
+            phpstan: .phpstan/symfony_2.neon
           - php: '7.1'
             variant: 'symfony/symfony:"3.0.*"'
-            config: symfony_3.neon
+            phpstan: .phpstan/symfony_3.neon
           - php: '7.1'
             variant: 'symfony/symfony:"3.1.*"'
-            config: symfony_3.neon
+            phpstan: .phpstan/symfony_3.neon
           - php: '7.1'
             variant: 'symfony/symfony:"3.2.*"'
-            config: symfony_3.neon
+            phpstan: .phpstan/symfony_3.neon
           - php: '7.1'
             variant: 'symfony/symfony:"3.3.*"'
-            config: symfony_3.neon
+            phpstan: .phpstan/symfony_3.neon
           - php: '7.1'
             variant: 'symfony/symfony:"3.4.*"'
-            config: symfony_3.neon
+            phpstan: .phpstan/symfony_3.neon
           - php: '7.1'
             variant: 'symfony/symfony:"4.0.*"'
-            config: symfony_4.1.neon
+            phpstan: .phpstan/symfony_4.1.neon
           - php: '7.1'
             variant: 'symfony/symfony:"4.1.*"'
-            config: symfony_4.1.neon
+            phpstan: .phpstan/symfony_4.1.neon
           - php: '7.1'
             variant: 'symfony/symfony:"4.2.*"'
-            config: symfony_4.neon
+            phpstan: .phpstan/symfony_4.neon
           - php: '7.1'
             variant: 'symfony/symfony:"4.3.*"'
-            config: symfony_4.neon
+            phpstan: .phpstan/symfony_4.neon
           - php: '7.1'
             variant: 'symfony/symfony:"4.4.*"'
-            config: symfony_4.neon
+            phpstan: .phpstan/symfony_4.neon
           - php: '7.2'
             variant: 'symfony/symfony:"5.0.*"'
-            config: symfony_5.neon
+            phpstan: .phpstan/symfony_5.neon
           - php: '7.2'
             variant: 'symfony/symfony:"5.1.*"'
-            config: symfony_5.neon
+            phpstan: .phpstan/symfony_5.neon
           - php: '7.2'
             variant: 'symfony/symfony:"5.2.*"'
-            config: symfony_5.neon
+            phpstan: .phpstan/symfony_5.neon
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -84,7 +84,7 @@ jobs:
           dependency-versions: '${{ matrix.dependencies }}'
 
       - name: Run PHPStan
-        run: phpstan --memory-limit=1G analyse -c ${{ matrix.config }}
+        run: phpstan --memory-limit=1G analyse -c ${{ matrix.phpstan }}
 
   php-cs-fixer:
     name: PHP CS Fixer
