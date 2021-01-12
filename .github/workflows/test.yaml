@@ -15,72 +15,72 @@ jobs:
         dependencies: [highest]
         php-version:
           - '7.1'
-          - '7.2'
-          - '7.3'
-          - '7.4'
+#          - '7.2'
+#          - '7.3'
+#          - '7.4'
         experimental: [false]
         variant: [normal]
         include:
-          - php-version: '7.1'
-            dependencies: highest
-            experimental: false
-            variant: 'symfony/symfony:"2.8.*"'
-          - php-version: '7.1'
-            dependencies: highest
-            experimental: false
-            variant: 'symfony/symfony:"3.0.*"'
-          - php-version: '7.1'
-            dependencies: highest
-            experimental: false
-            variant: 'symfony/symfony:"3.1.*"'
-          - php-version: '7.1'
-            dependencies: highest
-            experimental: false
-            variant: 'symfony/symfony:"3.2.*"'
-          - php-version: '7.1'
-            dependencies: highest
-            experimental: false
-            variant: 'symfony/symfony:"3.3.*"'
-          - php-version: '7.1'
-            dependencies: highest
-            experimental: false
-            variant: 'symfony/symfony:"3.4.*"'
-          - php-version: '7.1'
-            dependencies: highest
-            experimental: false
-            variant: 'symfony/symfony:"4.0.*"'
-          - php-version: '7.1'
-            dependencies: highest
-            experimental: false
-            variant: 'symfony/symfony:"4.1.*"'
-          - php-version: '7.1'
-            dependencies: highest
-            experimental: false
-            variant: 'symfony/symfony:"4.2.*"'
-          - php-version: '7.1'
-            dependencies: highest
-            experimental: false
-            variant: 'symfony/symfony:"4.3.*"'
-          - php-version: '7.1'
-            dependencies: highest
-            experimental: false
-            variant: 'symfony/symfony:"4.4.*"'
-          - php-version: '7.2'
-            dependencies: highest
-            experimental: false
-            variant: 'symfony/symfony:"5.0.*"'
-          - php-version: '7.2'
-            dependencies: highest
-            experimental: false
-            variant: 'symfony/symfony:"5.1.*"'
-          - php-version: '7.2'
-            dependencies: highest
-            experimental: false
-            variant: 'symfony/symfony:"5.2.*"'
-          - php-version: '8.0'
-            dependencies: lowest
-            variant: normal
-            experimental: true
+#          - php-version: '7.1'
+#            dependencies: highest
+#            experimental: false
+#            variant: 'symfony/symfony:"2.8.*"'
+#          - php-version: '7.1'
+#            dependencies: highest
+#            experimental: false
+#            variant: 'symfony/symfony:"3.0.*"'
+#          - php-version: '7.1'
+#            dependencies: highest
+#            experimental: false
+#            variant: 'symfony/symfony:"3.1.*"'
+#          - php-version: '7.1'
+#            dependencies: highest
+#            experimental: false
+#            variant: 'symfony/symfony:"3.2.*"'
+#          - php-version: '7.1'
+#            dependencies: highest
+#            experimental: false
+#            variant: 'symfony/symfony:"3.3.*"'
+#          - php-version: '7.1'
+#            dependencies: highest
+#            experimental: false
+#            variant: 'symfony/symfony:"3.4.*"'
+#          - php-version: '7.1'
+#            dependencies: highest
+#            experimental: false
+#            variant: 'symfony/symfony:"4.0.*"'
+#          - php-version: '7.1'
+#            dependencies: highest
+#            experimental: false
+#            variant: 'symfony/symfony:"4.1.*"'
+#          - php-version: '7.1'
+#            dependencies: highest
+#            experimental: false
+#            variant: 'symfony/symfony:"4.2.*"'
+#          - php-version: '7.1'
+#            dependencies: highest
+#            experimental: false
+#            variant: 'symfony/symfony:"4.3.*"'
+#          - php-version: '7.1'
+#            dependencies: highest
+#            experimental: false
+#            variant: 'symfony/symfony:"4.4.*"'
+#          - php-version: '7.2'
+#            dependencies: highest
+#            experimental: false
+#            variant: 'symfony/symfony:"5.0.*"'
+#          - php-version: '7.2'
+#            dependencies: highest
+#            experimental: false
+#            variant: 'symfony/symfony:"5.1.*"'
+#          - php-version: '7.2'
+#            dependencies: highest
+#            experimental: false
+#            variant: 'symfony/symfony:"5.2.*"'
+#          - php-version: '8.0'
+#            dependencies: lowest
+#            variant: normal
+#            experimental: true
           - php-version: '8.0'
             dependencies: highest
             variant: normal
@@ -89,10 +89,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Configure coverage driver
+        id: coverage
+        run: echo ::set-output name=driver::$([ "${{ matrix.php-version }}" = "7.1" ] && echo "xdebug" || echo "pcov")
+
       - name: Install PHP with extensions
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-version }}
+          coverage: ${{ steps.coverage.outputs.driver }}
           tools: composer:v2
 
       - name: Install variant
