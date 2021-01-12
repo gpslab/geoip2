@@ -2,7 +2,3 @@
 
 includes:
     - default.neon
-
-parameters:
-    ignoreErrors:
-        - '#Class Symfony\\Component\\Config\\Definition\\Builder\\TreeBuilder does not have a constructor and must be instantiated without any parameters\.#'
