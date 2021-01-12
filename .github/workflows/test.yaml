@@ -12,12 +12,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        dependencies: [highest]
+        dependencies:
+#          - lowest
+          - highest
         php:
           - '7.1'
 #          - '7.2'
 #          - '7.3'
 #          - '7.4'
+          - '8.0'
         experimental: [false]
         variant: [normal]
         include:
@@ -81,10 +84,10 @@ jobs:
 #            dependencies: lowest
 #            variant: normal
 #            experimental: true
-          - php: '8.0'
-            dependencies: highest
-            variant: normal
-            experimental: true
+#          - php: '8.0'
+#            dependencies: highest
+#            variant: normal
+#            experimental: true
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -123,6 +126,7 @@ jobs:
           COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COVERALLS_PARALLEL: true
           COVERALLS_FLAG_NAME: 'PHP ${{ matrix.php }} + ${{ matrix.dependencies }} + ${{ matrix.variant }}'
+        if: matrix.php != '8.0'
         run: |
           composer global require php-coveralls/php-coveralls
           php-coveralls -x build/coverage-clover.xml -o build/coveralls-upload.json -v
