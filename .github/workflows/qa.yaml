@@ -21,8 +21,8 @@ jobs:
 
       - name: Install variant
         run: |
-          composer require phpstan/phpstan:"0.11.*" --no-update
-          composer require phpstan/phpstan-phpunit:"0.11.*" --no-update
+          composer require phpstan/phpstan:"0.12.*" --no-update
+          composer require phpstan/phpstan-phpunit:"0.12.*" --no-update
 
       - name: Install Composer dependencies (highest)
         uses: 'ramsey/composer-install@v1'
