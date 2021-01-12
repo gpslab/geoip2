@@ -13,81 +13,88 @@ jobs:
       fail-fast: false
       matrix:
         dependencies:
-#          - lowest
+          - lowest
           - highest
         php:
           - '7.1'
-#          - '7.2'
-#          - '7.3'
-#          - '7.4'
+          - '7.2'
+          - '7.3'
+          - '7.4'
           - '8.0'
         experimental: [false]
         variant: [normal]
+        phpstan: [.phpstan/symfony_5.neon]
         include:
-#          - php: '7.1'
-#            dependencies: highest
-#            experimental: false
-#            variant: 'symfony/symfony:"2.8.*"'
-#          - php: '7.1'
-#            dependencies: highest
-#            experimental: false
-#            variant: 'symfony/symfony:"3.0.*"'
-#          - php: '7.1'
-#            dependencies: highest
-#            experimental: false
-#            variant: 'symfony/symfony:"3.1.*"'
-#          - php: '7.1'
-#            dependencies: highest
-#            experimental: false
-#            variant: 'symfony/symfony:"3.2.*"'
-#          - php: '7.1'
-#            dependencies: highest
-#            experimental: false
-#            variant: 'symfony/symfony:"3.3.*"'
-#          - php: '7.1'
-#            dependencies: highest
-#            experimental: false
-#            variant: 'symfony/symfony:"3.4.*"'
-#          - php: '7.1'
-#            dependencies: highest
-#            experimental: false
-#            variant: 'symfony/symfony:"4.0.*"'
-#          - php: '7.1'
-#            dependencies: highest
-#            experimental: false
-#            variant: 'symfony/symfony:"4.1.*"'
-#          - php: '7.1'
-#            dependencies: highest
-#            experimental: false
-#            variant: 'symfony/symfony:"4.2.*"'
-#          - php: '7.1'
-#            dependencies: highest
-#            experimental: false
-#            variant: 'symfony/symfony:"4.3.*"'
-#          - php: '7.1'
-#            dependencies: highest
-#            experimental: false
-#            variant: 'symfony/symfony:"4.4.*"'
-#          - php: '7.2'
-#            dependencies: highest
-#            experimental: false
-#            variant: 'symfony/symfony:"5.0.*"'
-#          - php: '7.2'
-#            dependencies: highest
-#            experimental: false
-#            variant: 'symfony/symfony:"5.1.*"'
-#          - php: '7.2'
-#            dependencies: highest
-#            experimental: false
-#            variant: 'symfony/symfony:"5.2.*"'
-#          - php: '8.0'
-#            dependencies: lowest
-#            variant: normal
-#            experimental: true
-#          - php: '8.0'
-#            dependencies: highest
-#            variant: normal
-#            experimental: true
+          - php: '7.1'
+            dependencies: highest
+            experimental: false
+            variant: 'symfony/symfony:"2.8.*"'
+            phpstan: .phpstan/symfony_2.neon
+          - php: '7.1'
+            dependencies: highest
+            experimental: false
+            variant: 'symfony/symfony:"3.0.*"'
+            phpstan: .phpstan/symfony_3.neon
+          - php: '7.1'
+            dependencies: highest
+            experimental: false
+            variant: 'symfony/symfony:"3.1.*"'
+            phpstan: .phpstan/symfony_3.neon
+          - php: '7.1'
+            dependencies: highest
+            experimental: false
+            variant: 'symfony/symfony:"3.2.*"'
+            phpstan: .phpstan/symfony_3.neon
+          - php: '7.1'
+            dependencies: highest
+            experimental: false
+            variant: 'symfony/symfony:"3.3.*"'
+            phpstan: .phpstan/symfony_3.neon
+          - php: '7.1'
+            dependencies: highest
+            experimental: false
+            variant: 'symfony/symfony:"3.4.*"'
+            phpstan: .phpstan/symfony_3.neon
+          - php: '7.1'
+            dependencies: highest
+            experimental: false
+            variant: 'symfony/symfony:"4.0.*"'
+            phpstan: .phpstan/symfony_4.1.neon
+          - php: '7.1'
+            dependencies: highest
+            experimental: false
+            variant: 'symfony/symfony:"4.1.*"'
+            phpstan: .phpstan/symfony_4.1.neon
+          - php: '7.1'
+            dependencies: highest
+            experimental: false
+            variant: 'symfony/symfony:"4.2.*"'
+            phpstan: .phpstan/symfony_4.neon
+          - php: '7.1'
+            dependencies: highest
+            experimental: false
+            variant: 'symfony/symfony:"4.3.*"'
+            phpstan: .phpstan/symfony_4.neon
+          - php: '7.1'
+            dependencies: highest
+            experimental: false
+            variant: 'symfony/symfony:"4.4.*"'
+            phpstan: .phpstan/symfony_4.neon
+          - php: '7.2'
+            dependencies: highest
+            experimental: false
+            variant: 'symfony/symfony:"5.0.*"'
+            phpstan: .phpstan/symfony_5.neon
+          - php: '7.2'
+            dependencies: highest
+            experimental: false
+            variant: 'symfony/symfony:"5.1.*"'
+            phpstan: .phpstan/symfony_5.neon
+          - php: '7.2'
+            dependencies: highest
+            experimental: false
+            variant: 'symfony/symfony:"5.2.*"'
+            phpstan: .phpstan/symfony_5.neon
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -130,3 +137,11 @@ jobs:
         run: |
           composer global require php-coveralls/php-coveralls
           php-coveralls -x build/coverage-clover.xml -o build/coveralls-upload.json -v
+
+      - name: Install PHPStan
+        run: |
+          composer global require phpstan/phpstan:"0.12.*"
+          composer global require phpstan/phpstan-phpunit:"0.12.*"
+
+      - name: Run PHPStan
+        run: phpstan --memory-limit=1G analyse -c ${{ matrix.phpstan }}
