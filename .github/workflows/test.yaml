@@ -23,59 +23,59 @@ jobs:
         include:
           - php-version: '7.1'
             dependencies: highest
-            allowed-to-fail: false
+            experimental: false
             variant: 'symfony/symfony:"2.8.*"'
           - php-version: '7.1'
             dependencies: highest
-            allowed-to-fail: false
+            experimental: false
             variant: 'symfony/symfony:"3.0.*"'
           - php-version: '7.1'
             dependencies: highest
-            allowed-to-fail: false
+            experimental: false
             variant: 'symfony/symfony:"3.1.*"'
           - php-version: '7.1'
             dependencies: highest
-            allowed-to-fail: false
+            experimental: false
             variant: 'symfony/symfony:"3.2.*"'
           - php-version: '7.1'
             dependencies: highest
-            allowed-to-fail: false
+            experimental: false
             variant: 'symfony/symfony:"3.3.*"'
           - php-version: '7.1'
             dependencies: highest
-            allowed-to-fail: false
+            experimental: false
             variant: 'symfony/symfony:"3.4.*"'
           - php-version: '7.1'
             dependencies: highest
-            allowed-to-fail: false
+            experimental: false
             variant: 'symfony/symfony:"4.0.*"'
           - php-version: '7.1'
             dependencies: highest
-            allowed-to-fail: false
+            experimental: false
             variant: 'symfony/symfony:"4.1.*"'
           - php-version: '7.1'
             dependencies: highest
-            allowed-to-fail: false
+            experimental: false
             variant: 'symfony/symfony:"4.2.*"'
           - php-version: '7.1'
             dependencies: highest
-            allowed-to-fail: false
+            experimental: false
             variant: 'symfony/symfony:"4.3.*"'
           - php-version: '7.1'
             dependencies: highest
-            allowed-to-fail: false
+            experimental: false
             variant: 'symfony/symfony:"4.4.*"'
           - php-version: '7.2'
             dependencies: highest
-            allowed-to-fail: false
+            experimental: false
             variant: 'symfony/symfony:"5.0.*"'
           - php-version: '7.2'
             dependencies: highest
-            allowed-to-fail: false
+            experimental: false
             variant: 'symfony/symfony:"5.1.*"'
           - php-version: '7.2'
             dependencies: highest
-            allowed-to-fail: false
+            experimental: false
             variant: 'symfony/symfony:"5.2.*"'
           - php-version: '8.0'
             dependencies: lowest
