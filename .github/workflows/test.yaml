@@ -12,9 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        dependencies:
-          - lowest
-          - highest
+        dependencies: [highest]
         php:
           - '7.1'
           - '7.2'
