@@ -110,8 +110,8 @@ jobs:
 
       - name: Send coverage results to Scrutinizer CI
         run: |
-          wget https://scrutinizer-ci.com/ocular.phar
-          php ocular.phar code-coverage:upload --format=php-clover build/coverage-clover.xml
+          composer global require scrutinizer/ocular
+          ocular code-coverage:upload --format=php-clover build/coverage-clover.xml
 
       - name: Send coverage results to Coveralls
         env:
