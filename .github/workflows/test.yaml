@@ -21,16 +21,16 @@ jobs:
             phpstan: .phpstan/default.neon
           - php: '7.1'
             symfony: '3.1.*'
-            phpstan: .phpstan/symfony_3.neon
+            phpstan: .phpstan/default.neon
           - php: '7.1'
             symfony: '3.2.*'
-            phpstan: .phpstan/symfony_3.neon
+            phpstan: .phpstan/default.neon
           - php: '7.1'
             symfony: '3.3.*'
-            phpstan: .phpstan/symfony_3.neon
+            phpstan: .phpstan/default.neon
           - php: '7.1'
             symfony: '3.4.*'
-            phpstan: .phpstan/symfony_3.neon
+            phpstan: .phpstan/default.neon
           - php: '7.1'
             symfony: '4.0.*'
             phpstan: .phpstan/default.neon
