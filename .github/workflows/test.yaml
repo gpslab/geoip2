@@ -114,7 +114,7 @@ jobs:
         run: vendor/bin/phpunit --coverage-clover build/coverage-clover.xml
 
       - name: Send coverage results to Scrutinizer CI
-        if: matrix.php < '8.0'
+        if: matrix.php-version < '8.0'
         run: |
           wget https://scrutinizer-ci.com/ocular.phar
           php ocular.phar code-coverage:upload --format=php-clover build/coverage-clover.xml
