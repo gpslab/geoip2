@@ -80,6 +80,7 @@ class MaxMindDownloader implements Downloader
 
         // extract tar archive
         $tar->extractTo($tmp_untar);
+        unset($zip, $tar);
 
         $this->logger->debug('Tar archive extracted');
 
