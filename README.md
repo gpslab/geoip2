@@ -61,6 +61,8 @@ URL in the configuration.
 
 ```yml
 gpslab_geoip:
+    license: 'XXXXXXXXXXXXXXXX'
+    edition: 'GeoLite2-City'
     url: 'https://example.com/GeoLite2-City.tar.gz'
 ```
 
@@ -73,6 +75,8 @@ environment may not be optimal. You can choose a common directory for all enviro
 
 ```yml
 gpslab_geoip:
+    license: 'XXXXXXXXXXXXXXXX'
+    edition: 'GeoLite2-City'
     path: '%kernel.project_dir%/var/GeoLite2-City.mmdb'
 ```
 
@@ -83,6 +87,8 @@ locales for fallback.
 
 ```yml
 gpslab_geoip:
+    license: 'XXXXXXXXXXXXXXXX'
+    edition: 'GeoLite2-City'
     locales: [ 'ru', 'en' ]
 ```
 
@@ -192,6 +198,8 @@ gpslab_geoip:
             locales: [ 'fr' ] # customize locales
         city:
             edition: 'GeoLite2-City'
+            url: 'https://example.com/GeoLite2-City.tar.gz' # customize url
+            path: '%kernel.project_dir%/var/GeoLite2-City.mmdb' # customize path
         country:
             edition: 'GeoLite2-Country'
             license: 'YYYYYYYYYYYYYYYY' # customize license

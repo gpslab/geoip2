@@ -324,6 +324,8 @@ class ConfigurationTest extends TestCase
                             'license' => 'LICENSE_2',
                             'edition' => 'GeoLite2-City',
                             'locales' => ['ru'],
+                            'url' => 'https://example.com/GeoLite2-City.tar.gz',
+                            'path' => '%kernel.project_dir%/var/GeoLite2-City.mmdb',
                         ],
                         'baz' => [
                             'license' => 'LICENSE_3',
@@ -346,8 +348,8 @@ class ConfigurationTest extends TestCase
                         'license' => 'LICENSE_2',
                         'edition' => 'GeoLite2-City',
                         'locales' => ['ru'],
-                        'url' => sprintf(self::URL, 'GeoLite2-City', 'LICENSE_2'),
-                        'path' => sprintf(self::PATH, $real_cache_dir, 'GeoLite2-City'),
+                        'url' => 'https://example.com/GeoLite2-City.tar.gz',
+                        'path' => '%kernel.project_dir%/var/GeoLite2-City.mmdb',
                     ],
                     'baz' => [
                         'license' => 'LICENSE_3',
