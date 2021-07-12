@@ -218,11 +218,13 @@ class GeoIPController
 {
     public function index(Request $request, ReaderFactory $factory): Response
     {
-        $locale = $request->getLocale();
-        $ip = $request->getClientIp();
+        $client_locale = $request->getLocale();
+        $client_ip = $request->getClientIp();
+        $database_name = 'default';
+        $fallback_locale = 'en';
     
-        $reader = $factory->create('default', [$locale, 'en' /* fallback */]);
-        $record = $reader->city($ip);
+        $reader = $factory->create($database_name, [$client_locale, $fallback_locale]);
+        $record = $reader->city($client_ip);
     
         return new Response(sprintf('You are from %s?', $record->country->name));
     }
