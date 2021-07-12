@@ -52,12 +52,14 @@ EOT;
 
         if (count($this->databases) >= 2) {
             $databases_help = '';
-            foreach (array_keys($this->databases) as $i => $name) {
+
+            foreach (array_keys($this->databases) as $name) {
                 $databases_help .= sprintf(' * <info>%s</info>'.PHP_EOL, $name);
             }
+
             [$first, $second, ] = array_keys($this->databases);
 
-            $help .= <<<'EOT'
+            $help .= <<<EOT
 
 Update the <info>$first</info> and <info>$second</info> database:
 
