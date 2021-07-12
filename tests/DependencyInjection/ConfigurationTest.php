@@ -274,6 +274,46 @@ class ConfigurationTest extends TestCase
 
             yield [$cache_dir, [
                 'gpslab_geoip' => [
+                    'license' => 'LICENSE',
+                    'edition' => 'GeoLite2-City',
+                    'url' => 'https://example.com/GeoLite2-City.tar.gz',
+                ],
+            ], [
+                'default_database' => 'default',
+                'databases' => [
+                    'default' => [
+                        'license' => 'LICENSE',
+                        'edition' => 'GeoLite2-City',
+                        'url' => 'https://example.com/GeoLite2-City.tar.gz',
+                        'path' => sprintf(self::PATH, $real_cache_dir, 'GeoLite2-City'),
+                        'locales' => ['en'],
+                    ],
+                ],
+                'locales' => ['en'],
+            ]];
+
+            yield [$cache_dir, [
+                'gpslab_geoip' => [
+                    'license' => 'LICENSE',
+                    'edition' => 'GeoLite2-City',
+                    'path' => '%kernel.project_dir%/var/GeoLite2-City.mmdb',
+                ],
+            ], [
+                'default_database' => 'default',
+                'databases' => [
+                    'default' => [
+                        'license' => 'LICENSE',
+                        'edition' => 'GeoLite2-City',
+                        'path' => '%kernel.project_dir%/var/GeoLite2-City.mmdb',
+                        'url' => sprintf(self::URL, 'GeoLite2-City', 'LICENSE'),
+                        'locales' => ['en'],
+                    ],
+                ],
+                'locales' => ['en'],
+            ]];
+
+            yield [$cache_dir, [
+                'gpslab_geoip' => [
                     'default_database' => 'foo',
                     'databases' => [
                         'foo' => [
