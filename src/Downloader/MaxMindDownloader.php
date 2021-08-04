@@ -67,7 +67,7 @@ class MaxMindDownloader implements Downloader
         $this->fs->copy($url, $tmp_zip, true);
 
         $this->logger->debug(sprintf('Download complete to %s', $tmp_zip));
-        $this->logger->debug(sprintf('Extracting archive file to %s', $tmp_zip));
+        $this->logger->debug(sprintf('Extracting archive file to %s', $tmp_untar));
 
         $this->fs->mkdir(dirname($target), 0755);
 
@@ -84,7 +84,10 @@ class MaxMindDownloader implements Downloader
         $database = '';
         $files = glob(sprintf('%s/**/*.mmdb', $tmp_untar)) ?: [];
         foreach ($files as $file) {
-            // expected something like that "GeoLite2-City_20200114"
+            // Use any .mmdb file in the archive, but stop searching if one matches the format expected below
+            $database = $file;
+
+            // expected filename like "GeoLite2-City_YYYYMMDD"
             if (preg_match('/(?<database>[^\/]+)_(?<year>\d{4})(?<month>\d{2})(?<day>\d{2})/', $file, $match)) {
                 $this->logger->debug(sprintf(
                     'Found %s database updated at %s-%s-%s in %s',
@@ -94,9 +97,8 @@ class MaxMindDownloader implements Downloader
                     $match['day'],
                     $file
                 ));
+                break;
             }
-
-            $database = $file;
         }
 
         if (!$database) {
