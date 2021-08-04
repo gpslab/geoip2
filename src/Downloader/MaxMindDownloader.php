@@ -12,6 +12,7 @@ declare(strict_types=1);
 namespace GpsLab\Bundle\GeoIP2Bundle\Downloader;
 
 use Psr\Log\LoggerInterface;
+use splitbrain\PHPArchive\Tar;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**
@@ -56,31 +57,26 @@ class MaxMindDownloader implements Downloader
     {
         $id = uniqid('', true);
         $tmp_zip = sprintf('%s/%s_GeoLite2.tar.gz', sys_get_temp_dir(), $id);
-        $tmp_unzip = sprintf('%s/%s_GeoLite2.tar', sys_get_temp_dir(), $id);
         $tmp_untar = sprintf('%s/%s_GeoLite2', sys_get_temp_dir(), $id);
 
         // remove old files and folders for correct overwrite it
-        $this->fs->remove([$tmp_zip, $tmp_unzip, $tmp_untar]);
+        $this->fs->remove([$tmp_zip, $tmp_untar]);
 
         $this->logger->debug(sprintf('Beginning download of file %s', $url));
 
         $this->fs->copy($url, $tmp_zip, true);
 
         $this->logger->debug(sprintf('Download complete to %s', $tmp_zip));
-        $this->logger->debug(sprintf('De-compressing file to %s', $tmp_unzip));
+        $this->logger->debug(sprintf('Extracting archive file to %s', $tmp_zip));
 
         $this->fs->mkdir(dirname($target), 0755);
 
-        // decompress gz file
-        $zip = new \PharData($tmp_zip);
-        $tar = $zip->decompress();
-
-        $this->logger->debug('Decompression complete');
-        $this->logger->debug(sprintf('Extract tar file to %s', $tmp_untar));
-
-        // extract tar archive
-        $tar->extractTo($tmp_untar);
-        unset($zip, $tar);
+        // extract tar.gz archive
+        $tar = new Tar();
+        $tar->open($tmp_zip);
+        $tar->extract($tmp_untar);
+        $tar->close();
+        unset($tar);
 
         $this->logger->debug('Tar archive extracted');
 
@@ -104,12 +100,12 @@ class MaxMindDownloader implements Downloader
         }
 
         if (!$database) {
-            throw new \RuntimeException('Not found GeoLite2 database in archive.');
+            throw new \RuntimeException('GeoLite2 database was not found in archive.');
         }
 
         $this->fs->copy($database, $target, true);
         $this->fs->chmod($target, 0755);
-        $this->fs->remove([$tmp_zip, $tmp_unzip, $tmp_untar]);
+        $this->fs->remove([$tmp_zip, $tmp_untar]);
 
         $this->logger->debug(sprintf('Database moved to %s', $target));
     }
