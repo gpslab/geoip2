@@ -57,26 +57,43 @@ class MaxMindDownloader implements Downloader
     {
         $id = uniqid('', true);
         $tmp_zip = sprintf('%s/%s_GeoLite2.tar.gz', sys_get_temp_dir(), $id);
+        $tmp_unzip = sprintf('%s/%s_GeoLite2.tar', sys_get_temp_dir(), $id);
         $tmp_untar = sprintf('%s/%s_GeoLite2', sys_get_temp_dir(), $id);
 
         // remove old files and folders for correct overwrite it
-        $this->fs->remove([$tmp_zip, $tmp_untar]);
+        $this->fs->remove([$tmp_zip, $tmp_unzip, $tmp_untar]);
 
         $this->logger->debug(sprintf('Beginning download of file %s', $url));
 
         $this->fs->copy($url, $tmp_zip, true);
 
         $this->logger->debug(sprintf('Download complete to %s', $tmp_zip));
-        $this->logger->debug(sprintf('Extracting archive file to %s', $tmp_untar));
 
         $this->fs->mkdir(dirname($target), 0755);
 
-        // extract tar.gz archive
-        $tar = new Tar();
-        $tar->open($tmp_zip);
-        $tar->extract($tmp_untar);
-        $tar->close();
-        unset($tar);
+        if (class_exists(Tar::class)) {
+            $this->logger->debug(sprintf('Extracting archive file to %s', $tmp_untar));
+
+            // extract tar.gz archive
+            $tar = new Tar();
+            $tar->open($tmp_zip);
+            $tar->extract($tmp_untar);
+            $tar->close();
+            unset($tar);
+        } else {
+            $this->logger->debug(sprintf('De-compressing file to %s', $tmp_unzip));
+
+            // decompress gz file
+            $zip = new \PharData($tmp_zip);
+            $tar = $zip->decompress();
+
+            $this->logger->debug('Decompression complete');
+            $this->logger->debug(sprintf('Extract tar file to %s', $tmp_untar));
+
+            // extract tar archive
+            $tar->extractTo($tmp_untar);
+            unset($zip, $tar);
+        }
 
         $this->logger->debug('Tar archive extracted');
 
@@ -84,10 +101,7 @@ class MaxMindDownloader implements Downloader
         $database = '';
         $files = glob(sprintf('%s/**/*.mmdb', $tmp_untar)) ?: [];
         foreach ($files as $file) {
-            // Use any .mmdb file in the archive, but stop searching if one matches the format expected below
-            $database = $file;
-
-            // expected filename like "GeoLite2-City_YYYYMMDD"
+            // expected something like that "GeoLite2-City_20200114"
             if (preg_match('/(?<database>[^\/]+)_(?<year>\d{4})(?<month>\d{2})(?<day>\d{2})/', $file, $match)) {
                 $this->logger->debug(sprintf(
                     'Found %s database updated at %s-%s-%s in %s',
@@ -97,17 +111,18 @@ class MaxMindDownloader implements Downloader
                     $match['day'],
                     $file
                 ));
-                break;
             }
+
+            $database = $file;
         }
 
         if (!$database) {
-            throw new \RuntimeException('GeoLite2 database was not found in archive.');
+            throw new \RuntimeException('Not found GeoLite2 database in archive.');
         }
 
         $this->fs->copy($database, $target, true);
         $this->fs->chmod($target, 0755);
-        $this->fs->remove([$tmp_zip, $tmp_untar]);
+        $this->fs->remove([$tmp_zip, $tmp_unzip, $tmp_untar]);
 
         $this->logger->debug(sprintf('Database moved to %s', $target));
     }
