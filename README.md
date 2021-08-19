@@ -261,6 +261,13 @@ You can update several databases:
 php bin/console geoip2:update city country
 ```
 
+Optionally installing splitbrain/php-archive uses significantly less memory when updating a database
+and can avoid out of memory errors:
+
+```
+composer req splitbrain/php-archive
+```
+
 ### Download GeoIP database
 
 You can download custom database with console command:

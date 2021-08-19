@@ -12,6 +12,7 @@ declare(strict_types=1);
 namespace GpsLab\Bundle\GeoIP2Bundle\Downloader;
 
 use Psr\Log\LoggerInterface;
+use splitbrain\PHPArchive\Tar;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**
@@ -67,20 +68,32 @@ class MaxMindDownloader implements Downloader
         $this->fs->copy($url, $tmp_zip, true);
 
         $this->logger->debug(sprintf('Download complete to %s', $tmp_zip));
-        $this->logger->debug(sprintf('De-compressing file to %s', $tmp_unzip));
 
         $this->fs->mkdir(dirname($target), 0755);
 
-        // decompress gz file
-        $zip = new \PharData($tmp_zip);
-        $tar = $zip->decompress();
+        if (class_exists(Tar::class)) {
+            $this->logger->debug(sprintf('Extracting archive file to %s', $tmp_untar));
 
-        $this->logger->debug('Decompression complete');
-        $this->logger->debug(sprintf('Extract tar file to %s', $tmp_untar));
+            // extract tar.gz archive
+            $tar = new Tar();
+            $tar->open($tmp_zip);
+            $tar->extract($tmp_untar);
+            $tar->close();
+            unset($tar);
+        } else {
+            $this->logger->debug(sprintf('De-compressing file to %s', $tmp_unzip));
 
-        // extract tar archive
-        $tar->extractTo($tmp_untar);
-        unset($zip, $tar);
+            // decompress gz file
+            $zip = new \PharData($tmp_zip);
+            $tar = $zip->decompress();
+
+            $this->logger->debug('Decompression complete');
+            $this->logger->debug(sprintf('Extract tar file to %s', $tmp_untar));
+
+            // extract tar archive
+            $tar->extractTo($tmp_untar);
+            unset($zip, $tar);
+        }
 
         $this->logger->debug('Tar archive extracted');
 
