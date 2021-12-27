@@ -58,6 +58,9 @@ jobs:
           - php: '8.0'
             symfony: '5.2.*'
             phpstan: .phpstan/symfony_5.neon
+          - php: '8.0'
+            symfony: '6.0.*'
+            phpstan: .phpstan/symfony_6.neon
     steps:
       - name: Checkout
         uses: actions/checkout@v2
