@@ -1,4 +1,4 @@
-# config for Symfone 5.0 - 5.2
+# config for Symfony 5.0 - 5.2
 
 includes:
     - default.neon

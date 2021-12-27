@@ -1,0 +1,4 @@
+# config for Symfony 6.0
+
+includes:
+    - symfony_5.neon
