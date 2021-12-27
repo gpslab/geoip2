@@ -1,9 +1,4 @@
 # config for Symfony 6.0
 
 includes:
-    - default.neon
-
-parameters:
-    ignoreErrors:
-        - '#Call to an undefined method Symfony\\Component\\Config\\Definition\\Builder\\TreeBuilder::root\(\)\.#'
-        - '#Class Symfony\\Component\\Config\\Definition\\Builder\\TreeBuilder constructor invoked with 0 parameters, 1\-3 required\.#'
+    - symfony_5.neon
