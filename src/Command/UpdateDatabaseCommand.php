@@ -57,7 +57,7 @@ EOT;
                 $databases_help .= sprintf(' * <info>%s</info>'.PHP_EOL, $name);
             }
 
-            [$first, $second, ] = array_keys($this->databases);
+            [$first, $second] = array_keys($this->databases);
 
             $help .= <<<EOT
 
@@ -105,10 +105,10 @@ EOT;
                 throw new \InvalidArgumentException(sprintf('Undefined "%s" database.', $database));
             }
 
-            if (!array_key_exists('url', $this->databases[$database]) ||
-                !array_key_exists('path', $this->databases[$database]) ||
-                !is_string($this->databases[$database]['url']) ||
-                !is_string($this->databases[$database]['path'])
+            if (!array_key_exists('url', $this->databases[$database])
+                || !array_key_exists('path', $this->databases[$database])
+                || !is_string($this->databases[$database]['url'])
+                || !is_string($this->databases[$database]['path'])
             ) {
                 throw new \InvalidArgumentException(sprintf('Invalid "%s" database config.', $database));
             }
