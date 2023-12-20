@@ -192,10 +192,10 @@ class Configuration implements ConfigurationInterface
             ->beforeNormalization()
             ->ifTrue(static function ($v): bool {
                 return
-                    is_array($v) &&
-                    !array_key_exists('default_database', $v) &&
-                    !empty($v['databases']) &&
-                    is_array($v['databases']);
+                    is_array($v)
+                    && !array_key_exists('default_database', $v)
+                    && !empty($v['databases'])
+                    && is_array($v['databases']);
             })
             ->then(static function (array $v): array {
                 $keys = array_keys($v['databases']);
@@ -268,10 +268,10 @@ class Configuration implements ConfigurationInterface
             ->validate()
             ->ifTrue(static function ($v): bool {
                 return
-                    is_array($v) &&
-                    array_key_exists('default_database', $v) &&
-                    !empty($v['databases']) &&
-                    !array_key_exists($v['default_database'], $v['databases']);
+                    is_array($v)
+                    && array_key_exists('default_database', $v)
+                    && !empty($v['databases'])
+                    && !array_key_exists($v['default_database'], $v['databases']);
             })
             ->then(static function (array $v): array {
                 $databases = implode('", "', array_keys($v['databases']));
@@ -292,10 +292,10 @@ class Configuration implements ConfigurationInterface
             ->beforeNormalization()
             ->ifTrue(static function ($v): bool {
                 return
-                    is_array($v) &&
-                    array_key_exists('license', $v) &&
-                    array_key_exists('databases', $v) &&
-                    is_array($v['databases']);
+                    is_array($v)
+                    && array_key_exists('license', $v)
+                    && array_key_exists('databases', $v)
+                    && is_array($v['databases']);
             })
             ->then(static function (array $v): array {
                 foreach ($v['databases'] as $name => $database) {
@@ -320,10 +320,10 @@ class Configuration implements ConfigurationInterface
             ->beforeNormalization()
             ->ifTrue(static function ($v): bool {
                 return
-                    is_array($v) &&
-                    array_key_exists('locales', $v) &&
-                    array_key_exists('databases', $v) &&
-                    is_array($v['databases']);
+                    is_array($v)
+                    && array_key_exists('locales', $v)
+                    && array_key_exists('databases', $v)
+                    && is_array($v['databases']);
             })
             ->then(static function (array $v): array {
                 foreach ($v['databases'] as $name => $database) {
@@ -386,10 +386,10 @@ class Configuration implements ConfigurationInterface
             ->beforeNormalization()
             ->ifTrue(static function ($v): bool {
                 return
-                    is_array($v) &&
-                    !array_key_exists('url', $v) &&
-                    array_key_exists('license', $v) &&
-                    array_key_exists('edition', $v);
+                    is_array($v)
+                    && !array_key_exists('url', $v)
+                    && array_key_exists('license', $v)
+                    && array_key_exists('edition', $v);
             })
             ->then(static function (array $v): array {
                 $v['url'] = sprintf(self::URL, urlencode($v['edition']), urlencode($v['license']));
