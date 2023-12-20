@@ -19,7 +19,7 @@ jobs:
         with:
           php-version: 7.4
           coverage: none
-          tools: composer:v2, cs2pr
+          tools: composer:v2, cs2pr, php-cs-fixer
 
       - name: Install Composer dependencies (highest)
         uses: 'ramsey/composer-install@v1'
@@ -27,4 +27,4 @@ jobs:
           dependency-versions: 'highest'
 
       - name: Run PHP-CS-Fixer
-        run: ./vender/bin/php-cs-fixer fix --dry-run --format checkstyle | cs2pr
+        run: php-cs-fixer fix --dry-run --format checkstyle | cs2pr
