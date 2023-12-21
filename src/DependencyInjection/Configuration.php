@@ -125,7 +125,7 @@ class Configuration implements ConfigurationInterface
     {
         // Symfony 4.2 +
         if (method_exists(TreeBuilder::class, '__construct')) {
-            return new TreeBuilder($name); /** @phpstan-ignore-line */
+            return new TreeBuilder($name);
         }
 
         // Symfony 4.1 and below

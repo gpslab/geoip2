@@ -15,28 +15,28 @@ jobs:
         include:
           - php: '7.2'
             symfony: '2.8.*'
-            phpstan: .phpstan/default.neon
+            phpstan: .phpstan/symfony_4.neon
           - php: '7.2'
             symfony: '3.0.*'
-            phpstan: .phpstan/default.neon
+            phpstan: .phpstan/symfony_4.neon
           - php: '7.2'
             symfony: '3.1.*'
-            phpstan: .phpstan/default.neon
+            phpstan: .phpstan/symfony_4.neon
           - php: '7.2'
             symfony: '3.2.*'
-            phpstan: .phpstan/default.neon
+            phpstan: .phpstan/symfony_4.neon
           - php: '7.2'
             symfony: '3.3.*'
-            phpstan: .phpstan/default.neon
+            phpstan: .phpstan/symfony_4.neon
           - php: '7.2'
             symfony: '3.4.*'
-            phpstan: .phpstan/default.neon
+            phpstan: .phpstan/symfony_4.neon
           - php: '7.2'
             symfony: '4.0.*'
-            phpstan: .phpstan/default.neon
+            phpstan: .phpstan/symfony_4.neon
           - php: '7.2'
             symfony: '4.1.*'
-            phpstan: .phpstan/default.neon
+            phpstan: .phpstan/symfony_4.neon
           - php: '7.2'
             symfony: '4.2.*'
             phpstan: .phpstan/default.neon
