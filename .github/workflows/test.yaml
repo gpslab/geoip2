@@ -91,7 +91,7 @@ jobs:
         run: vendor/bin/phpunit --coverage-clover build/coverage-clover.xml
 
       - name: Send coverage results to Scrutinizer CI
-        if: matrix.php != '8.0' && matrix.php != '8.1' && matrix.php != '8.2'
+        if: false && matrix.php != '8.0' && matrix.php != '8.1' && matrix.php != '8.2'
         run: |
           wget https://scrutinizer-ci.com/ocular.phar
           php ocular.phar code-coverage:upload --format=php-clover build/coverage-clover.xml
@@ -101,7 +101,7 @@ jobs:
           COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COVERALLS_PARALLEL: true
           COVERALLS_FLAG_NAME: 'PHP ${{ matrix.php }} + ${{ matrix.symfony }}'
-        if: matrix.php != '8.0' && matrix.php != '8.1' && matrix.php != '8.2'
+        if: false && matrix.php != '8.0' && matrix.php != '8.1' && matrix.php != '8.2'
         run: |
           composer global require php-coveralls/php-coveralls
           php-coveralls -x build/coverage-clover.xml -o build/coveralls-upload.json -v
