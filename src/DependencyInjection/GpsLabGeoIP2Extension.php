@@ -30,7 +30,7 @@ class GpsLabGeoIP2Extension extends Extension
     private const SERVICE_NAME = 'geoip2.database.%s_reader';
 
     /**
-     * @param array<array<mixed>> $config
+     * @param array<array<mixed>> $configs
      * @param ContainerBuilder    $container
      *
      * @return void
