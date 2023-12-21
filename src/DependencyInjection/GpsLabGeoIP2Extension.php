@@ -30,8 +30,10 @@ class GpsLabGeoIP2Extension extends Extension
     private const SERVICE_NAME = 'geoip2.database.%s_reader';
 
     /**
-     * @param array[]          $configs
-     * @param ContainerBuilder $container
+     * @param array<array<mixed>> $config
+     * @param ContainerBuilder    $container
+     *
+     * @return void
      */
     public function load(array $configs, ContainerBuilder $container): void
     {
@@ -102,8 +104,8 @@ class GpsLabGeoIP2Extension extends Extension
     }
 
     /**
-     * @param array[]          $config
-     * @param ContainerBuilder $container
+     * @param array<array<mixed>> $config
+     * @param ContainerBuilder    $container
      *
      * @return Configuration
      */

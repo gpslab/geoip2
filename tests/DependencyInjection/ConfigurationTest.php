@@ -162,8 +162,8 @@ class ConfigurationTest extends TestCase
     /**
      * @dataProvider getBadConfigs
      *
-     * @param string|null $cache_dir
-     * @param array[]     $configs
+     * @param string|null         $cache_dir
+     * @param array<array<mixed>> $configs
      */
     public function testBadConfigs(?string $cache_dir, array $configs): void
     {
@@ -177,7 +177,7 @@ class ConfigurationTest extends TestCase
     }
 
     /**
-     * @return mixed[]
+     * @return array<array<mixed>>
      */
     public function getConfigs(): iterable
     {
@@ -430,9 +430,9 @@ class ConfigurationTest extends TestCase
     /**
      * @dataProvider getConfigs
      *
-     * @param string|null $cache_dir
-     * @param array[]     $configs
-     * @param array[]     $expected
+     * @param string|null         $cache_dir
+     * @param array<array<mixed>> $configs
+     * @param array<array<mixed>> $expected
      */
     public function testConfigs(?string $cache_dir, array $configs, array $expected): void
     {
