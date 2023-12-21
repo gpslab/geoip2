@@ -13,37 +13,37 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - php: '7.1'
+          - php: '7.2'
             symfony: '2.8.*'
             phpstan: .phpstan/default.neon
-          - php: '7.1'
+          - php: '7.2'
             symfony: '3.0.*'
             phpstan: .phpstan/default.neon
-          - php: '7.1'
+          - php: '7.2'
             symfony: '3.1.*'
             phpstan: .phpstan/default.neon
-          - php: '7.1'
+          - php: '7.2'
             symfony: '3.2.*'
             phpstan: .phpstan/default.neon
-          - php: '7.1'
+          - php: '7.2'
             symfony: '3.3.*'
             phpstan: .phpstan/default.neon
-          - php: '7.1'
+          - php: '7.2'
             symfony: '3.4.*'
             phpstan: .phpstan/default.neon
-          - php: '7.1'
+          - php: '7.2'
             symfony: '4.0.*'
             phpstan: .phpstan/default.neon
-          - php: '7.1'
+          - php: '7.2'
             symfony: '4.1.*'
             phpstan: .phpstan/default.neon
-          - php: '7.1'
+          - php: '7.2'
             symfony: '4.2.*'
             phpstan: .phpstan/default.neon
-          - php: '7.1'
+          - php: '7.2'
             symfony: '4.3.*'
             phpstan: .phpstan/default.neon
-          - php: '7.1'
+          - php: '7.2'
             symfony: '4.4.*'
             phpstan: .phpstan/default.neon
           - php: '7.2'
@@ -70,7 +70,7 @@ jobs:
 
       - name: Configure coverage driver
         id: coverage
-        run: echo ::set-output name=driver::$([ "${{ matrix.php }}" = "7.1" ] && echo "xdebug" || echo "pcov")
+        run: echo ::set-output name=driver::pcov
 
       - name: Install PHP with extensions
         uses: shivammathur/setup-php@v2
