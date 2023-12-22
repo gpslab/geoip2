@@ -18,7 +18,7 @@ use PHPUnit\Framework\TestCase;
 class ReaderFactoryTest extends TestCase
 {
     /**
-     * @return array[]
+     * @return list<list<?list<string>>>
      */
     public function getLocales(): array
     {

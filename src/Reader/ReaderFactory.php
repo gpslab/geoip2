@@ -16,18 +16,18 @@ use GeoIp2\Database\Reader;
 class ReaderFactory
 {
     /**
-     * @var array[]
+     * @var array<string, ?array{url?: string|false, path?: string|false, locales?: string[], license?: ?string, edition?: string}>
      */
     private $databases;
 
     /**
-     * @var string
+     * @var class-string<Reader>
      */
     private $reader_class;
 
     /**
-     * @param array[] $databases
-     * @param string  $reader_class
+     * @param array<string, ?array{url?: string|false, path?: string|false, locales?: string[], license?: ?string, edition?: string}> $databases
+     * @param class-string<Reader>                                                                                                    $reader_class
      */
     public function __construct(array $databases, string $reader_class = Reader::class)
     {

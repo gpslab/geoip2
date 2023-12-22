@@ -26,13 +26,13 @@ class UpdateDatabaseCommand extends Command
     private $downloader;
 
     /**
-     * @var array[]
+     * @var array<string, ?array{url?: string|false, path?: string|false, locales?: string[], license?: ?string, edition?: string}>
      */
     private $databases;
 
     /**
-     * @param Downloader $downloader
-     * @param array[]    $databases
+     * @param Downloader                                                                                                              $downloader
+     * @param array<string, ?array{url?: string|false, path?: string|false, locales?: string[], license?: ?string, edition?: string}> $databases
      */
     public function __construct(Downloader $downloader, array $databases)
     {
