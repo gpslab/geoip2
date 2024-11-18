@@ -41,7 +41,7 @@ class ReaderFactory
      *
      * @return Reader
      */
-    public function create(string $database, array $locales = null): Reader
+    public function create(string $database, ?array $locales = null): Reader
     {
         if (!array_key_exists($database, $this->databases)) {
             $databases = implode('", "', array_keys($this->databases));
