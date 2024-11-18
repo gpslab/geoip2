@@ -82,9 +82,9 @@ class MaxMindDownloaderTest extends TestCase
                 $this->assertIsString($files[0]);
                 $this->assertIsString($files[1]);
                 $this->assertIsString($files[2]);
-                $this->assertRegExp($tmp_zip_regexp, $files[0]);
-                $this->assertRegExp($tmp_unzip_regexp, $files[1]);
-                $this->assertRegExp($tmp_untar_regexp, $files[2]);
+                $this->assertMatchesRegularExpression($tmp_zip_regexp, $files[0]);
+                $this->assertMatchesRegularExpression($tmp_unzip_regexp, $files[1]);
+                $this->assertMatchesRegularExpression($tmp_untar_regexp, $files[2]);
             });
         $this->fs
             ->expects($this->at($fs_call++))
@@ -96,7 +96,7 @@ class MaxMindDownloaderTest extends TestCase
                 $this->assertSame($url, $origin_file);
                 $this->assertIsString($target_file);
                 $this->assertTrue($overwrite_newer_files);
-                $this->assertRegExp($tmp_zip_regexp, $target_file);
+                $this->assertMatchesRegularExpression($tmp_zip_regexp, $target_file);
 
                 // make test GeoLite2 db
                 file_put_contents($target_file, base64_decode(self::TAR_GZ_BAD));
@@ -137,9 +137,9 @@ class MaxMindDownloaderTest extends TestCase
                 $this->assertIsString($files[0]);
                 $this->assertIsString($files[1]);
                 $this->assertIsString($files[2]);
-                $this->assertRegExp($tmp_zip_regexp, $files[0]);
-                $this->assertRegExp($tmp_unzip_regexp, $files[1]);
-                $this->assertRegExp($tmp_untar_regexp, $files[2]);
+                $this->assertMatchesRegularExpression($tmp_zip_regexp, $files[0]);
+                $this->assertMatchesRegularExpression($tmp_unzip_regexp, $files[1]);
+                $this->assertMatchesRegularExpression($tmp_untar_regexp, $files[2]);
             });
         $this->fs
             ->expects($this->at($fs_call++))
@@ -151,7 +151,7 @@ class MaxMindDownloaderTest extends TestCase
                 $this->assertSame($url, $origin_file);
                 $this->assertIsString($target_file);
                 $this->assertTrue($overwrite_newer_files);
-                $this->assertRegExp($tmp_zip_regexp, $target_file);
+                $this->assertMatchesRegularExpression($tmp_zip_regexp, $target_file);
 
                 // make test GeoLite2 db
                 file_put_contents($target_file, base64_decode(self::TAR_GZ));
@@ -175,7 +175,7 @@ class MaxMindDownloaderTest extends TestCase
                     '#^%s/[\da-f]+\.\d+_GeoLite2/GeoLite2-City_20200114/GeoLite2.mmdb$#',
                     $path_quote
                 );
-                $this->assertRegExp($regexp, $origin_file);
+                $this->assertMatchesRegularExpression($regexp, $origin_file);
                 $this->assertFileExists($origin_file);
                 $this->assertSame('TestGeoLite2', file_get_contents($origin_file));
             });
@@ -195,9 +195,9 @@ class MaxMindDownloaderTest extends TestCase
                 $this->assertIsString($files[0]);
                 $this->assertIsString($files[1]);
                 $this->assertIsString($files[2]);
-                $this->assertRegExp($tmp_zip_regexp, $files[0]);
-                $this->assertRegExp($tmp_unzip_regexp, $files[1]);
-                $this->assertRegExp($tmp_untar_regexp, $files[2]);
+                $this->assertMatchesRegularExpression($tmp_zip_regexp, $files[0]);
+                $this->assertMatchesRegularExpression($tmp_unzip_regexp, $files[1]);
+                $this->assertMatchesRegularExpression($tmp_untar_regexp, $files[2]);
             });
 
         $this->downloader->download($url, $target);
