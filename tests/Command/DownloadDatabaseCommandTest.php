@@ -78,11 +78,14 @@ class DownloadDatabaseCommandTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('URL of downloaded GeoIP2 database should be a string, got ["https:\/\/example.com\/GeoIP2.tar.gz"] instead.');
 
+        $url = ['https://example.com/GeoIP2.tar.gz'];
+        $target = '/tmp/GeoIP2.mmdb';
+
         $this->input
-            ->expects($this->at(4))
+            ->expects($this->exactly(2))
             ->method('getArgument')
-            ->with('url')
-            ->willReturn(['https://example.com/GeoIP2.tar.gz']);
+            ->withConsecutive(['url'], ['target'])
+            ->willReturnOnConsecutiveCalls($url, $target);
 
         $this->command->run($this->input, $this->output);
     }
@@ -92,11 +95,14 @@ class DownloadDatabaseCommandTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Target download path should be a string, got null instead.');
 
+        $url = 'https://example.com/GeoIP2.tar.gz';
+        $target = null;
+
         $this->input
-            ->expects($this->at(4))
+            ->expects($this->exactly(2))
             ->method('getArgument')
-            ->with('url')
-            ->willReturn('https://example.com/GeoIP2.tar.gz');
+            ->withConsecutive(['url'], ['target'])
+            ->willReturnOnConsecutiveCalls($url, $target);
 
         $this->command->run($this->input, $this->output);
     }
@@ -106,16 +112,14 @@ class DownloadDatabaseCommandTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Target download path should be a string, got ["\/tmp\/GeoIP2.mmdb"] instead.');
 
+        $url = 'https://example.com/GeoIP2.tar.gz';
+        $target = ['/tmp/GeoIP2.mmdb'];
+
         $this->input
-            ->expects($this->at(4))
+            ->expects($this->exactly(2))
             ->method('getArgument')
-            ->with('url')
-            ->willReturn('https://example.com/GeoIP2.tar.gz');
-        $this->input
-            ->expects($this->at(5))
-            ->method('getArgument')
-            ->with('target')
-            ->willReturn(['/tmp/GeoIP2.mmdb']);
+            ->withConsecutive(['url'], ['target'])
+            ->willReturnOnConsecutiveCalls($url, $target);
 
         $this->command->run($this->input, $this->output);
     }
@@ -126,15 +130,10 @@ class DownloadDatabaseCommandTest extends TestCase
         $target = '/tmp/GeoIP2.mmdb';
 
         $this->input
-            ->expects($this->at(4))
+            ->expects($this->exactly(2))
             ->method('getArgument')
-            ->with('url')
-            ->willReturn($url);
-        $this->input
-            ->expects($this->at(5))
-            ->method('getArgument')
-            ->with('target')
-            ->willReturn($target);
+            ->withConsecutive(['url'], ['target'])
+            ->willReturnOnConsecutiveCalls($url, $target);
 
         $this->downloader
             ->expects($this->once())
