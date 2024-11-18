@@ -162,7 +162,6 @@ class MaxMindDownloaderTest extends TestCase
                     $this->assertFileExists($origin_file);
                     $this->assertSame('TestGeoLite2', file_get_contents($origin_file));
                 } else {
-
                     $this->assertSame($url, $origin_file);
                     $this->assertMatchesRegularExpression($tmp_zip_regexp, $target_file);
 
