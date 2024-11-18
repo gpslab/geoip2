@@ -190,6 +190,28 @@ class UpdateDatabaseCommandTest extends TestCase
         $command->run($this->input, $this->output);
     }
 
+    public function testDownloadWithoutLicense(): void
+    {
+        $this->input
+            ->expects($this->at(4))
+            ->method('getArgument')
+            ->with('databases')
+            ->willReturn(['default']);
+
+        $databases = ['default' => [
+            'url' => 'https://example.com/GeoIP2.tar.gz',
+            'path' => '/tmp/GeoIP2.mmdb',
+        ]];
+
+        $this->downloader
+            ->expects($this->never())
+            ->method('download')
+            ->with($databases['default']['url'], $databases['default']['path']);
+
+        $command = new UpdateDatabaseCommand($this->downloader, $databases);
+        $command->run($this->input, $this->output);
+    }
+
     public function testDownloadOneDatabases(): void
     {
         $this->input
@@ -201,6 +223,7 @@ class UpdateDatabaseCommandTest extends TestCase
         $databases = ['default' => [
             'url' => 'https://example.com/GeoIP2.tar.gz',
             'path' => '/tmp/GeoIP2.mmdb',
+            'license' => 'license',
         ]];
 
         $this->downloader
@@ -224,10 +247,12 @@ class UpdateDatabaseCommandTest extends TestCase
             'first' => [
                 'url' => 'https://example.com/GeoIP2-First.tar.gz',
                 'path' => '/tmp/GeoIP2-First.mmdb',
+                'license' => 'license',
             ],
             'second' => [
                 'url' => 'https://example.com/GeoIP2-Second.tar.gz',
                 'path' => '/tmp/GeoIP2-Second.mmdb',
+                'license' => 'license',
             ],
         ];
 
