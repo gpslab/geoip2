@@ -115,9 +115,12 @@ EOT;
 
             $io->section(sprintf('Update "%s" database', $database));
 
-            $this->downloader->download($this->databases[$database]['url'], $this->databases[$database]['path']);
-
-            $io->comment(sprintf('Database <info>%s</info> updated', $database));
+            if (empty($this->databases[$database]['license'])) {
+                $io->warning(sprintf('GeoIP Database %s has no maxmind license key', $database));
+            } else {
+                $this->downloader->download($this->databases[$database]['url'], $this->databases[$database]['path']);
+                $io->comment(sprintf('Database <info>%s</info> updated', $database));
+            }
         }
 
         $io->success('Finished updating');
