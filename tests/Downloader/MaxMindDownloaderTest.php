@@ -182,7 +182,7 @@ class MaxMindDownloaderTest extends TestCase
     }
 
     /**
-     * Hook for BC
+     * Hook for BC.
      */
     public static function assertMatchesRegularExpression(string $pattern, string $string, string $message = ''): void
     {
