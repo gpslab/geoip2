@@ -69,9 +69,8 @@ class MaxMindDownloaderTest extends TestCase
             ->expects($this->atLeastOnce())
             ->method('debug');
 
-        $fs_call = 0;
         $this->fs
-            ->expects($this->at($fs_call++))
+            ->expects($this->once())
             ->method('remove')
             ->willReturnCallback(function ($files) use ($tmp_zip_regexp, $tmp_unzip_regexp, $tmp_untar_regexp) {
                 $this->assertIsArray($files);
@@ -82,12 +81,12 @@ class MaxMindDownloaderTest extends TestCase
                 $this->assertIsString($files[0]);
                 $this->assertIsString($files[1]);
                 $this->assertIsString($files[2]);
-                $this->assertRegExp($tmp_zip_regexp, $files[0]);
-                $this->assertRegExp($tmp_unzip_regexp, $files[1]);
-                $this->assertRegExp($tmp_untar_regexp, $files[2]);
+                $this->assertMatchesRegularExpression($tmp_zip_regexp, $files[0]);
+                $this->assertMatchesRegularExpression($tmp_unzip_regexp, $files[1]);
+                $this->assertMatchesRegularExpression($tmp_untar_regexp, $files[2]);
             });
         $this->fs
-            ->expects($this->at($fs_call++))
+            ->expects($this->once())
             ->method('copy')
             ->willReturnCallback(function ($origin_file, $target_file, $overwrite_newer_files) use (
                 $url,
@@ -96,13 +95,13 @@ class MaxMindDownloaderTest extends TestCase
                 $this->assertSame($url, $origin_file);
                 $this->assertIsString($target_file);
                 $this->assertTrue($overwrite_newer_files);
-                $this->assertRegExp($tmp_zip_regexp, $target_file);
+                $this->assertMatchesRegularExpression($tmp_zip_regexp, $target_file);
 
                 // make test GeoLite2 db
                 file_put_contents($target_file, base64_decode(self::TAR_GZ_BAD));
             });
         $this->fs
-            ->expects($this->at($fs_call))
+            ->expects($this->once())
             ->method('mkdir')
             ->with(dirname($target), 0755);
 
@@ -124,9 +123,8 @@ class MaxMindDownloaderTest extends TestCase
             ->expects($this->atLeastOnce())
             ->method('debug');
 
-        $fs_call = 0;
         $this->fs
-            ->expects($this->at($fs_call++))
+            ->expects($this->exactly(2))
             ->method('remove')
             ->willReturnCallback(function ($files) use ($tmp_zip_regexp, $tmp_unzip_regexp, $tmp_untar_regexp) {
                 $this->assertIsArray($files);
@@ -137,69 +135,61 @@ class MaxMindDownloaderTest extends TestCase
                 $this->assertIsString($files[0]);
                 $this->assertIsString($files[1]);
                 $this->assertIsString($files[2]);
-                $this->assertRegExp($tmp_zip_regexp, $files[0]);
-                $this->assertRegExp($tmp_unzip_regexp, $files[1]);
-                $this->assertRegExp($tmp_untar_regexp, $files[2]);
+                $this->assertMatchesRegularExpression($tmp_zip_regexp, $files[0]);
+                $this->assertMatchesRegularExpression($tmp_unzip_regexp, $files[1]);
+                $this->assertMatchesRegularExpression($tmp_untar_regexp, $files[2]);
             });
         $this->fs
-            ->expects($this->at($fs_call++))
+            ->expects($this->exactly(2))
             ->method('copy')
             ->willReturnCallback(function ($origin_file, $target_file, $overwrite_newer_files) use (
                 $url,
-                $tmp_zip_regexp
+                $tmp_zip_regexp,
+                $target,
+                $path_quote
             ) {
-                $this->assertSame($url, $origin_file);
+                $this->assertIsString($origin_file);
                 $this->assertIsString($target_file);
                 $this->assertTrue($overwrite_newer_files);
-                $this->assertRegExp($tmp_zip_regexp, $target_file);
 
-                // make test GeoLite2 db
-                file_put_contents($target_file, base64_decode(self::TAR_GZ));
+                if ($target === $target_file) {
+                    $this->assertSame($target, $target_file);
+                    $regexp = sprintf(
+                        '#^%s/[\da-f]+\.\d+_GeoLite2/GeoLite2-City_20200114/GeoLite2.mmdb$#',
+                        $path_quote
+                    );
+                    $this->assertMatchesRegularExpression($regexp, $origin_file);
+                    $this->assertFileExists($origin_file);
+                    $this->assertSame('TestGeoLite2', file_get_contents($origin_file));
+                } else {
+                    $this->assertSame($url, $origin_file);
+                    $this->assertMatchesRegularExpression($tmp_zip_regexp, $target_file);
+
+                    // make test GeoLite2 db
+                    file_put_contents($target_file, base64_decode(self::TAR_GZ));
+                }
             });
         $this->fs
-            ->expects($this->at($fs_call++))
+            ->expects($this->once())
             ->method('mkdir')
             ->with(dirname($target), 0755);
         $this->fs
-            ->expects($this->at($fs_call++))
-            ->method('copy')
-            ->willReturnCallback(function (
-                $origin_file,
-                $target_file,
-                $overwrite_newer_files
-            ) use ($target, $path_quote) {
-                $this->assertIsString($origin_file);
-                $this->assertSame($target, $target_file);
-                $this->assertTrue($overwrite_newer_files);
-                $regexp = sprintf(
-                    '#^%s/[\da-f]+\.\d+_GeoLite2/GeoLite2-City_20200114/GeoLite2.mmdb$#',
-                    $path_quote
-                );
-                $this->assertRegExp($regexp, $origin_file);
-                $this->assertFileExists($origin_file);
-                $this->assertSame('TestGeoLite2', file_get_contents($origin_file));
-            });
-        $this->fs
-            ->expects($this->at($fs_call++))
+            ->expects($this->once())
             ->method('chmod')
             ->with($target, 0755);
-        $this->fs
-            ->expects($this->at($fs_call))
-            ->method('remove')
-            ->willReturnCallback(function ($files) use ($tmp_zip_regexp, $tmp_unzip_regexp, $tmp_untar_regexp) {
-                $this->assertIsArray($files);
-                $this->assertCount(3, $files);
-                $this->assertArrayHasKey(0, $files);
-                $this->assertArrayHasKey(1, $files);
-                $this->assertArrayHasKey(2, $files);
-                $this->assertIsString($files[0]);
-                $this->assertIsString($files[1]);
-                $this->assertIsString($files[2]);
-                $this->assertRegExp($tmp_zip_regexp, $files[0]);
-                $this->assertRegExp($tmp_unzip_regexp, $files[1]);
-                $this->assertRegExp($tmp_untar_regexp, $files[2]);
-            });
 
         $this->downloader->download($url, $target);
+    }
+
+    /**
+     * Hook for BC.
+     */
+    public static function assertMatchesRegularExpression(string $pattern, string $string, string $message = ''): void
+    {
+        if (method_exists(parent::class, 'assertMatchesRegularExpression')) {
+            parent::assertMatchesRegularExpression($pattern, $string, $message);
+        } else {
+            parent::assertRegExp($pattern, $string, $message);
+        }
     }
 }

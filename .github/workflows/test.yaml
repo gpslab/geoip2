@@ -15,54 +15,79 @@ jobs:
         include:
           - php: '7.2'
             symfony: '2.8.*'
+            geoip2: '~2.0'
             phpstan: .phpstan/symfony_4.neon
           - php: '7.2'
             symfony: '3.0.*'
+            geoip2: '~2.0'
             phpstan: .phpstan/symfony_4.neon
           - php: '7.2'
             symfony: '3.1.*'
+            geoip2: '~2.0'
             phpstan: .phpstan/symfony_4.neon
           - php: '7.2'
             symfony: '3.2.*'
+            geoip2: '~2.0'
             phpstan: .phpstan/symfony_4.neon
           - php: '7.2'
             symfony: '3.3.*'
+            geoip2: '~2.0'
             phpstan: .phpstan/symfony_4.neon
           - php: '7.2'
             symfony: '3.4.*'
+            geoip2: '~2.0'
             phpstan: .phpstan/symfony_4.neon
           - php: '7.2'
             symfony: '4.0.*'
+            geoip2: '~2.0'
             phpstan: .phpstan/symfony_4.neon
           - php: '7.2'
             symfony: '4.1.*'
+            geoip2: '~2.0'
             phpstan: .phpstan/symfony_4.neon
           - php: '7.2'
             symfony: '4.2.*'
+            geoip2: '~2.0'
             phpstan: .phpstan/default.neon
           - php: '7.2'
             symfony: '4.3.*'
+            geoip2: '~2.0'
             phpstan: .phpstan/default.neon
           - php: '7.2'
             symfony: '4.4.*'
+            geoip2: '~2.0'
             phpstan: .phpstan/default.neon
           - php: '7.2'
             symfony: '5.0.*'
+            geoip2: '~2.0'
             phpstan: .phpstan/symfony_5.neon
           - php: '7.2'
             symfony: '5.1.*'
+            geoip2: '~2.0'
             phpstan: .phpstan/symfony_5.neon
           - php: '7.2'
             symfony: '5.2.*'
+            geoip2: '~2.0'
             phpstan: .phpstan/symfony_5.neon
           - php: '8.0'
             symfony: '5.2.*'
+            geoip2: '~2.0'
             phpstan: .phpstan/symfony_5.neon
           - php: '8.1'
             symfony: '6.4.*'
+            geoip2: '~2.0'
             phpstan: .phpstan/symfony_6.neon
           - php: '8.2'
             symfony: '7.0.*'
+            geoip2: '~2.0'
+            phpstan: .phpstan/symfony_6.neon
+          - php: '8.3'
+            symfony: '7.0.*'
+            geoip2: '~2.0'
+            phpstan: .phpstan/symfony_6.neon
+          - php: '8.3'
+            symfony: '7.0.*'
+            geoip2: '~3.0'
             phpstan: .phpstan/symfony_6.neon
     steps:
       - name: Checkout
@@ -82,6 +107,9 @@ jobs:
       - name: Install Symfony
         run: composer require symfony/symfony:"${{ matrix.symfony }}" --no-update
 
+      - name: Install GeoIP2-php
+        run: composer require geoip2/geoip2:"${{ matrix.geoip2 }}" --no-update
+
       - name: 'Install Composer dependencies (highest)'
         uses: 'ramsey/composer-install@v1'
         with:
@@ -91,7 +119,7 @@ jobs:
         run: vendor/bin/phpunit --coverage-clover build/coverage-clover.xml
 
       - name: Send coverage results to Scrutinizer CI
-        if: matrix.php != '8.0' && matrix.php != '8.1' && matrix.php != '8.2'
+        if: matrix.php != '8.0' && matrix.php != '8.1' && matrix.php != '8.2' && matrix.php != '8.3'
         run: |
           wget https://scrutinizer-ci.com/ocular.phar
           php ocular.phar code-coverage:upload --format=php-clover build/coverage-clover.xml
@@ -101,7 +129,7 @@ jobs:
           COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COVERALLS_PARALLEL: true
           COVERALLS_FLAG_NAME: 'PHP ${{ matrix.php }} + ${{ matrix.symfony }}'
-        if: matrix.php != '8.0' && matrix.php != '8.1' && matrix.php != '8.2'
+        if: matrix.php != '8.0' && matrix.php != '8.1' && matrix.php != '8.2' && matrix.php != '8.3'
         run: |
           composer global require php-coveralls/php-coveralls
           php-coveralls -x build/coverage-clover.xml -o build/coveralls-upload.json -v

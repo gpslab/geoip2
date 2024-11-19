@@ -74,7 +74,7 @@ class UpdateDatabaseCommandTest extends TestCase
         $this->expectExceptionMessage('Updated databases should be a array, got "" instead.');
 
         $this->input
-            ->expects($this->at(4))
+            ->expects($this->once())
             ->method('getArgument')
             ->with('databases')
             ->willReturn('');
@@ -89,7 +89,7 @@ class UpdateDatabaseCommandTest extends TestCase
         $this->expectExceptionMessage('Undefined "default" database.');
 
         $this->input
-            ->expects($this->at(4))
+            ->expects($this->once())
             ->method('getArgument')
             ->with('databases')
             ->willReturn(['default']);
@@ -104,7 +104,7 @@ class UpdateDatabaseCommandTest extends TestCase
         $this->expectExceptionMessage('Undefined "foo" database.');
 
         $this->input
-            ->expects($this->at(4))
+            ->expects($this->once())
             ->method('getArgument')
             ->with('databases')
             ->willReturn(['foo']);
@@ -121,7 +121,7 @@ class UpdateDatabaseCommandTest extends TestCase
         $this->expectExceptionMessage('Invalid "default" database config.');
 
         $this->input
-            ->expects($this->at(4))
+            ->expects($this->once())
             ->method('getArgument')
             ->with('databases')
             ->willReturn(['default']);
@@ -138,7 +138,7 @@ class UpdateDatabaseCommandTest extends TestCase
         $this->expectExceptionMessage('Invalid "default" database config.');
 
         $this->input
-            ->expects($this->at(4))
+            ->expects($this->once())
             ->method('getArgument')
             ->with('databases')
             ->willReturn(['default']);
@@ -157,7 +157,7 @@ class UpdateDatabaseCommandTest extends TestCase
         $this->expectExceptionMessage('Invalid "default" database config.');
 
         $this->input
-            ->expects($this->at(4))
+            ->expects($this->once())
             ->method('getArgument')
             ->with('databases')
             ->willReturn(['default']);
@@ -176,7 +176,7 @@ class UpdateDatabaseCommandTest extends TestCase
         $this->expectExceptionMessage('Invalid "default" database config.');
 
         $this->input
-            ->expects($this->at(4))
+            ->expects($this->once())
             ->method('getArgument')
             ->with('databases')
             ->willReturn(['default']);
@@ -193,7 +193,7 @@ class UpdateDatabaseCommandTest extends TestCase
     public function testDownloadOneDatabases(): void
     {
         $this->input
-            ->expects($this->at(4))
+            ->expects($this->once())
             ->method('getArgument')
             ->with('databases')
             ->willReturn(['default']);
@@ -215,7 +215,7 @@ class UpdateDatabaseCommandTest extends TestCase
     public function testDownloadSeveralDatabases(): void
     {
         $this->input
-            ->expects($this->at(4))
+            ->expects($this->once())
             ->method('getArgument')
             ->with('databases')
             ->willReturn(['second', 'first']);
@@ -232,13 +232,12 @@ class UpdateDatabaseCommandTest extends TestCase
         ];
 
         $this->downloader
-            ->expects($this->at(0))
+            ->expects($this->exactly(2))
             ->method('download')
-            ->with($databases['second']['url'], $databases['second']['path']);
-        $this->downloader
-            ->expects($this->at(1))
-            ->method('download')
-            ->with($databases['first']['url'], $databases['first']['path']);
+            ->withConsecutive(
+                [$databases['second']['url'], $databases['second']['path']],
+                [$databases['first']['url'], $databases['first']['path']]
+            );
 
         $command = new UpdateDatabaseCommand($this->downloader, $databases);
         $command->run($this->input, $this->output);
