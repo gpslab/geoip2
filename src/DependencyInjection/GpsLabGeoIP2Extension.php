@@ -19,8 +19,8 @@ use GpsLab\Bundle\GeoIP2Bundle\Downloader\MaxMindDownloader;
 use GpsLab\Bundle\GeoIP2Bundle\Reader\ReaderFactory;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
-use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\DependencyInjection\Extension\Extension;
+use Symfony\Component\DependencyInjection\Reference;
 
 class GpsLabGeoIP2Extension extends Extension
 {
