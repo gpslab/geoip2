@@ -24,6 +24,8 @@ class Configuration implements ConfigurationInterface
 
     private const LICENSE_DIRTY_HACK = 'YOUR-LICENSE-KEY';
 
+    private const PERMISSIONS = 0755;
+
     private const DATABASE_EDITION_IDS = [
         'GeoLite2-ASN',
         'GeoLite2-City',
@@ -71,6 +73,12 @@ class Configuration implements ConfigurationInterface
         $locales->defaultValue(['en']);
 
         $root_node->children()->scalarNode('license');
+
+        $permissions = $root_node->children()->scalarNode('permissions');
+        $permissions->defaultValue(self::PERMISSIONS);
+
+        $this->normalizePermissions($permissions);
+        $this->validatePermissions($permissions);
 
         $default_database = $root_node->children()->scalarNode('default_database');
         $default_database->defaultValue('default');
@@ -219,15 +227,22 @@ class Configuration implements ConfigurationInterface
             })
             ->then(static function (array $v): array {
                 $database = $v;
-                unset($database['default_database']);
+                // options of the bundle, not of the database
+                unset($database['default_database'], $database['permissions']);
                 $default_database = isset($v['default_database']) ? (string) $v['default_database'] : 'default';
 
-                return [
+                $config = [
                     'default_database' => $default_database,
                     'databases' => [
                         $default_database => $database,
                     ],
                 ];
+
+                if (array_key_exists('permissions', $v)) {
+                    $config['permissions'] = $v['permissions'];
+                }
+
+                return $config;
             });
     }
 
@@ -414,6 +429,46 @@ class Configuration implements ConfigurationInterface
                 $v['path'] = sprintf(self::PATH, $this->cache_dir, $v['edition']);
 
                 return $v;
+            });
+    }
+
+    /**
+     * Normalize permissions from the octal notation.
+     *
+     * The YAML parser does not treat "0644" as an octal number since Symfony 5, it returns the "0644" string.
+     * Only the "0o644" notation is parsed as an integer.
+     *
+     * @param NodeDefinition $permissions
+     */
+    private function normalizePermissions(NodeDefinition $permissions): void
+    {
+        $permissions
+            ->beforeNormalization()
+            ->ifString()
+            ->then(static function (string $v) {
+                // leave a malformed value as is, it is rejected by the validation
+                if (!preg_match('/^0?[0-7]{3}$/', $v)) {
+                    return $v;
+                }
+
+                return (int) octdec($v);
+            });
+    }
+
+    /**
+     * The permissions option must be a file mode.
+     *
+     * @param NodeDefinition $permissions
+     */
+    private function validatePermissions(NodeDefinition $permissions): void
+    {
+        $permissions
+            ->validate()
+            ->ifTrue(static function ($v): bool {
+                return !is_int($v) || $v < 0 || $v > 0777;
+            })
+            ->then(static function ($v): array {
+                throw new \InvalidArgumentException(sprintf('Permissions "%s" should be an octal number between "0000" and "0777".', is_scalar($v) ? $v : gettype($v)));
             });
     }
 
