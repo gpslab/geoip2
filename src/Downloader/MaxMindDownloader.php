@@ -29,6 +29,8 @@ use Symfony\Component\Filesystem\Filesystem;
  */
 class MaxMindDownloader implements Downloader
 {
+    private const PERMISSIONS = 0755;
+
     /**
      * @var Filesystem
      */
@@ -40,13 +42,22 @@ class MaxMindDownloader implements Downloader
     private $logger;
 
     /**
+     * Permissions of the downloaded database.
+     *
+     * @var int
+     */
+    private $permissions;
+
+    /**
      * @param Filesystem      $fs
      * @param LoggerInterface $logger
+     * @param int             $permissions
      */
-    public function __construct(Filesystem $fs, LoggerInterface $logger)
+    public function __construct(Filesystem $fs, LoggerInterface $logger, int $permissions = self::PERMISSIONS)
     {
         $this->fs = $fs;
         $this->logger = $logger;
+        $this->permissions = $permissions;
     }
 
     /**
@@ -121,7 +132,7 @@ class MaxMindDownloader implements Downloader
         }
 
         $this->fs->copy($database, $target, true);
-        $this->fs->chmod($target, 0755);
+        $this->fs->chmod($target, $this->permissions);
         $this->fs->remove([$tmp_zip, $tmp_unzip, $tmp_untar]);
 
         $this->logger->debug(sprintf('Database moved to %s', $target));

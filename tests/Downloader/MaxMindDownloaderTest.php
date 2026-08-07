@@ -110,6 +110,20 @@ class MaxMindDownloaderTest extends TestCase
 
     public function testDownload(): void
     {
+        $this->assertDownloadWithPermissions($this->downloader, 0755);
+    }
+
+    public function testDownloadWithPermissions(): void
+    {
+        $this->assertDownloadWithPermissions(new MaxMindDownloader($this->fs, $this->logger, 0644), 0644);
+    }
+
+    /**
+     * @param MaxMindDownloader $downloader
+     * @param int               $permissions
+     */
+    private function assertDownloadWithPermissions(MaxMindDownloader $downloader, int $permissions): void
+    {
         $path = sys_get_temp_dir();
         $path_quote = preg_quote($path, '#');
         $url = 'https://example.com';
@@ -176,9 +190,9 @@ class MaxMindDownloaderTest extends TestCase
         $this->fs
             ->expects($this->once())
             ->method('chmod')
-            ->with($target, 0755);
+            ->with($target, $permissions);
 
-        $this->downloader->download($url, $target);
+        $downloader->download($url, $target);
     }
 
     /**

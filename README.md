@@ -79,6 +79,23 @@ gpslab_geoip:
     path: '%kernel.project_dir%/var/GeoLite2-City.mmdb'
 ```
 
+#### Permissions
+
+By default, a downloaded database gets the `0755` permissions. A database is a data file and does not need to be
+executable, so you may prefer to make it less permissive. The permissions are applied to the databases of all
+configured editions.
+
+```yml
+gpslab_geoip:
+    license: 'XXXXXXXXXXXXXXXX'
+    edition: 'GeoLite2-City'
+    permissions: '0644'
+```
+
+Quote the value: the YAML parser does not treat `0644` as an octal number, it returns the `'0644'` string. Both
+notations are accepted, as well as the YAML `0o644` and the decimal `420`. The directory of the database is still
+created with the `0755` permissions, it has to stay traversable.
+
 #### Localization
 
 By default, the English locale is used for GeoIP record. You can change the locale for record and declare multiple
