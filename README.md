@@ -97,8 +97,14 @@ gpslab_geoip:
     proxy: '%env(HTTPS_PROXY)%'
 ```
 
-The `http`, `https`, `tcp` and `ssl` schemes are supported. Use `http` for a plain proxy and `https` for a proxy that
-expects a TLS connection to itself. A proxy of any of these schemes can download a database over HTTPS.
+The `http`, `https`, `socks4`, `socks4a`, `socks5` and `socks5h` schemes are supported. Use `http` for a plain proxy
+and `https` for a proxy that expects a TLS connection to itself. A proxy of any scheme can download a database over
+HTTPS.
+
+A database is downloaded with the [cURL](https://www.php.net/manual/en/book.curl.php) extension when it is installed
+and with PHP streams otherwise. Install the extension if you need a SOCKS proxy, a proxy that authenticates with
+anything other than Basic, or if the `allow_url_fopen` option is disabled on your server. PHP streams support HTTP
+proxies only and a SOCKS proxy is rejected with an explicit error.
 
 ### Target download path
 

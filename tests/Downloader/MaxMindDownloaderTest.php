@@ -40,16 +40,15 @@ class MaxMindDownloaderTest extends TestCase
      */
     private $logger;
 
-    /**
-     * @var MaxMindDownloader
-     */
-    private $downloader;
-
     protected function setUp(): void
     {
         $this->fs = $this->createMock(Filesystem::class);
         $this->logger = $this->createMock(LoggerInterface::class);
-        $this->downloader = new MaxMindDownloader($this->fs, $this->logger);
+    }
+
+    protected function tearDown(): void
+    {
+        ProxyStreamWrapper::unregister();
     }
 
     public function testNotFoundDatabase(): void
@@ -57,14 +56,7 @@ class MaxMindDownloaderTest extends TestCase
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('Not found GeoLite2 database in archive.');
 
-        $path = sys_get_temp_dir();
-        $path_quote = preg_quote($path, '#');
-        $url = 'https://example.com';
-        $target = sprintf('%s/%s_GeoLite2.mmdb', $path, uniqid('', true));
-
-        $tmp_zip_regexp = sprintf('#^%s/[\da-f]+\.\d+_GeoLite2\.tar\.gz$#', $path_quote);
-        $tmp_unzip_regexp = sprintf('#^%s/[\da-f]+\.\d+_GeoLite2\.tar$#', $path_quote);
-        $tmp_untar_regexp = sprintf('#^%s/[\da-f]+\.\d+_GeoLite2$#', $path_quote);
+        $target = $this->createTarget();
 
         $this->logger
             ->expects($this->atLeastOnce())
@@ -73,50 +65,31 @@ class MaxMindDownloaderTest extends TestCase
         $this->fs
             ->expects($this->once())
             ->method('remove')
-            ->willReturnCallback(function ($files) use ($tmp_zip_regexp, $tmp_unzip_regexp, $tmp_untar_regexp) {
-                $this->assertIsArray($files);
-                $this->assertCount(3, $files);
-                $this->assertArrayHasKey(0, $files);
-                $this->assertArrayHasKey(1, $files);
-                $this->assertArrayHasKey(2, $files);
-                $this->assertIsString($files[0]);
-                $this->assertIsString($files[1]);
-                $this->assertIsString($files[2]);
-                self::assertPatternMatches($tmp_zip_regexp, $files[0]);
-                self::assertPatternMatches($tmp_unzip_regexp, $files[1]);
-                self::assertPatternMatches($tmp_untar_regexp, $files[2]);
+            ->willReturnCallback(function ($files): void {
+                $this->assertTemporaryFiles($files);
             });
         $this->fs
-            ->expects($this->once())
-            ->method('copy')
-            ->willReturnCallback(function ($origin_file, $target_file, $overwrite_newer_files) use (
-                $url,
-                $tmp_zip_regexp
-            ) {
-                $this->assertSame($url, $origin_file);
-                $this->assertIsString($target_file);
-                $this->assertTrue($overwrite_newer_files);
-                self::assertPatternMatches($tmp_zip_regexp, $target_file);
-
-                // make test GeoLite2 db
-                file_put_contents($target_file, base64_decode(self::TAR_GZ_BAD));
-            });
+            ->expects($this->never())
+            ->method('copy');
         $this->fs
             ->expects($this->once())
             ->method('mkdir')
             ->with(dirname($target), 0755);
 
-        $this->downloader->download($url, $target);
+        ProxyStreamWrapper::register(base64_decode(self::TAR_GZ_BAD));
+
+        $downloader = new StreamMaxMindDownloader($this->fs, $this->logger);
+        $downloader->download($this->createUrl(), $target);
     }
 
     public function testDownload(): void
     {
-        $this->assertDownloadWithPermissions($this->downloader, 0755);
+        $this->assertDownloadWithPermissions(new StreamMaxMindDownloader($this->fs, $this->logger), 0755);
     }
 
     public function testDownloadWithPermissions(): void
     {
-        $this->assertDownloadWithPermissions(new MaxMindDownloader($this->fs, $this->logger, 0644), 0644);
+        $this->assertDownloadWithPermissions(new StreamMaxMindDownloader($this->fs, $this->logger, 0644), 0644);
     }
 
     /**
@@ -125,10 +98,6 @@ class MaxMindDownloaderTest extends TestCase
     public static function getProxies(): array
     {
         return [
-            ['tcp://proxy.example.com:3128', [
-                'proxy' => 'tcp://proxy.example.com:3128',
-                'request_fulluri' => true,
-            ]],
             // an application protocol is replaced with the transport PHP expects
             ['http://proxy.example.com:3128', [
                 'proxy' => 'tcp://proxy.example.com:3128',
@@ -164,41 +133,62 @@ class MaxMindDownloaderTest extends TestCase
      * @param array<string, string|bool> $expected_options
      */
     #[DataProvider('getProxies')]
-    public function testDownloadThroughProxy(string $proxy, array $expected_options): void
+    public function testDownloadThroughProxyWithStreams(string $proxy, array $expected_options): void
     {
-        $path = sys_get_temp_dir();
-        $target = sprintf('%s/%s_GeoLite2.mmdb', $path, uniqid('', true));
-        $url = sprintf('%s://example.com/GeoLite2-City.tar.gz', ProxyStreamWrapper::PROTOCOL);
+        $target = $this->createTarget();
 
-        $this->logger
-            ->expects($this->atLeastOnce())
-            ->method('debug');
-
-        // the archive is fetched by the downloader itself, the filesystem only moves the extracted database
-        $this->fs
-            ->expects($this->once())
-            ->method('copy')
-            ->willReturnCallback(function ($origin_file, $target_file, $overwrite_newer_files) use ($target): void {
-                $this->assertSame($target, $target_file);
-                $this->assertTrue($overwrite_newer_files);
-                $this->assertIsString($origin_file);
-                $this->assertSame('TestGeoLite2', file_get_contents($origin_file));
-            });
-        $this->fs
-            ->expects($this->once())
-            ->method('chmod')
-            ->with($target, 0755);
+        $this->expectSuccessfulDownload($target, 0755);
 
         ProxyStreamWrapper::register(base64_decode(self::TAR_GZ));
 
-        try {
-            $downloader = new MaxMindDownloader($this->fs, $this->logger, 0755, $proxy);
-            $downloader->download($url, $target);
-        } finally {
-            ProxyStreamWrapper::unregister();
-        }
+        $downloader = new StreamMaxMindDownloader($this->fs, $this->logger, 0755, $proxy);
+        $downloader->download($this->createUrl(), $target);
 
         $this->assertSame(['http' => $expected_options], ProxyStreamWrapper::$context_options);
+    }
+
+    public function testStreamsDoNotSupportSocksProxy(): void
+    {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('The "socks5://proxy.example.com:1080" proxy requires the cURL extension, PHP streams support HTTP proxies only.');
+
+        $downloader = new StreamMaxMindDownloader($this->fs, $this->logger, 0755, 'socks5://proxy.example.com:1080');
+        $downloader->download($this->createUrl(), $this->createTarget());
+    }
+
+    /**
+     * Downloads through a real proxy running in a separate process.
+     */
+    public function testDownloadThroughProxyWithCurl(): void
+    {
+        if (!extension_loaded('curl')) {
+            $this->markTestSkipped('The cURL extension is not installed.');
+        }
+
+        $proxy = ProxyServer::start(base64_decode(self::TAR_GZ));
+
+        if ($proxy === null) {
+            $this->markTestSkipped('The proxy server could not be started.');
+        }
+
+        $target = $this->createTarget();
+
+        $this->expectSuccessfulDownload($target, 0755);
+
+        $downloader = new MaxMindDownloader(
+            $this->fs,
+            $this->logger,
+            0755,
+            sprintf('http://user:p%%40ss@%s', $proxy->getAddress())
+        );
+        $downloader->download('http://example.com/GeoLite2-City.tar.gz', $target);
+
+        $requests = $proxy->stop();
+
+        // the absolute URI in the request line is what tells the proxy where to go
+        $this->assertPatternMatches('#^GET http://example\.com/GeoLite2-City\.tar\.gz #', $requests);
+        // the credentials are only sent after the 407 challenge
+        $this->assertNotFalse(strpos($requests, 'Proxy-Authorization: Basic dXNlcjpwQHNz')); // user:p@ss
     }
 
     /**
@@ -207,15 +197,26 @@ class MaxMindDownloaderTest extends TestCase
      */
     private function assertDownloadWithPermissions(MaxMindDownloader $downloader, int $permissions): void
     {
-        $path = sys_get_temp_dir();
-        $path_quote = preg_quote($path, '#');
-        $url = 'https://example.com';
-        $target = sprintf('%s/%s_GeoLite2.mmdb', $path, uniqid('', true));
+        $target = $this->createTarget();
 
-        $tmp_zip_regexp = sprintf('#^%s/[\da-f]+\.\d+_GeoLite2\.tar\.gz$#', $path_quote);
-        $tmp_unzip_regexp = sprintf('#^%s/[\da-f]+\.\d+_GeoLite2\.tar$#', $path_quote);
-        $tmp_untar_regexp = sprintf('#^%s/[\da-f]+\.\d+_GeoLite2$#', $path_quote);
+        $this->expectSuccessfulDownload($target, $permissions);
 
+        ProxyStreamWrapper::register(base64_decode(self::TAR_GZ));
+
+        $downloader->download($this->createUrl(), $target);
+
+        // no proxy is configured, the stream context stays empty
+        $this->assertSame([], ProxyStreamWrapper::$context_options);
+    }
+
+    /**
+     * The archive is fetched by the downloader itself, the filesystem only moves the extracted database.
+     *
+     * @param string $target
+     * @param int    $permissions
+     */
+    private function expectSuccessfulDownload(string $target, int $permissions): void
+    {
         $this->logger
             ->expects($this->atLeastOnce())
             ->method('debug');
@@ -223,48 +224,8 @@ class MaxMindDownloaderTest extends TestCase
         $this->fs
             ->expects($this->exactly(2))
             ->method('remove')
-            ->willReturnCallback(function ($files) use ($tmp_zip_regexp, $tmp_unzip_regexp, $tmp_untar_regexp) {
-                $this->assertIsArray($files);
-                $this->assertCount(3, $files);
-                $this->assertArrayHasKey(0, $files);
-                $this->assertArrayHasKey(1, $files);
-                $this->assertArrayHasKey(2, $files);
-                $this->assertIsString($files[0]);
-                $this->assertIsString($files[1]);
-                $this->assertIsString($files[2]);
-                self::assertPatternMatches($tmp_zip_regexp, $files[0]);
-                self::assertPatternMatches($tmp_unzip_regexp, $files[1]);
-                self::assertPatternMatches($tmp_untar_regexp, $files[2]);
-            });
-        $this->fs
-            ->expects($this->exactly(2))
-            ->method('copy')
-            ->willReturnCallback(function ($origin_file, $target_file, $overwrite_newer_files) use (
-                $url,
-                $tmp_zip_regexp,
-                $target,
-                $path_quote
-            ) {
-                $this->assertIsString($origin_file);
-                $this->assertIsString($target_file);
-                $this->assertTrue($overwrite_newer_files);
-
-                if ($target === $target_file) {
-                    $this->assertSame($target, $target_file);
-                    $regexp = sprintf(
-                        '#^%s/[\da-f]+\.\d+_GeoLite2/GeoLite2-City_20200114/GeoLite2.mmdb$#',
-                        $path_quote
-                    );
-                    self::assertPatternMatches($regexp, $origin_file);
-                    $this->assertFileExists($origin_file);
-                    $this->assertSame('TestGeoLite2', file_get_contents($origin_file));
-                } else {
-                    $this->assertSame($url, $origin_file);
-                    self::assertPatternMatches($tmp_zip_regexp, $target_file);
-
-                    // make test GeoLite2 db
-                    file_put_contents($target_file, base64_decode(self::TAR_GZ));
-                }
+            ->willReturnCallback(function ($files): void {
+                $this->assertTemporaryFiles($files);
             });
         $this->fs
             ->expects($this->once())
@@ -272,10 +233,56 @@ class MaxMindDownloaderTest extends TestCase
             ->with(dirname($target), 0755);
         $this->fs
             ->expects($this->once())
+            ->method('copy')
+            ->willReturnCallback(function ($origin_file, $target_file, $overwrite_newer_files) use ($target): void {
+                $this->assertSame($target, $target_file);
+                $this->assertTrue($overwrite_newer_files);
+                $this->assertIsString($origin_file);
+                $path_quote = preg_quote(sys_get_temp_dir(), '#');
+                $regexp = sprintf('#^%s/[\da-f]+\.\d+_GeoLite2/GeoLite2-City_20200114/GeoLite2.mmdb$#', $path_quote);
+                self::assertPatternMatches($regexp, $origin_file);
+                $this->assertSame('TestGeoLite2', file_get_contents($origin_file));
+            });
+        $this->fs
+            ->expects($this->once())
             ->method('chmod')
             ->with($target, $permissions);
+    }
 
-        $downloader->download($url, $target);
+    /**
+     * @param mixed $files
+     */
+    private function assertTemporaryFiles($files): void
+    {
+        $path_quote = preg_quote(sys_get_temp_dir(), '#');
+
+        $this->assertIsArray($files);
+        $this->assertCount(3, $files);
+        $this->assertArrayHasKey(0, $files);
+        $this->assertArrayHasKey(1, $files);
+        $this->assertArrayHasKey(2, $files);
+        $this->assertIsString($files[0]);
+        $this->assertIsString($files[1]);
+        $this->assertIsString($files[2]);
+        self::assertPatternMatches(sprintf('#^%s/[\da-f]+\.\d+_GeoLite2\.tar\.gz$#', $path_quote), $files[0]);
+        self::assertPatternMatches(sprintf('#^%s/[\da-f]+\.\d+_GeoLite2\.tar$#', $path_quote), $files[1]);
+        self::assertPatternMatches(sprintf('#^%s/[\da-f]+\.\d+_GeoLite2$#', $path_quote), $files[2]);
+    }
+
+    /**
+     * @return string
+     */
+    private function createTarget(): string
+    {
+        return sprintf('%s/%s_GeoLite2.mmdb', sys_get_temp_dir(), uniqid('', true));
+    }
+
+    /**
+     * @return string
+     */
+    private function createUrl(): string
+    {
+        return sprintf('%s://example.com/GeoLite2-City.tar.gz', ProxyStreamWrapper::PROTOCOL);
     }
 
     /**

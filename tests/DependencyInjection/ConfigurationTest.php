@@ -464,7 +464,7 @@ class ConfigurationTest extends TestCase
             }
 
             // a proxy can be defined for the bundle in both configuration forms
-            foreach (['tcp://proxy.example.com:3128', 'http://user:pass@proxy.example.com:3128'] as $proxy) {
+            foreach (['http://proxy.example.com:3128', 'socks5://proxy.example.com:1080', 'http://user:pass@proxy.example.com:3128'] as $proxy) {
                 yield [$cache_dir, [
                     'gpslab_geoip' => [
                         'license' => 'LICENSE',
@@ -491,7 +491,7 @@ class ConfigurationTest extends TestCase
             // the proxy of the bundle is not an option of the database
             yield [$cache_dir, [
                 'gpslab_geoip' => [
-                    'proxy' => 'tcp://proxy.example.com:3128',
+                    'proxy' => 'http://proxy.example.com:3128',
                     'databases' => [
                         'default' => [
                             'license' => 'LICENSE',
@@ -500,7 +500,7 @@ class ConfigurationTest extends TestCase
                     ],
                 ],
             ], [
-                'proxy' => 'tcp://proxy.example.com:3128',
+                'proxy' => 'http://proxy.example.com:3128',
                 'databases' => [
                     'default' => [
                         'license' => 'LICENSE',

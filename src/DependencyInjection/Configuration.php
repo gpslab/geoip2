@@ -35,11 +35,16 @@ class Configuration implements ConfigurationInterface
         'proxy',
     ];
 
+    /**
+     * The SOCKS schemes require the cURL extension, PHP streams support HTTP proxies only.
+     */
     private const PROXY_SCHEMES = [
         'http',
         'https',
-        'tcp',
-        'ssl',
+        'socks4',
+        'socks4a',
+        'socks5',
+        'socks5h',
     ];
 
     private const DATABASE_EDITION_IDS = [
