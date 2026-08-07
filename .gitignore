@@ -1,6 +1,7 @@
 /vendor/
 /build/
 phpunit.xml
+phpunit-10.xml
 composer.lock
 .php_cs.cache
 .phpunit.result.cache

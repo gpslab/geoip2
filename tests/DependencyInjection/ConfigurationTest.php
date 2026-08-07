@@ -12,6 +12,7 @@ declare(strict_types=1);
 namespace GpsLab\Bundle\GeoIP2Bundle\Tests\DependencyInjection;
 
 use GpsLab\Bundle\GeoIP2Bundle\DependencyInjection\Configuration;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\Config\Definition\Processor;
@@ -36,7 +37,7 @@ class ConfigurationTest extends TestCase
     /**
      * @return mixed[]
      */
-    public function getBadConfigs(): iterable
+    public static function getBadConfigs(): iterable
     {
         $configurations = [];
         // undefined edition
@@ -165,6 +166,7 @@ class ConfigurationTest extends TestCase
      * @param string|null         $cache_dir
      * @param array<array<mixed>> $configs
      */
+    #[DataProvider('getBadConfigs')]
     public function testBadConfigs(?string $cache_dir, array $configs): void
     {
         $this->expectException(InvalidConfigurationException::class);
@@ -179,7 +181,7 @@ class ConfigurationTest extends TestCase
     /**
      * @return array<array<mixed>>
      */
-    public function getConfigs(): iterable
+    public static function getConfigs(): iterable
     {
         foreach (['/tmp/var/cache', null] as $cache_dir) {
             $real_cache_dir = $cache_dir ?: sys_get_temp_dir();
@@ -434,6 +436,7 @@ class ConfigurationTest extends TestCase
      * @param array<array<mixed>> $configs
      * @param array<array<mixed>> $expected
      */
+    #[DataProvider('getConfigs')]
     public function testConfigs(?string $cache_dir, array $configs, array $expected): void
     {
         $configuration = new Configuration($cache_dir);

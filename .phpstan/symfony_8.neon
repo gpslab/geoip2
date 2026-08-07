@@ -1,0 +1,4 @@
+# config for Symfony 8.0 +
+
+includes:
+    - symfony_6.neon

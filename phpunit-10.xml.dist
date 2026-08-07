@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Configuration for PHPUnit 10 and above.
+
+    PHPUnit 10 dropped the configuration schema used in phpunit.xml.dist,
+    which is still needed to run the test suite on PHP 7.2 with PHPUnit 7-9.
+-->
+<phpunit
+    colors="true"
+    stopOnFailure="false"
+    bootstrap="tests/bootstrap.php"
+>
+    <testsuites>
+        <testsuite name="GeoIP2 Bundle Test Suite">
+            <directory>./tests</directory>
+        </testsuite>
+    </testsuites>
+    <source>
+        <include>
+            <directory suffix=".php">./src</directory>
+        </include>
+    </source>
+</phpunit>
