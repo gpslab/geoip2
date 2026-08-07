@@ -149,7 +149,7 @@ class Configuration implements ConfigurationInterface
         }
 
         // @codeCoverageIgnoreStart
-        if (!($root instanceof ArrayNodeDefinition)) { // should be always false
+        if (!$root instanceof ArrayNodeDefinition) { // should be always false
             throw new \RuntimeException(sprintf('The root node should be instance of %s, got %s instead.', ArrayNodeDefinition::class, get_class($root)));
         }
         // @codeCoverageIgnoreEnd
@@ -173,7 +173,7 @@ class Configuration implements ConfigurationInterface
         $node = $root_node->prototype('array');
 
         // @codeCoverageIgnoreStart
-        if (!($node instanceof ArrayNodeDefinition)) { // should be always false
+        if (!$node instanceof ArrayNodeDefinition) { // should be always false
             throw new \RuntimeException(sprintf('The "array" prototype should be instance of %s, got %s instead.', ArrayNodeDefinition::class, get_class($node)));
         }
         // @codeCoverageIgnoreEnd

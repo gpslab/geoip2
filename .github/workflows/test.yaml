@@ -92,42 +92,34 @@ jobs:
           - php: '8.3'
             symfony: '7.4.*'
             geoip2: '~2.0'
-            phpstan: .phpstan/symfony_7.neon
+            phpstan: .phpstan/symfony_6.neon
           - php: '8.3'
             symfony: '7.4.*'
             geoip2: '~3.0'
-            phpstan: .phpstan/symfony_7.neon
-          # Symfony 8 requires PHP 8.4 +, which in turn requires PHPUnit 10 + and PHPStan 2
+            phpstan: .phpstan/symfony_6.neon
+          # Symfony 8 requires PHP 8.4 +, which in turn requires PHPUnit 10 +
           - php: '8.4'
             symfony: '8.0.*'
             geoip2: '~2.0'
             phpstan: .phpstan/symfony_8.neon
-            phpstan_version: '2.1.*'
-            phpstan_phpunit_version: '2.0.*'
             phpunit: '~12.0'
             phpunit_config: phpunit-10.xml.dist
           - php: '8.4'
             symfony: '8.0.*'
             geoip2: '~3.0'
             phpstan: .phpstan/symfony_8.neon
-            phpstan_version: '2.1.*'
-            phpstan_phpunit_version: '2.0.*'
             phpunit: '~12.0'
             phpunit_config: phpunit-10.xml.dist
           - php: '8.4'
             symfony: '8.1.*'
             geoip2: '~3.0'
             phpstan: .phpstan/symfony_8.neon
-            phpstan_version: '2.1.*'
-            phpstan_phpunit_version: '2.0.*'
             phpunit: '~12.0'
             phpunit_config: phpunit-10.xml.dist
           - php: '8.5'
             symfony: '8.1.*'
             geoip2: '~3.0'
             phpstan: .phpstan/symfony_8.neon
-            phpstan_version: '2.1.*'
-            phpstan_phpunit_version: '2.0.*'
             phpunit: '~12.0'
             phpunit_config: phpunit-10.xml.dist
     steps:
@@ -144,6 +136,11 @@ jobs:
           php-version: ${{ matrix.php }}
           coverage: ${{ steps.coverage.outputs.driver }}
           tools: composer:v2
+
+      # the matrix intentionally tests Symfony versions that are out of support
+      # and are therefore reported by the Composer security advisories
+      - name: Allow install of unsupported Symfony versions
+        run: composer config policy.advisories.block false
 
       - name: Install Symfony
         run: composer require symfony/symfony:"${{ matrix.symfony }}" --no-update
@@ -178,10 +175,7 @@ jobs:
           composer global require php-coveralls/php-coveralls
           php-coveralls -x build/coverage-clover.xml -o build/coveralls-upload.json -v
 
-      - name: Install PHPStan
-        run: |
-          composer global require phpstan/phpstan:"${{ matrix.phpstan_version || '1.10.*' }}"
-          composer global require phpstan/phpstan-phpunit:"${{ matrix.phpstan_phpunit_version || '1.3.*' }}"
-
+      # PHPStan is not installed globally: the configs include the extension of the locally
+      # installed phpstan-phpunit, and the two must come from the same dependency resolution
       - name: Run PHPStan
-        run: phpstan --memory-limit=1G analyse -c ${{ matrix.phpstan }}
+        run: vendor/bin/phpstan --memory-limit=1G analyse -c ${{ matrix.phpstan }}

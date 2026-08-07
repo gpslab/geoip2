@@ -1,4 +1,4 @@
-# config for Symfony 5.0 - 5.2
+# config for Symfony 5.0 +
 
 includes:
     - default.neon
@@ -7,3 +7,11 @@ parameters:
     ignoreErrors:
         - '#Call to an undefined method Symfony\\Component\\Config\\Definition\\Builder\\TreeBuilder::root\(\)\.#'
         - '#Class Symfony\\Component\\Config\\Definition\\Builder\\TreeBuilder constructor invoked with 0 parameters, 1\-3 required\.#'
+        # the Configuration BC layers for Symfony 4.1 and below are dead code since Symfony 4.2
+        # and PHPStan is able to prove it. They must stay: the bundle still supports Symfony 2.8
+        -
+            identifier: function.alreadyNarrowedType
+            path: ../src/DependencyInjection/Configuration.php
+        -
+            identifier: instanceof.alwaysTrue
+            path: ../src/DependencyInjection/Configuration.php

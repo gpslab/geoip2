@@ -1,20 +1,4 @@
 # config for Symfony 8.0 +
-#
-# Symfony 8 requires PHP 8.4 +, which is only supported by PHPStan 2. It does not include
-# symfony_7.neon: the checkGenericClassInNonGenericObjectType option is removed in PHPStan 2,
-# which does not report missing generic types of the Symfony 7.3 + node definitions at all.
-#
-# The Configuration BC layers for Symfony 4.1 and below are dead code on modern Symfony
-# and PHPStan is able to prove it. They must stay: the bundle still supports Symfony 2.8.
 
 includes:
-    - symfony_5.neon
-
-parameters:
-    ignoreErrors:
-        -
-            identifier: function.alreadyNarrowedType
-            path: ../src/DependencyInjection/Configuration.php
-        -
-            identifier: instanceof.alwaysTrue
-            path: ../src/DependencyInjection/Configuration.php
+    - symfony_6.neon
