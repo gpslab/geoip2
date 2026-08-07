@@ -55,8 +55,8 @@ By default, this URL is used to download a new databases
 * `edition_id` - character ID name from first column on [download page](https://www.maxmind.com/en/download_files);
 * `license_key` - your personal [licence key](https://www.maxmind.com/en/accounts/current/license-key).
 
-You can change this URL, for example, if you want to use a proxy to download the database. You can customize the source
-URL in the configuration.
+You can change this URL, for example, if you download the database from a mirror of your own. You can customize the
+source URL in the configuration.
 
 ```yml
 gpslab_geoip:
@@ -64,6 +64,41 @@ gpslab_geoip:
     edition: 'GeoLite2-City'
     url: 'https://example.com/GeoLite2-City.tar.gz'
 ```
+
+#### Proxy
+
+If the outgoing connections of your server go through a proxy, declare the proxy server itself. Do not put it in the
+source URL, the URL is the address of the database and not of the proxy.
+
+```yml
+gpslab_geoip:
+    license: 'XXXXXXXXXXXXXXXX'
+    edition: 'GeoLite2-City'
+    proxy: 'http://proxy.example.com:3128'
+```
+
+The proxy is used for downloading the databases of all configured editions. Credentials can be a part of the address,
+they are sent in the `Proxy-Authorization` header.
+
+```yml
+gpslab_geoip:
+    license: 'XXXXXXXXXXXXXXXX'
+    edition: 'GeoLite2-City'
+    proxy: 'http://user:password@proxy.example.com:3128'
+```
+
+Url encode a login or a password that contains special characters. Keeping the credentials in a parameter is a better
+idea than keeping them in the configuration file.
+
+```yml
+gpslab_geoip:
+    license: '%env(MAXMIND_LICENSE)%'
+    edition: 'GeoLite2-City'
+    proxy: '%env(HTTPS_PROXY)%'
+```
+
+The `http`, `https`, `tcp` and `ssl` schemes are supported. Use `http` for a plain proxy and `https` for a proxy that
+expects a TLS connection to itself. A proxy of any of these schemes can download a database over HTTPS.
 
 ### Target download path
 

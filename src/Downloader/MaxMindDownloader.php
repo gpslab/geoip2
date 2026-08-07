@@ -13,6 +13,7 @@ namespace GpsLab\Bundle\GeoIP2Bundle\Downloader;
 
 use Psr\Log\LoggerInterface;
 use splitbrain\PHPArchive\Tar;
+use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**
@@ -49,15 +50,24 @@ class MaxMindDownloader implements Downloader
     private $permissions;
 
     /**
+     * URL of the proxy server to download a database through.
+     *
+     * @var string|null
+     */
+    private $proxy;
+
+    /**
      * @param Filesystem      $fs
      * @param LoggerInterface $logger
      * @param int             $permissions
+     * @param string|null     $proxy
      */
-    public function __construct(Filesystem $fs, LoggerInterface $logger, int $permissions = self::PERMISSIONS)
+    public function __construct(Filesystem $fs, LoggerInterface $logger, int $permissions = self::PERMISSIONS, ?string $proxy = null)
     {
         $this->fs = $fs;
         $this->logger = $logger;
         $this->permissions = $permissions;
+        $this->proxy = $proxy;
     }
 
     /**
@@ -76,7 +86,13 @@ class MaxMindDownloader implements Downloader
 
         $this->logger->debug(sprintf('Beginning download of file %s', $url));
 
-        $this->fs->copy($url, $tmp_zip, true);
+        if ($this->proxy === null) {
+            $this->fs->copy($url, $tmp_zip, true);
+        } else {
+            $this->logger->debug(sprintf('Download through the %s proxy', $this->proxy));
+
+            $this->copyThroughProxy($url, $tmp_zip);
+        }
 
         $this->logger->debug(sprintf('Download complete to %s', $tmp_zip));
 
@@ -136,5 +152,72 @@ class MaxMindDownloader implements Downloader
         $this->fs->remove([$tmp_zip, $tmp_unzip, $tmp_untar]);
 
         $this->logger->debug(sprintf('Database moved to %s', $target));
+    }
+
+    /**
+     * Filesystem::copy() opens the source with the default stream context, so a proxy can not be given to it.
+     *
+     * @param string $url
+     * @param string $target
+     */
+    private function copyThroughProxy(string $url, string $target): void
+    {
+        $context = stream_context_create(['http' => $this->createProxyContextOptions()]);
+
+        $source = @fopen($url, 'r', false, $context);
+
+        if ($source === false) {
+            throw new IOException(sprintf('Failed to copy "%s" to "%s" because source file could not be opened for reading.', $url, $target), 0, null, $url);
+        }
+
+        $destination = @fopen($target, 'w');
+
+        if ($destination === false) {
+            fclose($source);
+
+            throw new IOException(sprintf('Failed to copy "%s" to "%s" because target file could not be opened for writing.', $url, $target), 0, null, $url);
+        }
+
+        $copied = @stream_copy_to_stream($source, $destination);
+
+        fclose($source);
+        fclose($destination);
+
+        if ($copied === false) {
+            throw new IOException(sprintf('Failed to copy "%s" to "%s".', $url, $target), 0, null, $url);
+        }
+    }
+
+    /**
+     * Build the HTTP stream context options for the configured proxy.
+     *
+     * PHP expects a transport in the proxy address, not an application protocol, and sends the credentials
+     * in the Proxy-Authorization header, they can not be a part of the address.
+     *
+     * @return array<string, string|bool>
+     */
+    private function createProxyContextOptions(): array
+    {
+        $proxy = (string) $this->proxy;
+        $scheme = (string) parse_url($proxy, PHP_URL_SCHEME);
+        $host = (string) parse_url($proxy, PHP_URL_HOST);
+        $port = parse_url($proxy, PHP_URL_PORT);
+        $user = parse_url($proxy, PHP_URL_USER);
+        $password = parse_url($proxy, PHP_URL_PASS);
+
+        $transport = $scheme === 'https' || $scheme === 'ssl' ? 'ssl' : 'tcp';
+
+        $options = [
+            'proxy' => sprintf('%s://%s%s', $transport, $host, is_int($port) ? ':'.$port : ''),
+            // a proxy expects the absolute URI in the request line of a plain HTTP request
+            'request_fulluri' => true,
+        ];
+
+        if (is_string($user)) {
+            $credentials = rawurldecode($user).':'.(is_string($password) ? rawurldecode($password) : '');
+            $options['header'] = 'Proxy-Authorization: Basic '.base64_encode($credentials);
+        }
+
+        return $options;
     }
 }

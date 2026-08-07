@@ -71,6 +71,7 @@ class GpsLabGeoIP2Extension extends Extension
                 new Reference('filesystem'),
                 new Reference('logger'),
                 $config['permissions'],
+                $config['proxy'] ?? null,
             ]);
 
         $container->setAlias(Downloader::class, MaxMindDownloader::class);

@@ -12,6 +12,7 @@ declare(strict_types=1);
 namespace GpsLab\Bundle\GeoIP2Bundle\Tests\Downloader;
 
 use GpsLab\Bundle\GeoIP2Bundle\Downloader\MaxMindDownloader;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -116,6 +117,88 @@ class MaxMindDownloaderTest extends TestCase
     public function testDownloadWithPermissions(): void
     {
         $this->assertDownloadWithPermissions(new MaxMindDownloader($this->fs, $this->logger, 0644), 0644);
+    }
+
+    /**
+     * @return array<array{string, array<string, string|bool>}>
+     */
+    public static function getProxies(): array
+    {
+        return [
+            ['tcp://proxy.example.com:3128', [
+                'proxy' => 'tcp://proxy.example.com:3128',
+                'request_fulluri' => true,
+            ]],
+            // an application protocol is replaced with the transport PHP expects
+            ['http://proxy.example.com:3128', [
+                'proxy' => 'tcp://proxy.example.com:3128',
+                'request_fulluri' => true,
+            ]],
+            ['https://proxy.example.com:3129', [
+                'proxy' => 'ssl://proxy.example.com:3129',
+                'request_fulluri' => true,
+            ]],
+            // the port is optional
+            ['http://proxy.example.com', [
+                'proxy' => 'tcp://proxy.example.com',
+                'request_fulluri' => true,
+            ]],
+            // credentials are moved from the address to the Proxy-Authorization header and are url decoded
+            ['http://user:p%40ss@proxy.example.com:3128', [
+                'proxy' => 'tcp://proxy.example.com:3128',
+                'request_fulluri' => true,
+                'header' => 'Proxy-Authorization: Basic dXNlcjpwQHNz', // user:p@ss
+            ]],
+            ['http://user@proxy.example.com:3128', [
+                'proxy' => 'tcp://proxy.example.com:3128',
+                'request_fulluri' => true,
+                'header' => 'Proxy-Authorization: Basic dXNlcjo=', // user:
+            ]],
+        ];
+    }
+
+    /**
+     * @dataProvider getProxies
+     *
+     * @param string                     $proxy
+     * @param array<string, string|bool> $expected_options
+     */
+    #[DataProvider('getProxies')]
+    public function testDownloadThroughProxy(string $proxy, array $expected_options): void
+    {
+        $path = sys_get_temp_dir();
+        $target = sprintf('%s/%s_GeoLite2.mmdb', $path, uniqid('', true));
+        $url = sprintf('%s://example.com/GeoLite2-City.tar.gz', ProxyStreamWrapper::PROTOCOL);
+
+        $this->logger
+            ->expects($this->atLeastOnce())
+            ->method('debug');
+
+        // the archive is fetched by the downloader itself, the filesystem only moves the extracted database
+        $this->fs
+            ->expects($this->once())
+            ->method('copy')
+            ->willReturnCallback(function ($origin_file, $target_file, $overwrite_newer_files) use ($target): void {
+                $this->assertSame($target, $target_file);
+                $this->assertTrue($overwrite_newer_files);
+                $this->assertIsString($origin_file);
+                $this->assertSame('TestGeoLite2', file_get_contents($origin_file));
+            });
+        $this->fs
+            ->expects($this->once())
+            ->method('chmod')
+            ->with($target, 0755);
+
+        ProxyStreamWrapper::register(base64_decode(self::TAR_GZ));
+
+        try {
+            $downloader = new MaxMindDownloader($this->fs, $this->logger, 0755, $proxy);
+            $downloader->download($url, $target);
+        } finally {
+            ProxyStreamWrapper::unregister();
+        }
+
+        $this->assertSame(['http' => $expected_options], ProxyStreamWrapper::$context_options);
     }
 
     /**
