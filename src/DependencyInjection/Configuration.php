@@ -26,6 +26,27 @@ class Configuration implements ConfigurationInterface
 
     private const PERMISSIONS = 0755;
 
+    /**
+     * Options of the bundle, they should not be moved into the configuration of the default database.
+     */
+    private const BUNDLE_OPTIONS = [
+        'default_database',
+        'permissions',
+        'proxy',
+    ];
+
+    /**
+     * The SOCKS schemes require the cURL extension, PHP streams support HTTP proxies only.
+     */
+    private const PROXY_SCHEMES = [
+        'http',
+        'https',
+        'socks4',
+        'socks4a',
+        'socks5',
+        'socks5h',
+    ];
+
     private const DATABASE_EDITION_IDS = [
         'GeoLite2-ASN',
         'GeoLite2-City',
@@ -79,6 +100,10 @@ class Configuration implements ConfigurationInterface
 
         $this->normalizePermissions($permissions);
         $this->validatePermissions($permissions);
+
+        $proxy = $root_node->children()->scalarNode('proxy');
+
+        $this->validateProxy($proxy);
 
         $default_database = $root_node->children()->scalarNode('default_database');
         $default_database->defaultValue('default');
@@ -227,8 +252,11 @@ class Configuration implements ConfigurationInterface
             })
             ->then(static function (array $v): array {
                 $database = $v;
-                // options of the bundle, not of the database
-                unset($database['default_database'], $database['permissions']);
+
+                foreach (self::BUNDLE_OPTIONS as $option) {
+                    unset($database[$option]);
+                }
+
                 $default_database = isset($v['default_database']) ? (string) $v['default_database'] : 'default';
 
                 $config = [
@@ -238,8 +266,10 @@ class Configuration implements ConfigurationInterface
                     ],
                 ];
 
-                if (array_key_exists('permissions', $v)) {
-                    $config['permissions'] = $v['permissions'];
+                foreach (self::BUNDLE_OPTIONS as $option) {
+                    if ($option !== 'default_database' && array_key_exists($option, $v)) {
+                        $config[$option] = $v[$option];
+                    }
                 }
 
                 return $config;
@@ -469,6 +499,32 @@ class Configuration implements ConfigurationInterface
             })
             ->then(static function ($v): array {
                 throw new \InvalidArgumentException(sprintf('Permissions "%s" should be an octal number between "0000" and "0777".', is_scalar($v) ? $v : gettype($v)));
+            });
+    }
+
+    /**
+     * The proxy option must be an URL of a proxy server with a supported scheme and a host.
+     *
+     * @param NodeDefinition $proxy
+     */
+    private function validateProxy(NodeDefinition $proxy): void
+    {
+        $proxy
+            ->validate()
+            ->ifTrue(static function ($v): bool {
+                if (!is_string($v) || $v === '') {
+                    return $v !== null;
+                }
+
+                $scheme = parse_url($v, PHP_URL_SCHEME);
+                $host = parse_url($v, PHP_URL_HOST);
+
+                return !is_string($scheme) || !in_array($scheme, self::PROXY_SCHEMES, true) || !is_string($host) || $host === '';
+            })
+            ->then(static function ($v): array {
+                $schemes = implode('", "', self::PROXY_SCHEMES);
+
+                throw new \InvalidArgumentException(sprintf('Proxy "%s" should be an URL with a host and one of the "%s" schemes.', is_scalar($v) ? $v : gettype($v), $schemes));
             });
     }
 

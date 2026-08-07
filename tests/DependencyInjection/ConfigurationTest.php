@@ -166,6 +166,17 @@ class ConfigurationTest extends TestCase
             ];
         }
 
+        // proxy is not an URL with a supported scheme and a host
+        foreach (['proxy.example.com:3128', 'ftp://proxy.example.com:21', 'http://', '/proxy', '', 3128, true] as $proxy) {
+            $configurations[] = [
+                'gpslab_geoip' => [
+                    'license' => 'LICENSE',
+                    'edition' => 'GeoLite2-City',
+                    'proxy' => $proxy,
+                ],
+            ];
+        }
+
         foreach ($configurations as $configuration) {
             foreach (['/tmp/var/cache', null] as $cache_dir) {
                 yield [$cache_dir, $configuration];
@@ -451,6 +462,58 @@ class ConfigurationTest extends TestCase
                     'locales' => ['en'],
                 ]];
             }
+
+            // a proxy can be defined for the bundle in both configuration forms
+            foreach (['http://proxy.example.com:3128', 'socks5://proxy.example.com:1080', 'http://user:pass@proxy.example.com:3128'] as $proxy) {
+                yield [$cache_dir, [
+                    'gpslab_geoip' => [
+                        'license' => 'LICENSE',
+                        'edition' => 'GeoLite2-City',
+                        'proxy' => $proxy,
+                    ],
+                ], [
+                    'default_database' => 'default',
+                    'databases' => [
+                        'default' => [
+                            'license' => 'LICENSE',
+                            'edition' => 'GeoLite2-City',
+                            'url' => sprintf(self::URL, 'GeoLite2-City', 'LICENSE'),
+                            'path' => sprintf(self::PATH, $real_cache_dir, 'GeoLite2-City'),
+                            'locales' => ['en'],
+                        ],
+                    ],
+                    'proxy' => $proxy,
+                    'locales' => ['en'],
+                    'permissions' => self::PERMISSIONS,
+                ]];
+            }
+
+            // the proxy of the bundle is not an option of the database
+            yield [$cache_dir, [
+                'gpslab_geoip' => [
+                    'proxy' => 'http://proxy.example.com:3128',
+                    'databases' => [
+                        'default' => [
+                            'license' => 'LICENSE',
+                            'edition' => 'GeoLite2-City',
+                        ],
+                    ],
+                ],
+            ], [
+                'proxy' => 'http://proxy.example.com:3128',
+                'databases' => [
+                    'default' => [
+                        'license' => 'LICENSE',
+                        'edition' => 'GeoLite2-City',
+                        'url' => sprintf(self::URL, 'GeoLite2-City', 'LICENSE'),
+                        'path' => sprintf(self::PATH, $real_cache_dir, 'GeoLite2-City'),
+                        'locales' => ['en'],
+                    ],
+                ],
+                'default_database' => 'default',
+                'locales' => ['en'],
+                'permissions' => self::PERMISSIONS,
+            ]];
 
             // the permissions of the bundle are not an option of the database
             yield [$cache_dir, [

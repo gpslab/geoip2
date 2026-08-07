@@ -13,6 +13,7 @@ namespace GpsLab\Bundle\GeoIP2Bundle\Downloader;
 
 use Psr\Log\LoggerInterface;
 use splitbrain\PHPArchive\Tar;
+use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**
@@ -30,6 +31,8 @@ use Symfony\Component\Filesystem\Filesystem;
 class MaxMindDownloader implements Downloader
 {
     private const PERMISSIONS = 0755;
+
+    private const CONNECT_TIMEOUT = 30;
 
     /**
      * @var Filesystem
@@ -49,15 +52,24 @@ class MaxMindDownloader implements Downloader
     private $permissions;
 
     /**
+     * URL of the proxy server to download a database through.
+     *
+     * @var string|null
+     */
+    private $proxy;
+
+    /**
      * @param Filesystem      $fs
      * @param LoggerInterface $logger
      * @param int             $permissions
+     * @param string|null     $proxy
      */
-    public function __construct(Filesystem $fs, LoggerInterface $logger, int $permissions = self::PERMISSIONS)
+    public function __construct(Filesystem $fs, LoggerInterface $logger, int $permissions = self::PERMISSIONS, ?string $proxy = null)
     {
         $this->fs = $fs;
         $this->logger = $logger;
         $this->permissions = $permissions;
+        $this->proxy = $proxy;
     }
 
     /**
@@ -76,7 +88,11 @@ class MaxMindDownloader implements Downloader
 
         $this->logger->debug(sprintf('Beginning download of file %s', $url));
 
-        $this->fs->copy($url, $tmp_zip, true);
+        if ($this->proxy !== null) {
+            $this->logger->debug(sprintf('Download through the %s proxy', $this->proxy));
+        }
+
+        $this->copyFromUrl($url, $tmp_zip);
 
         $this->logger->debug(sprintf('Download complete to %s', $tmp_zip));
 
@@ -136,5 +152,194 @@ class MaxMindDownloader implements Downloader
         $this->fs->remove([$tmp_zip, $tmp_unzip, $tmp_untar]);
 
         $this->logger->debug(sprintf('Database moved to %s', $target));
+    }
+
+    /**
+     * Filesystem::copy() opens the source with the default stream context, so neither a proxy nor any other
+     * transport option can be given to it.
+     *
+     * @param string $url
+     * @param string $target
+     */
+    private function copyFromUrl(string $url, string $target): void
+    {
+        $destination = @fopen($target, 'w');
+
+        if ($destination === false) {
+            throw new IOException(sprintf('Failed to copy "%s" to "%s" because target file could not be opened for writing.', $url, $target), 0, null, $url);
+        }
+
+        try {
+            if ($this->isCurlAvailable()) {
+                $this->copyWithCurl($url, $target, $destination);
+            } else {
+                $this->copyWithStreamContext($url, $target, $destination);
+            }
+        } finally {
+            if (is_resource($destination)) {
+                fclose($destination);
+            }
+        }
+    }
+
+    /**
+     * The curl extension is optional, it is only used when it is installed.
+     *
+     * @return bool
+     */
+    protected function isCurlAvailable(): bool
+    {
+        return extension_loaded('curl');
+    }
+
+    /**
+     * @param string   $url
+     * @param string   $target
+     * @param resource $destination
+     */
+    private function copyWithCurl(string $url, string $target, $destination): void
+    {
+        $curl = curl_init();
+
+        if ($curl === false) {
+            throw new IOException(sprintf('Failed to copy "%s" to "%s" because a cURL session could not be created.', $url, $target), 0, null, $url);
+        }
+
+        curl_setopt_array($curl, $this->createCurlOptions($url, $destination));
+
+        $success = curl_exec($curl);
+        $error = curl_error($curl);
+
+        // curl_close() has no effect since PHP 8.0 and is deprecated since PHP 8.5
+        if (PHP_VERSION_ID < 80000) {
+            curl_close($curl);
+        }
+
+        if ($success === false) {
+            throw new IOException(sprintf('Failed to copy "%s" to "%s": %s.', $url, $target, $error), 0, null, $url);
+        }
+    }
+
+    /**
+     * curl understands the proxy address as is, including the scheme and the credentials.
+     *
+     * @param string   $url
+     * @param resource $destination
+     *
+     * @return array<int, mixed>
+     */
+    private function createCurlOptions(string $url, $destination): array
+    {
+        $options = [
+            CURLOPT_URL => $url,
+            CURLOPT_FILE => $destination,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_FAILONERROR => true,
+            CURLOPT_CONNECTTIMEOUT => self::CONNECT_TIMEOUT,
+        ];
+
+        if ($this->proxy !== null) {
+            $options[CURLOPT_PROXY] = $this->getProxyAddress();
+            $options[CURLOPT_PROXYAUTH] = CURLAUTH_ANY;
+
+            $credentials = $this->getProxyCredentials();
+
+            if ($credentials !== null) {
+                $options[CURLOPT_PROXYUSERPWD] = $credentials;
+            }
+        }
+
+        return $options;
+    }
+
+    /**
+     * @param string   $url
+     * @param string   $target
+     * @param resource $destination
+     */
+    private function copyWithStreamContext(string $url, string $target, $destination): void
+    {
+        $context = stream_context_create(['http' => $this->createStreamContextOptions()]);
+
+        $source = @fopen($url, 'r', false, $context);
+
+        if ($source === false) {
+            throw new IOException(sprintf('Failed to copy "%s" to "%s" because source file could not be opened for reading.', $url, $target), 0, null, $url);
+        }
+
+        $copied = @stream_copy_to_stream($source, $destination);
+
+        fclose($source);
+
+        if ($copied === false) {
+            throw new IOException(sprintf('Failed to copy "%s" to "%s".', $url, $target), 0, null, $url);
+        }
+    }
+
+    /**
+     * Build the HTTP stream context options.
+     *
+     * PHP expects a transport in the proxy address, not an application protocol, and sends the credentials
+     * in the Proxy-Authorization header, they can not be a part of the address.
+     *
+     * @return array<string, string|bool>
+     */
+    private function createStreamContextOptions(): array
+    {
+        if ($this->proxy === null) {
+            return [];
+        }
+
+        $scheme = (string) parse_url($this->proxy, PHP_URL_SCHEME);
+
+        if (strpos($scheme, 'socks') === 0) {
+            throw new \RuntimeException(sprintf('The "%s" proxy requires the cURL extension, PHP streams support HTTP proxies only.', $this->proxy));
+        }
+
+        $options = [
+            'proxy' => preg_replace('/^https?/', $scheme === 'https' ? 'ssl' : 'tcp', $this->getProxyAddress()),
+            // a proxy expects the absolute URI in the request line of a plain HTTP request
+            'request_fulluri' => true,
+        ];
+
+        $credentials = $this->getProxyCredentials();
+
+        if ($credentials !== null) {
+            $options['header'] = 'Proxy-Authorization: Basic '.base64_encode($credentials);
+        }
+
+        return $options;
+    }
+
+    /**
+     * The address of the proxy server without the credentials.
+     *
+     * @return string
+     */
+    private function getProxyAddress(): string
+    {
+        $scheme = (string) parse_url((string) $this->proxy, PHP_URL_SCHEME);
+        $host = (string) parse_url((string) $this->proxy, PHP_URL_HOST);
+        $port = parse_url((string) $this->proxy, PHP_URL_PORT);
+
+        return sprintf('%s://%s%s', $scheme, $host, is_int($port) ? ':'.$port : '');
+    }
+
+    /**
+     * The url decoded "user:password" pair of the proxy server.
+     *
+     * @return string|null
+     */
+    private function getProxyCredentials(): ?string
+    {
+        $user = parse_url((string) $this->proxy, PHP_URL_USER);
+
+        if (!is_string($user)) {
+            return null;
+        }
+
+        $password = parse_url((string) $this->proxy, PHP_URL_PASS);
+
+        return rawurldecode($user).':'.(is_string($password) ? rawurldecode($password) : '');
     }
 }

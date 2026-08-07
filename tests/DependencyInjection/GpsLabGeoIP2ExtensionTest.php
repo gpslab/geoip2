@@ -21,6 +21,7 @@ use GpsLab\Bundle\GeoIP2Bundle\Reader\ReaderFactory;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
 
 class GpsLabGeoIP2ExtensionTest extends TestCase
@@ -139,6 +140,7 @@ class GpsLabGeoIP2ExtensionTest extends TestCase
         $this->assertInstanceOf(Reference::class, $downloader->getArgument(1));
         $this->assertSame('logger', (string) $downloader->getArgument(1));
         $this->assertSame(0755, $downloader->getArgument(2));
+        $this->assertNull($downloader->getArgument(3));
 
         $this->assertTrue($container->hasDefinition(UpdateDatabaseCommand::class));
         $update_command = $container->getDefinition(UpdateDatabaseCommand::class);
@@ -213,6 +215,7 @@ class GpsLabGeoIP2ExtensionTest extends TestCase
         $this->assertInstanceOf(Reference::class, $downloader->getArgument(1));
         $this->assertSame('logger', (string) $downloader->getArgument(1));
         $this->assertSame(0755, $downloader->getArgument(2));
+        $this->assertNull($downloader->getArgument(3));
 
         $this->assertTrue($container->hasDefinition(UpdateDatabaseCommand::class));
         $update_command = $container->getDefinition(UpdateDatabaseCommand::class);
@@ -239,23 +242,42 @@ class GpsLabGeoIP2ExtensionTest extends TestCase
 
     public function testLoadWithPermissions(): void
     {
-        $configs = [
-            'gpslab_geoip' => [
-                'license' => 'XXXXXX',
-                'edition' => 'GeoLite2-City',
-                'permissions' => '0644',
-            ],
-        ];
+        $downloader = $this->loadDownloader([
+            'license' => 'XXXXXX',
+            'edition' => 'GeoLite2-City',
+            'permissions' => '0644',
+        ]);
 
+        $this->assertSame(0644, $downloader->getArgument(2));
+    }
+
+    public function testLoadWithProxy(): void
+    {
+        $downloader = $this->loadDownloader([
+            'license' => 'XXXXXX',
+            'edition' => 'GeoLite2-City',
+            'proxy' => 'http://proxy.example.com:3128',
+        ]);
+
+        $this->assertSame('http://proxy.example.com:3128', $downloader->getArgument(3));
+    }
+
+    /**
+     * @param array<string, mixed> $config
+     *
+     * @return Definition
+     */
+    private function loadDownloader(array $config): Definition
+    {
         $container = new ContainerBuilder();
         $container->setParameter('kernel.cache_dir', '/tmp/cache');
 
         $extension = new GpsLabGeoIP2Extension();
-        $extension->load($configs, $container);
+        $extension->load(['gpslab_geoip' => $config], $container);
 
         $this->assertTrue($container->hasDefinition(MaxMindDownloader::class));
-        $downloader = $container->getDefinition(MaxMindDownloader::class);
-        $this->assertSame(0644, $downloader->getArgument(2));
+
+        return $container->getDefinition(MaxMindDownloader::class);
     }
 
     public function testGetAlias(): void
