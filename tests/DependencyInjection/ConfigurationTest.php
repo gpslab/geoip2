@@ -23,6 +23,8 @@ class ConfigurationTest extends TestCase
 
     private const PATH = '%s/%s.mmdb';
 
+    private const PERMISSIONS = 0755;
+
     private const DATABASE_EDITION_IDS = [
         'GeoLite2-ASN',
         'GeoLite2-City',
@@ -153,6 +155,17 @@ class ConfigurationTest extends TestCase
             ];
         }
 
+        // permissions is not an octal number
+        foreach (['0888', '07777', '64', 'rw-r--r--', '', 644, 07777, -1] as $permissions) {
+            $configurations[] = [
+                'gpslab_geoip' => [
+                    'license' => 'LICENSE',
+                    'edition' => 'GeoLite2-City',
+                    'permissions' => $permissions,
+                ],
+            ];
+        }
+
         foreach ($configurations as $configuration) {
             foreach (['/tmp/var/cache', null] as $cache_dir) {
                 yield [$cache_dir, $configuration];
@@ -188,6 +201,7 @@ class ConfigurationTest extends TestCase
 
             yield [$cache_dir, [], [
                 'locales' => ['en'],
+                'permissions' => self::PERMISSIONS,
                 'default_database' => 'default',
                 'databases' => [],
             ]];
@@ -196,6 +210,7 @@ class ConfigurationTest extends TestCase
                 'gpslab_geoip' => null,
             ], [
                 'locales' => ['en'],
+                'permissions' => self::PERMISSIONS,
                 'default_database' => 'default',
                 'databases' => [],
             ]];
@@ -204,6 +219,7 @@ class ConfigurationTest extends TestCase
                 'gpslab_geoip' => [],
             ], [
                 'locales' => ['en'],
+                'permissions' => self::PERMISSIONS,
                 'default_database' => 'default',
                 'databases' => [],
             ]];
@@ -215,6 +231,7 @@ class ConfigurationTest extends TestCase
             ], [
                 'databases' => [],
                 'locales' => ['en'],
+                'permissions' => self::PERMISSIONS,
                 'default_database' => 'default',
             ]];
 
@@ -225,6 +242,7 @@ class ConfigurationTest extends TestCase
             ], [
                 'databases' => [],
                 'locales' => ['en'],
+                'permissions' => self::PERMISSIONS,
                 'default_database' => 'default',
             ]];
 
@@ -246,6 +264,7 @@ class ConfigurationTest extends TestCase
                         ],
                     ],
                     'locales' => ['en'],
+                    'permissions' => self::PERMISSIONS,
                 ]];
 
                 yield [$cache_dir, [
@@ -271,6 +290,7 @@ class ConfigurationTest extends TestCase
                     ],
                     'default_database' => 'default',
                     'locales' => ['en'],
+                    'permissions' => self::PERMISSIONS,
                 ]];
             }
 
@@ -292,6 +312,7 @@ class ConfigurationTest extends TestCase
                     ],
                 ],
                 'locales' => ['en'],
+                'permissions' => self::PERMISSIONS,
             ]];
 
             yield [$cache_dir, [
@@ -312,6 +333,7 @@ class ConfigurationTest extends TestCase
                     ],
                 ],
                 'locales' => ['en'],
+                'permissions' => self::PERMISSIONS,
             ]];
 
             yield [$cache_dir, [
@@ -362,6 +384,7 @@ class ConfigurationTest extends TestCase
                     ],
                 ],
                 'locales' => ['en'],
+                'permissions' => self::PERMISSIONS,
             ]];
 
             yield [$cache_dir, [
@@ -399,6 +422,60 @@ class ConfigurationTest extends TestCase
                     ],
                 ],
                 'default_database' => 'default',
+                'permissions' => self::PERMISSIONS,
+            ]];
+
+            // permissions can be defined in the octal notation, which the YAML parser returns as a string,
+            // and as an integer, which is what the "0o644" YAML notation and the PHP config give
+            $permissions_variants = [['0644', 0644], ['644', 0644], [0644, 0644], ['0777', 0777], ['0000', 0]];
+
+            foreach ($permissions_variants as [$permissions, $expected]) {
+                yield [$cache_dir, [
+                    'gpslab_geoip' => [
+                        'license' => 'LICENSE',
+                        'edition' => 'GeoLite2-City',
+                        'permissions' => $permissions,
+                    ],
+                ], [
+                    'default_database' => 'default',
+                    'databases' => [
+                        'default' => [
+                            'license' => 'LICENSE',
+                            'edition' => 'GeoLite2-City',
+                            'url' => sprintf(self::URL, 'GeoLite2-City', 'LICENSE'),
+                            'path' => sprintf(self::PATH, $real_cache_dir, 'GeoLite2-City'),
+                            'locales' => ['en'],
+                        ],
+                    ],
+                    'permissions' => $expected,
+                    'locales' => ['en'],
+                ]];
+            }
+
+            // the permissions of the bundle are not an option of the database
+            yield [$cache_dir, [
+                'gpslab_geoip' => [
+                    'permissions' => '0644',
+                    'databases' => [
+                        'default' => [
+                            'license' => 'LICENSE',
+                            'edition' => 'GeoLite2-City',
+                        ],
+                    ],
+                ],
+            ], [
+                'permissions' => 0644,
+                'databases' => [
+                    'default' => [
+                        'license' => 'LICENSE',
+                        'edition' => 'GeoLite2-City',
+                        'url' => sprintf(self::URL, 'GeoLite2-City', 'LICENSE'),
+                        'path' => sprintf(self::PATH, $real_cache_dir, 'GeoLite2-City'),
+                        'locales' => ['en'],
+                    ],
+                ],
+                'default_database' => 'default',
+                'locales' => ['en'],
             ]];
 
             // test dirty hack for Symfony Flex
@@ -411,6 +488,7 @@ class ConfigurationTest extends TestCase
                 'default_database' => 'default',
                 'databases' => [],
                 'locales' => ['en'],
+                'permissions' => self::PERMISSIONS,
             ]];
 
             yield [$cache_dir, [
@@ -425,6 +503,7 @@ class ConfigurationTest extends TestCase
                 'databases' => [],
                 'default_database' => 'default',
                 'locales' => ['en'],
+                'permissions' => self::PERMISSIONS,
             ]];
         }
     }

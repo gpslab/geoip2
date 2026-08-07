@@ -138,6 +138,7 @@ class GpsLabGeoIP2ExtensionTest extends TestCase
         $this->assertSame('filesystem', (string) $downloader->getArgument(0));
         $this->assertInstanceOf(Reference::class, $downloader->getArgument(1));
         $this->assertSame('logger', (string) $downloader->getArgument(1));
+        $this->assertSame(0755, $downloader->getArgument(2));
 
         $this->assertTrue($container->hasDefinition(UpdateDatabaseCommand::class));
         $update_command = $container->getDefinition(UpdateDatabaseCommand::class);
@@ -211,6 +212,7 @@ class GpsLabGeoIP2ExtensionTest extends TestCase
         $this->assertSame('filesystem', (string) $downloader->getArgument(0));
         $this->assertInstanceOf(Reference::class, $downloader->getArgument(1));
         $this->assertSame('logger', (string) $downloader->getArgument(1));
+        $this->assertSame(0755, $downloader->getArgument(2));
 
         $this->assertTrue($container->hasDefinition(UpdateDatabaseCommand::class));
         $update_command = $container->getDefinition(UpdateDatabaseCommand::class);
@@ -233,6 +235,27 @@ class GpsLabGeoIP2ExtensionTest extends TestCase
             Downloader::class, // Symfony >= 4.0
             strtolower(Downloader::class), // Symfony < 4.0
         ]);
+    }
+
+    public function testLoadWithPermissions(): void
+    {
+        $configs = [
+            'gpslab_geoip' => [
+                'license' => 'XXXXXX',
+                'edition' => 'GeoLite2-City',
+                'permissions' => '0644',
+            ],
+        ];
+
+        $container = new ContainerBuilder();
+        $container->setParameter('kernel.cache_dir', '/tmp/cache');
+
+        $extension = new GpsLabGeoIP2Extension();
+        $extension->load($configs, $container);
+
+        $this->assertTrue($container->hasDefinition(MaxMindDownloader::class));
+        $downloader = $container->getDefinition(MaxMindDownloader::class);
+        $this->assertSame(0644, $downloader->getArgument(2));
     }
 
     public function testGetAlias(): void
