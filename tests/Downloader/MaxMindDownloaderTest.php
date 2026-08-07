@@ -81,9 +81,9 @@ class MaxMindDownloaderTest extends TestCase
                 $this->assertIsString($files[0]);
                 $this->assertIsString($files[1]);
                 $this->assertIsString($files[2]);
-                $this->assertMatchesRegularExpression($tmp_zip_regexp, $files[0]);
-                $this->assertMatchesRegularExpression($tmp_unzip_regexp, $files[1]);
-                $this->assertMatchesRegularExpression($tmp_untar_regexp, $files[2]);
+                self::assertPatternMatches($tmp_zip_regexp, $files[0]);
+                self::assertPatternMatches($tmp_unzip_regexp, $files[1]);
+                self::assertPatternMatches($tmp_untar_regexp, $files[2]);
             });
         $this->fs
             ->expects($this->once())
@@ -95,7 +95,7 @@ class MaxMindDownloaderTest extends TestCase
                 $this->assertSame($url, $origin_file);
                 $this->assertIsString($target_file);
                 $this->assertTrue($overwrite_newer_files);
-                $this->assertMatchesRegularExpression($tmp_zip_regexp, $target_file);
+                self::assertPatternMatches($tmp_zip_regexp, $target_file);
 
                 // make test GeoLite2 db
                 file_put_contents($target_file, base64_decode(self::TAR_GZ_BAD));
@@ -135,9 +135,9 @@ class MaxMindDownloaderTest extends TestCase
                 $this->assertIsString($files[0]);
                 $this->assertIsString($files[1]);
                 $this->assertIsString($files[2]);
-                $this->assertMatchesRegularExpression($tmp_zip_regexp, $files[0]);
-                $this->assertMatchesRegularExpression($tmp_unzip_regexp, $files[1]);
-                $this->assertMatchesRegularExpression($tmp_untar_regexp, $files[2]);
+                self::assertPatternMatches($tmp_zip_regexp, $files[0]);
+                self::assertPatternMatches($tmp_unzip_regexp, $files[1]);
+                self::assertPatternMatches($tmp_untar_regexp, $files[2]);
             });
         $this->fs
             ->expects($this->exactly(2))
@@ -158,12 +158,12 @@ class MaxMindDownloaderTest extends TestCase
                         '#^%s/[\da-f]+\.\d+_GeoLite2/GeoLite2-City_20200114/GeoLite2.mmdb$#',
                         $path_quote
                     );
-                    $this->assertMatchesRegularExpression($regexp, $origin_file);
+                    self::assertPatternMatches($regexp, $origin_file);
                     $this->assertFileExists($origin_file);
                     $this->assertSame('TestGeoLite2', file_get_contents($origin_file));
                 } else {
                     $this->assertSame($url, $origin_file);
-                    $this->assertMatchesRegularExpression($tmp_zip_regexp, $target_file);
+                    self::assertPatternMatches($tmp_zip_regexp, $target_file);
 
                     // make test GeoLite2 db
                     file_put_contents($target_file, base64_decode(self::TAR_GZ));
@@ -182,14 +182,19 @@ class MaxMindDownloaderTest extends TestCase
     }
 
     /**
-     * Hook for BC.
+     * Hook for BC between PHPUnit versions.
+     *
+     * PHPUnit 8 and below know assertRegExp() only, it is removed in PHPUnit 10.
+     * PHPUnit 9.1 + know assertMatchesRegularExpression(), it is final since PHPUnit 10 and can not be shimmed.
+     *
+     * @param string $pattern
+     * @param string $string
+     * @param string $message
      */
-    public static function assertMatchesRegularExpression(string $pattern, string $string, string $message = ''): void
+    private static function assertPatternMatches(string $pattern, string $string, string $message = ''): void
     {
-        if (method_exists(parent::class, 'assertMatchesRegularExpression')) {
-            parent::assertMatchesRegularExpression($pattern, $string, $message);
-        } else {
-            parent::assertRegExp($pattern, $string, $message);
-        }
+        $message = $message ?: sprintf('Failed asserting that "%s" matches PCRE pattern "%s".', $string, $pattern);
+
+        self::assertSame(1, preg_match($pattern, $string), $message);
     }
 }

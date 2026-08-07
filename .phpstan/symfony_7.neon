@@ -1,0 +1,11 @@
+# config for Symfony 7.3 +
+#
+# TreeBuilder and the node definitions became generic in Symfony 7.3.
+# Their generic types can not be declared here: they do not exist in the older Symfony versions
+# that the bundle still supports.
+
+includes:
+    - symfony_6.neon
+
+parameters:
+    checkGenericClassInNonGenericObjectType: false

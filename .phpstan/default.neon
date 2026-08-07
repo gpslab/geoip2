@@ -7,3 +7,10 @@ parameters:
     paths:
         - ../src
         - ../tests
+    # the bundle is analysed against every supported Symfony and PHPUnit version,
+    # so a part of the ignored errors below is reported only by a part of them
+    reportUnmatchedIgnoredErrors: false
+    ignoreErrors:
+        # data providers are declared twice: with the @dataProvider annotation for PHPUnit 9 and below
+        # and with the #[DataProvider] attribute for PHPUnit 10 and above, where the annotation is removed
+        - '#^Attribute class PHPUnit\\Framework\\Attributes\\DataProvider does not exist\.$#'

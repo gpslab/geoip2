@@ -193,7 +193,7 @@ class UpdateDatabaseCommandTest extends TestCase
     public function testDownloadWithoutLicense(): void
     {
         $this->input
-            ->expects($this->at(4))
+            ->expects($this->once())
             ->method('getArgument')
             ->with('databases')
             ->willReturn(['default']);
@@ -256,13 +256,18 @@ class UpdateDatabaseCommandTest extends TestCase
             ],
         ];
 
+        // not using withConsecutive(): it is removed in PHPUnit 10
+        $expected_downloads = [
+            [$databases['second']['url'], $databases['second']['path']],
+            [$databases['first']['url'], $databases['first']['path']],
+        ];
+
         $this->downloader
             ->expects($this->exactly(2))
             ->method('download')
-            ->withConsecutive(
-                [$databases['second']['url'], $databases['second']['path']],
-                [$databases['first']['url'], $databases['first']['path']]
-            );
+            ->willReturnCallback(function ($url, $path) use (&$expected_downloads): void {
+                $this->assertSame(array_shift($expected_downloads), [$url, $path]);
+            });
 
         $command = new UpdateDatabaseCommand($this->downloader, $databases);
         $command->run($this->input, $this->output);
