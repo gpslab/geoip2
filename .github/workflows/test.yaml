@@ -159,12 +159,6 @@ jobs:
       - name: Run Tests
         run: vendor/bin/phpunit -c ${{ matrix.phpunit_config || 'phpunit.xml.dist' }} --coverage-clover build/coverage-clover.xml
 
-      - name: Send coverage results to Scrutinizer CI
-        if: startsWith(matrix.php, '7.')
-        run: |
-          wget https://scrutinizer-ci.com/ocular.phar
-          php ocular.phar code-coverage:upload --format=php-clover build/coverage-clover.xml
-
       - name: Send coverage results to Coveralls
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
