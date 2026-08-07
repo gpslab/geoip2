@@ -21,12 +21,14 @@ class TestReader extends Reader
     /**
      * @var string
      */
-    public $filename;
+    private $test_filename;
 
     /**
+     * Can not be named "locales": GeoIP2 3.x declares it as a readonly promoted property of the Reader.
+     *
      * @var string[]
      */
-    public $locales;
+    private $test_locales;
 
     /**
      * @param string   $filename
@@ -34,9 +36,25 @@ class TestReader extends Reader
      */
     public function __construct(string $filename, array $locales = ['en'])
     {
-        $this->filename = $filename;
-        $this->locales = $locales;
+        $this->test_filename = $filename;
+        $this->test_locales = $locales;
         // no call parent for not read database
         // parent::__construct($filename, $locales);
+    }
+
+    /**
+     * @return string
+     */
+    public function getFilename(): string
+    {
+        return $this->test_filename;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getLocales(): array
+    {
+        return $this->test_locales;
     }
 }

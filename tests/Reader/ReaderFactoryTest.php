@@ -13,6 +13,7 @@ namespace GpsLab\Bundle\GeoIP2Bundle\Tests\Reader;
 
 use GeoIp2\Database\Reader;
 use GpsLab\Bundle\GeoIP2Bundle\Reader\ReaderFactory;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class ReaderFactoryTest extends TestCase
@@ -20,7 +21,7 @@ class ReaderFactoryTest extends TestCase
     /**
      * @return list<list<?list<string>>>
      */
-    public function getLocales(): array
+    public static function getLocales(): array
     {
         return [
             [null],
@@ -34,6 +35,7 @@ class ReaderFactoryTest extends TestCase
      *
      * @param string[]|null $locales
      */
+    #[DataProvider('getLocales')]
     public function testNoDatabases(?array $locales): void
     {
         $this->expectException(\InvalidArgumentException::class);
@@ -48,6 +50,7 @@ class ReaderFactoryTest extends TestCase
      *
      * @param string[]|null $locales
      */
+    #[DataProvider('getLocales')]
     public function testUndefinedDatabase(?array $locales): void
     {
         $this->expectException(\InvalidArgumentException::class);
@@ -65,6 +68,7 @@ class ReaderFactoryTest extends TestCase
      *
      * @param string[]|null $locales
      */
+    #[DataProvider('getLocales')]
     public function testNotConfiguredDatabase(?array $locales): void
     {
         $this->expectException(\InvalidArgumentException::class);
@@ -81,6 +85,7 @@ class ReaderFactoryTest extends TestCase
      *
      * @param string[]|null $locales
      */
+    #[DataProvider('getLocales')]
     public function testEmptyPathToDatabase(?array $locales): void
     {
         $this->expectException(\InvalidArgumentException::class);
@@ -99,6 +104,7 @@ class ReaderFactoryTest extends TestCase
      *
      * @param string[]|null $locales
      */
+    #[DataProvider('getLocales')]
     public function testCreate(?array $locales): void
     {
         $databases = [
@@ -112,7 +118,7 @@ class ReaderFactoryTest extends TestCase
         $reader = $factory->create('default', $locales);
 
         $this->assertInstanceOf(TestReader::class, $reader);
-        $this->assertSame($databases['default']['path'], $reader->filename);
-        $this->assertSame($locales ?: ['en'], $reader->locales);
+        $this->assertSame($databases['default']['path'], $reader->getFilename());
+        $this->assertSame($locales ?: ['en'], $reader->getLocales());
     }
 }

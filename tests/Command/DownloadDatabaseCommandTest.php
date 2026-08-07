@@ -81,11 +81,7 @@ class DownloadDatabaseCommandTest extends TestCase
         $url = ['https://example.com/GeoIP2.tar.gz'];
         $target = '/tmp/GeoIP2.mmdb';
 
-        $this->input
-            ->expects($this->exactly(2))
-            ->method('getArgument')
-            ->withConsecutive(['url'], ['target'])
-            ->willReturnOnConsecutiveCalls($url, $target);
+        $this->expectArguments($url, $target);
 
         $this->command->run($this->input, $this->output);
     }
@@ -98,11 +94,7 @@ class DownloadDatabaseCommandTest extends TestCase
         $url = 'https://example.com/GeoIP2.tar.gz';
         $target = null;
 
-        $this->input
-            ->expects($this->exactly(2))
-            ->method('getArgument')
-            ->withConsecutive(['url'], ['target'])
-            ->willReturnOnConsecutiveCalls($url, $target);
+        $this->expectArguments($url, $target);
 
         $this->command->run($this->input, $this->output);
     }
@@ -115,11 +107,7 @@ class DownloadDatabaseCommandTest extends TestCase
         $url = 'https://example.com/GeoIP2.tar.gz';
         $target = ['/tmp/GeoIP2.mmdb'];
 
-        $this->input
-            ->expects($this->exactly(2))
-            ->method('getArgument')
-            ->withConsecutive(['url'], ['target'])
-            ->willReturnOnConsecutiveCalls($url, $target);
+        $this->expectArguments($url, $target);
 
         $this->command->run($this->input, $this->output);
     }
@@ -129,11 +117,7 @@ class DownloadDatabaseCommandTest extends TestCase
         $url = 'https://example.com/GeoIP2.tar.gz';
         $target = '/tmp/GeoIP2.mmdb';
 
-        $this->input
-            ->expects($this->exactly(2))
-            ->method('getArgument')
-            ->withConsecutive(['url'], ['target'])
-            ->willReturnOnConsecutiveCalls($url, $target);
+        $this->expectArguments($url, $target);
 
         $this->downloader
             ->expects($this->once())
@@ -141,5 +125,31 @@ class DownloadDatabaseCommandTest extends TestCase
             ->with($url, $target);
 
         $this->command->run($this->input, $this->output);
+    }
+
+    /**
+     * Expect the "url" and the "target" arguments to be read once each.
+     *
+     * Not using withConsecutive(): it is removed in PHPUnit 10.
+     *
+     * @param mixed $url
+     * @param mixed $target
+     */
+    private function expectArguments($url, $target): void
+    {
+        $this->input
+            ->expects($this->exactly(2))
+            ->method('getArgument')
+            ->willReturnCallback(function ($name) use ($url, $target) {
+                switch ($name) {
+                    case 'url':
+                        return $url;
+
+                    case 'target':
+                        return $target;
+                }
+
+                throw new \InvalidArgumentException(sprintf('Unexpected "%s" argument.', $name));
+            });
     }
 }
